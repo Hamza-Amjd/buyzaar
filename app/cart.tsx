@@ -23,6 +23,7 @@ import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { router } from "expo-router";
+import { numberWithCommas } from "@/utils/healper";
 
 export default function cart() {
   const navigation = useNavigation();
@@ -38,7 +39,7 @@ export default function cart() {
     const userId = await AsyncStorage.getItem("userId");
     if (userId) {
       axios
-        .post("https://shopro-backend.vercel.app/api/shop/addtocart", {
+        .post(`https://buyzaar-backend.vercel.app/api/shop/addtocart`, {
           userId: userId,
           cart: cart,
         })
@@ -52,7 +53,7 @@ export default function cart() {
     const userId = await AsyncStorage.getItem("userId");
     if (userId) {
       await axios
-        .get(`https://shopro-backend.vercel.app/api/shop/cart/${userId}`)
+        .get(`https://buyzaar-backend.vercel.app/api/shop/cart/${userId}`)
         .then((response) => {
           if ((response.status = 200)) {
             console.log(response.data);
@@ -113,7 +114,7 @@ export default function cart() {
             {item.title}
           </ThemedText>
         </View>
-        <ThemedText type="defaultSemiBold" style={{color:Colors.light.tertiary}}> $ {item.price}</ThemedText>
+        <ThemedText type="defaultSemiBold" style={{color:Colors.light.tertiary}}><Text style={{fontSize: 18}}>Rs. </Text>{numberWithCommas(item.price)}</ThemedText>
         <View style={{ flexDirection:"row", marginVertical: 5,alignSelf:'center',width:"70%",paddingRight:10 }}>
           {item.quantity !== 1 ? (
             <TouchableOpacity onPress={() => ondecreseQuantity(item)}>
@@ -182,7 +183,7 @@ export default function cart() {
         <TouchableOpacity
           style={{marginLeft:15}}
             onPress={() => {
-              navigation.goBack();
+              router.back();
             }}
           >
             <Ionicons name="arrow-back" size={35} color={Colors[colorScheme??'light'].text} />
@@ -205,14 +206,14 @@ export default function cart() {
           renderItem={renderItem}
         />
       </View>
-      <View style={{position:'absolute',bottom:15,width:"97%"}}>
+      <View style={{position:'absolute',bottom:15,width:"97%",alignSelf:'center'}}>
         <View style={styles.titleRow}>
-          <ThemedText type="subtitle" >SubTotal :</ThemedText>
-          <ThemedText type="subtitle" style={{color:Colors.light.tertiary}} >$ {total}</ThemedText>
+          <ThemedText type="defaultSemiBold" >SubTotal :</ThemedText>
+          <ThemedText type="subtitle" style={{color:Colors.light.tertiary}} ><Text style={{fontSize: 14}}>Rs. </Text>{numberWithCommas(total)}</ThemedText>
         </View>
 
         <TouchableOpacity
-          onPress={() => router.push("confirmorder")}
+          onPress={() => router.push("/confirmorder")}
           disabled={total == 0}
           style={[styles.buyRow,total != 0 ? {backgroundColor:Colors.light.primary}:{backgroundColor: Colors.light.gray}]}
         >

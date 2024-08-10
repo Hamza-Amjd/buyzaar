@@ -20,7 +20,7 @@ export default function category() {
   const [products, setProducts] = useState([]);
   const navigation = useNavigation();
   const updateProducts = async () => {
-    await axios.get(`https://shopro-backend.vercel.app/api/admin/items?limit=100&category=${category}`).then((response)=> {
+    await axios.get(`https://buyzaar-backend.vercel.app/api/admin/items?limit=100&category=${category}`).then((response)=> {
       if ((response.status = 200)) {
         setProducts(response.data.item);
       }

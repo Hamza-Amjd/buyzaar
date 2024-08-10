@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Image, useColorScheme } from 
 import { useNavigation } from "@react-navigation/native";
 import { Colors} from "@/constants/Colors";
 import { ThemedText } from "./ThemedText";
+import { numberWithCommas } from "@/utils/healper";
 type searchTileProps={
   item:any
 }
@@ -24,11 +25,7 @@ const SearchTile:React.FC<searchTileProps> = ({ item}) => {
       <View style={[styles.productMain,{backgroundColor:Colors[colorSchene??'light'].background3}]}>
         <View style={styles.imgContainer}>
           <Image
-          style={{
-            width: 40,
-            height: 40,
-            resizeMode: "contain",
-          }}
+          style={styles.imgContainer}
           source={{ uri: item.image }}
         />
         </View>
@@ -43,15 +40,14 @@ const SearchTile:React.FC<searchTileProps> = ({ item}) => {
         >
           <ThemedText style={styles.text}>
             {item.title?.length > 40
-              ? item.title.slice(0, 40) + "..."
+              ? item.title.slice(0, 38) + "..."
               : item.title}
           </ThemedText>
           <View style={{ flexDirection: "row" }}>
             <Text style={styles.pricetext}>
-              {" "}
-              $ {item.price}
+            <Text style={{fontSize: 12}}> Rs. </Text>{numberWithCommas(item.price)}
             </Text>
-            <Text>{item.quantity && " x" + item.quantity}</Text>
+            <ThemedText style={{lineHeight:18}}>{item.quantity && " x" + item.quantity}</ThemedText>
           </View>
         </View>
       </View>
@@ -65,7 +61,7 @@ const styles = StyleSheet.create({
   productMain: {
     width:'100%',
     flexDirection: "row",
-    borderRadius: 15,
+    borderRadius: 10,
     marginVertical: 5,
     padding: 5,
   },

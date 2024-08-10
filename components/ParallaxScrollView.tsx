@@ -62,11 +62,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   header: {
-    height: 300,
     overflow: 'hidden',
   },
   content: {
     flex: 1,
+    top:-20,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
   },

@@ -39,7 +39,7 @@ export default function Home() {
   const getProducts = async () => {
     setLoading(true);
     await axios
-      .get(`https://shopro-backend.vercel.app/api/admin/items?page=1&limit=8`)
+      .get(`https://buyzaar-backend.vercel.app/api/admin/items?page=1&limit=8`)
       .then((response) => {
         if ((response.status = 200)) {
           setProducts(response.data.item);
@@ -55,7 +55,7 @@ export default function Home() {
     setFooterLoading(true);
     await axios
       .get(
-        `https://shopro-backend.vercel.app/api/admin/items?page=${currentPage}&limit=8`
+        `https://buyzaar-backend.vercel.app/api/admin/items?page=${currentPage}&limit=8`
       )
       .then((response) => {
         if ((response.status = 200)) {
@@ -75,7 +75,7 @@ export default function Home() {
     setUserId(userId1);
     if (userId1) {
       await axios
-        .get(`https://shopro-backend.vercel.app/api/shop/addresses/${userId1}`)
+        .get(`https://buyzaar-backend.vercel.app/api/shop/addresses/${userId1}`)
         .then((response) => {
           if ((response.status = 200)) {
             setAddresses(response.data);
@@ -130,7 +130,7 @@ export default function Home() {
           </ThemedText>
           <TouchableOpacity
             onPress={() => {
-              router.push("cart");
+              router.push("/cart");
             }}
           >
             <View style={{ alignItems: "flex-end" }}>
@@ -238,13 +238,13 @@ export default function Home() {
       </ThemedView>
         <BottomModal
           //@ts-ignore
-          onHardwareBackPress={() => setModalVisible(!modalVisible)}
+          onHardwareBackPress={() => setModalVisible(false)}
           visible={modalVisible}
           modalAnimation={new SlideAnimation({ slideFrom: "bottom" })}
-          onTouchOutside={() => setModalVisible(!modalVisible)}
+          onTouchOutside={() => setModalVisible(false)}
           swipeDirection={["up", "down"]}
           swipeThreshold={200}
-          onSwipeOut={() => setModalVisible(!modalVisible)}
+          onSwipeOut={() => setModalVisible(false)}
         >
           <ModalContent style={{ width: "100%", height: 300,backgroundColor:Colors[colorScheme??'light'].background }}>
             <View style={{ marginBottom: 8 }}>
@@ -264,24 +264,10 @@ export default function Home() {
                 <TouchableOpacity
                   key={index}
                   onPress={() => setSelectedAdress(item)}
-                  style={{
-                    width: 140,
-                    height: 140,
-                    borderColor: "#D0D0D0",
-                    borderWidth: 1,
-                    padding: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 3,
-                    marginRight: 15,
-                    marginTop: 10,
-                    borderRadius: 10,
-                    backgroundColor:
-                      selectedAddress === item ? "#FBCEB1" : "white",
-                  }}
+                  style={[styles.addressContainer,{backgroundColor:selectedAddress === item ? "#FBCEB1" : "white"}]}
                 >
                   <View
-                    style={{ flexDirection: "row", alignItems: "center", gap: 3 }}
+                    style={styles.row}
                   >
                     <Text style={{ fontSize: 13, fontWeight: "bold" }}>
                       {item.name}
@@ -308,29 +294,15 @@ export default function Home() {
                 onPress={() => {
                   setModalVisible(false);
                   if (!userId) {
-                    router.push("(auth)");
+                    router.push("/(auth)");
                   } else {
-                    router.push("address");
+                    router.push('/address');
                   }
                 }}
-                style={{
-                  width: 140,
-                  height: 140,
-                  borderColor: "#D0D0D0",
-                  marginTop: 10,
-                  borderWidth: 1,
-                  padding: 10,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 10,
-                }}
+                style={styles.addAddressContainer}
               >
                 <Text
-                  style={{
-                    textAlign: "center",
-                    color: "#0066b2",
-                    fontWeight: "500",
-                  }}
+                  style={styles.addAddressTxt}
                 >
                   Add an Address or pick-up point
                 </Text>
@@ -374,4 +346,34 @@ const styles = StyleSheet.create({
     margin: 5,
     marginVertical: 10,
   },
+  addressContainer: {
+    width: 140,
+                    height: 140,
+                    borderColor: "#D0D0D0",
+                    borderWidth: 1,
+                    padding: 10,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 3,
+                    marginRight: 15,
+                    marginTop: 10,
+                    borderRadius: 10,
+  },
+  row:{ flexDirection: "row", alignItems: "center", gap: 3 },
+  addAddressContainer:{
+    width: 140,
+    height: 140,
+    borderColor: "#D0D0D0",
+    marginTop: 10,
+    borderWidth: 1,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+  },
+  addAddressTxt:{
+    textAlign: "center",
+    color: "#0066b2",
+    fontWeight: "500",
+  }
 });

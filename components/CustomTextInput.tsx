@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native'
 import React from 'react'
 import { Colors } from '@/constants/Colors'
 
@@ -8,8 +8,10 @@ type customTextInputProps={
     handleChange:any,
     value:string,
     setFieldTouched:any,
+    keyboardType?: any,
+    autoComplete?: any,
 }
-const CustomTextInput:React.FC<customTextInputProps> = ({title,touched,handleChange,value,setFieldTouched}) => {
+const CustomTextInput:React.FC<customTextInputProps> = ({title,touched,handleChange,value,setFieldTouched,keyboardType='default',autoComplete='off'}) => {
   return (
     <View style={[styles.label,
         touched && {borderColor:Colors["light"].primary } 
@@ -21,6 +23,8 @@ const CustomTextInput:React.FC<customTextInputProps> = ({title,touched,handleCha
     value={value}
     onBlur={() => setFieldTouched(title, "")}
     onFocus={() => setFieldTouched(title)}
+    keyboardType={keyboardType}
+    autoComplete={autoComplete}
   />
   </View>
 

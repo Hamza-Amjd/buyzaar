@@ -29,9 +29,9 @@ export default function address() {
     const handleAddress=async(values:any)=>{
         const userId=await AsyncStorage.getItem('userId')
         const address=values
-      axios.post("https://shopro-backend.vercel.app/api/shop/addresses", {userId,address}).then((response) => {
+      axios.post(`https://buyzaar-backend.vercel.app/api/shop/addresses`, {userId,address}).then((response) => {
         // @ts-ignore
-        Alert.alert("Address Added","",[{text:'ok',onPress:router.replace('(tabs)')}]);
+        Alert.alert("Address Added","",[{text:'ok',onPress:router.back()}]);
       })
       .catch((error) => {
         console.log("Unable to add Address", error);
@@ -67,12 +67,12 @@ export default function address() {
           isValid
         }) => (
           <View>
-            <CustomTextInput  title={"name"} value={values.name} touched={touched.name}  handleChange={handleChange} setFieldTouched={setFieldTouched} />
-            <CustomTextInput title={"mobileNo"} value={values.mobileNo} touched={touched.mobileNo}  handleChange={handleChange} setFieldTouched={setFieldTouched} />
-            <CustomTextInput title={"streetAddress"} value={values.streetAddress} touched={touched.streetAddress}  handleChange={handleChange} setFieldTouched={setFieldTouched} />
+            <CustomTextInput  title={"name"} value={values.name} touched={touched.name}  handleChange={handleChange} setFieldTouched={setFieldTouched} autoComplete={'name'}/>
+            <CustomTextInput title={"mobileNo"} value={values.mobileNo} touched={touched.mobileNo}  handleChange={handleChange} setFieldTouched={setFieldTouched} keyboardType={'number-pad'} autoComplete={''}/>
+            <CustomTextInput title={"streetAddress"} value={values.streetAddress} touched={touched.streetAddress}  handleChange={handleChange} setFieldTouched={setFieldTouched} autoComplete={'street-address'}/>
             <CustomTextInput  title={"city"} value={values.city} touched={touched.city}  handleChange={handleChange} setFieldTouched={setFieldTouched} />
-            <CustomTextInput  title={"country"} value={values.country} touched={touched.country}  handleChange={handleChange} setFieldTouched={setFieldTouched} />
-            <CustomTextInput  title={"postalCode"} value={values.postalCode} touched={touched.postalCode}  handleChange={handleChange} setFieldTouched={setFieldTouched} />
+            <CustomTextInput  title={"country"} value={values.country} touched={touched.country}  handleChange={handleChange} setFieldTouched={setFieldTouched} autoComplete={'country'}/>
+            <CustomTextInput  title={"postalCode"} value={values.postalCode} touched={touched.postalCode}  handleChange={handleChange} setFieldTouched={setFieldTouched} keyboardType={'number-pad'}/>
             
             {/* @ts-ignore */}
             <TouchableOpacity disabled={!isValid} onPress={handleSubmit} style={[styles.loginbtn,isValid && {backgroundColor: Colors["light"].primary}]}>

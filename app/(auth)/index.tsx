@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -19,8 +19,11 @@ import jwtDecode from "jwt-decode";
 import { useRouter } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
+import * as webBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
 
 
+webBrowser.maybeCompleteAuthSession();
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email address").required("Required"),
@@ -34,12 +37,47 @@ export default function Login() {
   const [loader, setLoader] = useState(false);
   const [userData, setUserData] = useState(null);
   const [obsecureText, setobsecureText] = useState(true);
+  const [userInfo, setUserInfo] = useState(null)
 
+  const [request,response,promptAsync]=Google.useAuthRequest({
+    webClientId:"298590590674-us734l31u9v6v8861evpoq2ibolb6koo.apps.googleusercontent.com",
+    androidClientId: "298590590674-g68ppu7ekl91u8arp6vm0u5nieahnmnc.apps.googleusercontent.com"
+  })
+   const handleSignInWithGoogle=async()=>{
+    try {
+      const user=AsyncStorage.getItem("@user");
+      if(!user){
+        if(response?.type=="success"){
+          await getUserInfo(response.authentication?.accessToken)
+        }else{
+          setUserInfo(JSON.parse(user))
+        }
+      }
+    } catch (error) {
+      console.log('Login with Google error', error);
+    }
+   }
+
+   const getUserInfo=async(accessToken:any)=>{
+    try {
+      const response=await axios.get("https://www.googleapis.com/userinfo/v2/me",{
+        headers:{Authorization:`Bearer ${accessToken}`}
+      })
+      setUserInfo(response.data)
+      await AsyncStorage.setItem("@user",response.data)
+    } catch (error) {
+      console.log('Get user info error', error);
+    }
+   }
   
+   useEffect(() => {
+     handleSignInWithGoogle();
+   }, [response])
+   
   const handleLogin = (values:any) => {
     setLoader(true);
     axios
-      .post("https://shopro-backend.vercel.app/api/auth/login", values)
+      .post(`https://buyzaar-backend.vercel.app/api/auth/login`, values)
       .then((response:any) => {
         setLoader(false);
         if ((response.success = true)) {
@@ -48,7 +86,7 @@ export default function Login() {
           const decodedtoken:any = jwtDecode(response.data.authtoken);
           const userId:any = decodedtoken.user.id;
           AsyncStorage.setItem("userId", userId);
-          router.replace("(tabs)");
+          router.replace("/(tabs)");
         }
       })
       .catch((error) => {
@@ -62,7 +100,7 @@ export default function Login() {
     <ThemedView style={{flex:1,paddingTop:40,paddingLeft:20}}>
         <TouchableOpacity
           onPress={() => {
-            router.replace('(tabs)');
+            router.replace('/(tabs)');
           }}
         >
           <ThemedText type="title"><Ionicons name="arrow-back" size={30} /></ThemedText>
@@ -90,6 +128,7 @@ export default function Login() {
             isValid,
           }) => (
             <View>
+            <ThemedText>{userInfo}</ThemedText>
               <View
                 style={[styles.label,
                   touched.email && {borderColor:Colors["light"].primary } 
@@ -173,10 +212,11 @@ export default function Login() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={()=>{}}
+              //@ts-ignore
+                onPress={()=>promptAsync()}
                 style={styles.googleBtn}
               >
-                <Image source={require('@/assets/images/google-icon.png')} style={{height:30,width:30}}/>
+                <Image source={require('@/assets/images/google-icon.png')} style={{height:25,width:25}}/>
                 <Text
                   style={{
                     fontWeight: "700",
@@ -184,11 +224,11 @@ export default function Login() {
                     color: Colors["light"].primary,
                   }}
                 >
-                   Sign In with Google
+                    Sign In with Google
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => router.push("register")}
+                onPress={() => router.push("/register")}
               >
                 <ThemedText type="defaultSemiBold" style={{textAlign:'center',marginTop:15}}>Don't have an account?  Sign up</ThemedText>
               </TouchableOpacity>
@@ -240,7 +280,7 @@ const styles = StyleSheet.create({
     width: "95%",
     height: 50,
     borderRadius: 20,
-    backgroundColor: "white",
+    backgroundColor: "#f2f2f2",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",

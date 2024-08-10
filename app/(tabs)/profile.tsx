@@ -21,7 +21,7 @@ const profile = () => {
             setUserLogin(true)
 
         try {
-            const response = await fetch(`https://shopro-backend.vercel.app/api/auth/getuser`, {
+            const response = await fetch(`https://buyzaar-backend.vercel.app/api/auth/getuser`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -40,7 +40,8 @@ const profile = () => {
     const logout=()=>{
         Alert.alert(
             'Logout','Are you sure you want to logout',
-            [{text:'Cancel',onPress:()=>{}},{text:'Confirm',onPress:async()=>{await AsyncStorage.removeItem('token');await AsyncStorage.removeItem('userId');
+            [{text:'Cancel',onPress:()=>{}},{text:'Confirm',onPress:async()=>{await AsyncStorage.removeItem('token');
+                await AsyncStorage.removeItem('userId');
             setUserLogin(false);setUserData([])}}]);
       }
     
@@ -48,9 +49,9 @@ const profile = () => {
       checkUserExist()
     }, [])
     const menuitems=[
-        {name:'Favoraties' ,icon:'heart',"function":()=>router.push('favorities')},
-        {name:'Cart' ,icon:'cart',"function":()=>router.push('cart')},
-        {name:'Orders' ,icon:'bag',"function":()=>router.push('orders')},
+        {name:'Favoraties' ,icon:'heart',"function":()=>router.push('/favorities')},
+        {name:'Cart' ,icon:'cart',"function":()=>router.push('/cart')},
+        {name:'Orders' ,icon:'bag',"function":()=>router.push('/orders')},
         {name:'To Review' ,icon:'star',"function":null},
         {name:'Settings' ,icon:'settings',"function":null},
         {name:'Log out' ,icon:'log-out',"function":logout},
@@ -77,7 +78,7 @@ const profile = () => {
         <TouchableOpacity style={{borderColor:Colors[colorScheme ?? 'light'].text,
         borderWidth:1,
         borderRadius:25,
-        padding:5}} onPress={()=>router.push("(auth)")}>
+        padding:5}} onPress={()=>router.push("/(auth)")}>
             <ThemedText type='defaultSemiBold'>Sign Up</ThemedText>
         </TouchableOpacity>
         }

@@ -40,20 +40,14 @@ export default function RegisterationScreen() {
     const [obsecurePass, setobsecurePass] = useState(true);
     const [obsecureCpass, setobsecureCpass] = useState(true);
     const handleRegister=async(values:any)=>{
-      axios.post("https://shopro-backend.vercel.app/api/auth/register", values).then((response:any) => {
+      axios.post(`https://buyzaar-backend.vercel.app/api/auth/register`, values).then((response:any) => {
         setLoader(false);
         console.log(response.data)
         if (response.success == true) {
-          // AsyncStorage.setItem("token", response.data.authtoken);
-
-          // const decodedtoken:any = jwtDecode(response.data.authtoken);
-          // const userId:any = decodedtoken.user.id;
-          // AsyncStorage.setItem("userId", userId);
-          // navigation.replace("Tabs");
+          Alert.alert("Registration successful","Please check your email for verification", [{text:'ok',onPress:()=>router.back()}]
+        );
         }
         //@ts-ignore
-        Alert.alert("Registration successful","Please check your email for verification", [{text:'ok',onPress:router.back()}]
-        );
       })
       .catch((error) => {
         Alert.alert(

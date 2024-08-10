@@ -19,7 +19,7 @@ const search = () => {
   const[searchResults,setSearchResults]=useState([])
   const tabBarHieght=useBottomTabBarHeight();
   const search=async()=>{
-      await axios.get(`https://shopro-backend.vercel.app/api/admin/items?limit=100&search=${searchKey}`).then((response)=> {
+      await axios.get(`https://buyzaar-backend.vercel.app/api/admin/items?limit=100&search=${searchKey}`).then((response)=> {
         if ((response.status = 200)) {
           setSearchResults(response.data.item);
         }

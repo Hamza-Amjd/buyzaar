@@ -7,8 +7,9 @@ import {
   Alert,
   ActivityIndicator,
   useColorScheme,
+  BackHandler,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -17,12 +18,16 @@ import { useNavigation } from "@react-navigation/native";
 import { clearCart } from "../redux/CartReducer";
 import AnimatedLottieView from "lottie-react-native";
 import SearchTile from "@/components/SearchTile";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
+import Step1 from "@/components/ConfirmOrder/Step1";
+import Step2 from "@/components/ConfirmOrder/Step2";
+import Step3 from "@/components/ConfirmOrder/Step3";
+import Step4 from "@/components/ConfirmOrder/Step4";
 const confirmorder = () => {
-  const colorScheme= useColorScheme();
+  const colorScheme = useColorScheme();
   const [currentStep, setCurrentStep] = useState(0);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAdress] = useState<any>();
@@ -35,10 +40,38 @@ const confirmorder = () => {
   //@ts-ignore
   const totalPrice = cart?.map((item) => item.price * item.quantity).reduce((curr, prev) => curr + prev, 0);
 
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+        if(currentStep === 0){
+          router.back();
+          return;
+        }
+        if (currentStep < 4) {
+          setCurrentStep((prev) => prev - 1);
+        }
+        return true;
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction
+      );
+
+      return () => backHandler.remove();
+    }, [currentStep])
+  );
+  const handleNext = () => {
+    setCurrentStep((prev) => prev + 1);
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep((prev) => prev - 1);
+  };
   const handlePlaceOrder = async () => {
     const userId = await AsyncStorage.getItem("userId");
     axios
-      .post("https://shopro-backend.vercel.app/api/shop/order", {
+      .post(`https://buyzaar-backend.vercel.app/api/shop/order`, {
         userId: userId,
         cart: cart,
         totalPrice: totalPrice,
@@ -46,14 +79,16 @@ const confirmorder = () => {
         paymentMethod: selectedPaymentOption,
       })
       .then((response) => {
+        console.log(response.data)
         dispatch(clearCart());
         setTimeout(() => {
-          router.replace("orders");
+          router.replace("/orders");
         }, 100);
       })
       .catch((error) => {
         console.log("failed to place order", error);
       });
+    handleNext();
   };
 
   const getAddress = async () => {
@@ -64,7 +99,7 @@ const confirmorder = () => {
       return;
     }
     await axios
-      .get(`https://shopro-backend.vercel.app/api/shop/addresses/${userId}`)
+      .get(`https://buyzaar-backend.vercel.app/api/shop/addresses/${userId}`)
       .then((response) => {
         if ((response.status = 200)) {
           setAddresses(response.data);
@@ -86,10 +121,8 @@ const confirmorder = () => {
     { title: "Place Order", content: "Order Summary" },
   ];
   return (
-    <ThemedView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 40 }}>
-      <View
-        style={styles.stepsContainer}
-      >
+    <ThemedView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 60 }}>
+      <View style={styles.stepsContainer}>
         {steps?.map((step, index) => (
           <View
             key={index}
@@ -104,335 +137,82 @@ const confirmorder = () => {
               />
             )}
             <TouchableOpacity
-            disabled={index>currentStep}
+              disabled={index > currentStep}
               onPress={() => setCurrentStep(index)}
               style={[
                 styles.steps,
-                index == currentStep && {borderWidth:3,borderColor:'green',padding:2},
+                index == currentStep && {
+                  borderWidth: 3,
+                  borderColor: "green",
+                  padding: 2,
+                },
                 index < currentStep && { backgroundColor: "green" },
               ]}
             >
               {index < currentStep ? (
-                <Text
-                  style={styles.stepstxt}
-                >
-                  &#10003;
-                </Text>
+                <Text style={styles.stepstxt}>&#10003;</Text>
               ) : (
-                <Text
-                  style={styles.stepstxt}
-                >
-                  {index + 1}
-                </Text>
+                <Text style={styles.stepstxt}>{index + 1}</Text>
               )}
             </TouchableOpacity>
-            <ThemedText type="defaultSemiBold" style={{ textAlign: "center", marginTop: 8 }}>
+            <ThemedText
+              type="defaultSemiBold"
+              style={{ textAlign: "center", marginTop: 8 }}
+            >
               {step.title}
             </ThemedText>
           </View>
         ))}
       </View>
 
-      {currentStep == 0 && (loading ? (
-        <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-        >
-          <ActivityIndicator size={"large"} />
-        </View>
-      ) : (
-        <View style={styles.detailsContainer}>
-          <View>
-            <ThemedText type="heading">
-              Select Delivery Address
-            </ThemedText>
-
-              {addresses.map((item:any, index) => (
-                <TouchableOpacity key={item._id} style={[styles.itemContainer,{backgroundColor:Colors[colorScheme??'light'].background2}]} onPress={() => setSelectedAdress(item)}>
-                  {selectedAddress && selectedAddress._id == item._id ? (
-                    <FontAwesome5
-                      name="dot-circle"
-                      size={20}
-                      color={Colors.light.primary}
-                    />
-                  ) : (
-                    <Entypo
-                      name="circle"
-                      size={20}
-                      color="gray"
-                    />
-                  )}
-
-                  <View style={{ marginLeft: 6 }}>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 3,
-                      }}
-                    >
-                      <ThemedText type="defaultSemiBold">
-                        {item.name}
-                      </ThemedText>
-                      <Entypo name="location-pin" size={24} color="red" />
-                    </View>
-
-                    <ThemedText  type='default'>
-                      {item.streetAddress +
-                        ", " +
-                        item.city +
-                        ", " +
-                        item.country}
-                    </ThemedText>
-
-                    <ThemedText  type='default'>
-                      Contact : {item.mobileNo}
-                    </ThemedText>
-
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 10,
-                        marginTop: 7,
-                      }}
-                    >
-                      <TouchableOpacity style={styles.subButton}>
-                        <Text>Edit</Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity style={styles.subButton}>
-                        <Text>Remove</Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity style={styles.subButton}>
-                        <Text>Set as Default</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
-          </View>
-          <TouchableOpacity
-            onPress={() => setCurrentStep(1)}
-            style={[
-              styles.button,
-              !selectedAddress && {backgroundColor:Colors[colorScheme??'light'].gray}]}
-            disabled={!selectedAddress}
+      {currentStep == 0 &&
+        (loading ? (
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
           >
-            <Text style={{ color: "white" }}>
-              Deliver to this Address
-            </Text>
-          </TouchableOpacity>
-        </View>
-      ))}
+            <ActivityIndicator size={"large"} />
+          </View>
+        ) : (
+          <Step1
+            addresses={addresses}
+            setSelectedAdress={setSelectedAdress}
+            handleNext={handleNext}
+            selectedAddress={selectedAddress}
+            styles={styles}
+          />
+        ))}
 
       {currentStep == 1 && (
-        <View style={styles.detailsContainer}>
-          <View>
-          <ThemedText type="heading">
-              Choose your delivery options
-            </ThemedText>
-
-            <View style={styles.itemContainer}>
-              <TouchableOpacity onPress={() => setDeliveryOption(!deliveryOption)}>{deliveryOption ? 
-                <FontAwesome5
-                  name="dot-circle"
-                  size={20}
-                  color={Colors.light.primary}
-                />:
-                <Entypo
-                  name="circle"
-                  size={20}
-                  color="gray"
-                />
-              }
-              </TouchableOpacity>
-
-              <ThemedText style={{ flex: 1 }}>
-                <Text style={{ color: "green", fontWeight: "500" }}>
-                  Promtional Offer
-                </Text>{" "}
-                - FREE DELIVERY
-              </ThemedText>
-            </View>
-          </View>
-          <TouchableOpacity
-            onPress={() => setCurrentStep(2)}
-            style={[
-              styles.button,
-              !deliveryOption && {backgroundColor:Colors[colorScheme??'light'].gray}
-            ]}
-            disabled={!deliveryOption}
-          >
-            <Text style={{ color: "white" }}>Continue</Text>
-          </TouchableOpacity>
-        </View>
+        <Step2
+          deliveryOption={deliveryOption}
+          setDeliveryOption={setDeliveryOption}
+          styles={styles}
+          handleNext={handleNext}
+        />
       )}
 
       {currentStep == 2 && (
-        <View style={styles.detailsContainer}>
-          <View>
-          <ThemedText type="heading">
-              Select your payment Method
-            </ThemedText>
-
-            <View style={styles.itemContainer}>
-              {selectedPaymentOption === "cash on delivery" ? (
-                <FontAwesome5
-                  name="dot-circle"
-                  size={20}
-                  color={Colors.light.primary}
-                />
-              ) : (
-                <Entypo
-                  onPress={() => setSelectedPaymentOption("cash on delivery")}
-                  name="circle"
-                  size={20}
-                  color="gray"
-                />
-              )}
-
-              <ThemedText type="default">Cash on Delivery</ThemedText>
-            </View>
-
-            <View style={styles.itemContainer}>
-              {selectedPaymentOption === "card" ? (
-                <FontAwesome5
-                  name="dot-circle"
-                  size={20}
-                  color={Colors.light.primary}
-                />
-              ) : (
-                <Entypo
-                  onPress={() => {
-                    setSelectedPaymentOption("card payment");
-                    Alert.alert("Credit/Debit card", "Pay Online", [
-                      {
-                        text: "Cancel",
-                        onPress: () => console.log("Cancel is pressed"),
-                      },
-                      {
-                        text: "OK",
-                      },
-                    ]);
-                  }}
-                  name="circle"
-                  size={20}
-                  color="gray"
-                />
-              )}
-
-              <ThemedText type="default">Credit or debit card</ThemedText>
-            </View>
-          </View>
-          <TouchableOpacity
-            onPress={() => setCurrentStep(3)}
-            style={[
-              styles.button,
-              !selectedPaymentOption && {backgroundColor:Colors[colorScheme??'light'].gray}
-            ]}
-            disabled={!selectedPaymentOption}
-          >
-            <Text style={{ color: "white" }}>Continue</Text>
-          </TouchableOpacity>
-        </View>
+        <Step3
+          selectedPaymentOption={selectedPaymentOption}
+          setSelectedPaymentOption={setSelectedPaymentOption}
+          styles={styles}
+          handleNext={handleNext}
+        />
       )}
 
       {currentStep === 3 && selectedPaymentOption === "cash on delivery" && (
-        <View style={styles.detailsContainer}>
-          <View>
-          <ThemedText type="heading">Order Now</ThemedText>
-
-            <View
-              style={[
-                styles.itemContainer,
-                { backgroundColor:Colors[colorScheme??'light'].background2, justifyContent: "space-between" },
-              ]}
-            >
-              <View>
-                <ThemedText style={{ fontSize: 17, fontWeight: "bold" }}>
-                  Save 5% and never run out
-                </ThemedText>
-                <ThemedText style={{ fontSize: 15, color: "gray", marginTop: 5 }}>
-                  Turn on auto deliveries
-                </ThemedText>
-              </View>
-
-              <MaterialIcons
-                name="keyboard-arrow-right"
-                size={24}
-                color={Colors[colorScheme??'light'].text}
-              />
-            </View>
-
-            <View
-              style={[styles.itemListContainer,{backgroundColor:Colors[colorScheme??'light'].background2}]}
-            >
-              <ThemedText type="subtitle">Shipping to {selectedAddress.name}</ThemedText>
-
-              <View style={styles.subItemContainer}>
-                <ThemedText type="default"
-                  style={{ color: "gray" }}
-                >
-                  Items
-                </ThemedText>
-                
-                <ThemedText type="default" style={{ color: "gray", fontSize: 16 }}>
-                  $ {totalPrice}{" "}
-                </ThemedText>
-              </View>
-              <View >
-                  {cart.map((item:any)=>{
-                      return<SearchTile key={item._id} item={item}/>
-                  })}
-                </View>
-                
-              <View style={styles.subItemContainer}>
-                <Text
-                  style={{ fontSize: 16, fontWeight:'bold', color: "gray" }}
-                >
-                  Delivery
-                </Text>
-
-                <Text style={{ color: "gray", fontSize: 16 }}>$ 0</Text>
-              </View>
-
-              <View style={styles.subItemContainer}>
-                <ThemedText style={{ fontSize: 20, fontWeight: "bold" }}>
-                  Order Total
-                </ThemedText>
-
-                <Text
-                  style={{ color: "#C60C30", fontSize: 17, fontWeight: "bold" }}
-                >
-                  $ {totalPrice}
-                </Text>
-              </View>
-            </View>
-
-            <View style={[styles.itemListContainer,{backgroundColor:Colors[colorScheme??'light'].background2,gap:2}]}
-            >
-              <ThemedText type="subtitle">Pay With</ThemedText>
-
-              <ThemedText type="default">
-                Pay on delivery (Cash)
-              </ThemedText>
-            </View>
-          </View> 
-          
-          <TouchableOpacity
-            onPress={() => {
-              handlePlaceOrder();
-              setCurrentStep(4);
-            }}
-            style={styles.button}
-          >
-            <Text style={{ color: "white" }}>Place your order</Text>
-          </TouchableOpacity>
-        </View>
+        <Step4
+          handleSubmit={handlePlaceOrder}
+          styles={styles}
+          cart={cart}
+          selectedAddress={selectedAddress}
+          totalPrice={totalPrice}
+        />
       )}
       {currentStep === 4 && (
-        <View style={{flex:1,alignItems:'center',justifyContent:'center'}}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
           <AnimatedLottieView
             autoPlay
             loop={false}
@@ -457,7 +237,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     justifyContent: "space-between",
   },
-  
+
   steps: {
     width: 40,
     height: 40,
@@ -466,7 +246,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  stepstxt:{
+  stepstxt: {
     fontSize: 16,
     fontWeight: "bold",
     color: "white",
@@ -475,11 +255,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
   },
-  detailsTitle:{
+  detailsTitle: {
     fontSize: 20,
-    fontWeight: "bold", 
-    color:Colors.light.primary,
-    paddingBottom: 10
+    fontWeight: "bold",
+    color: Colors.light.primary,
+    paddingBottom: 10,
   },
   button: {
     backgroundColor: Colors.light.primary,
@@ -489,7 +269,12 @@ const styles = StyleSheet.create({
     height: 45,
     marginBottom: 10,
   },
-  disabledBtn:{
+  btnTxt: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "white",
+  },
+  disabledBtn: {
     color: Colors.light.white,
   },
   subButton: {
@@ -509,7 +294,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 10,
     borderRadius: 10,
-    overflow:'hidden'
+    overflow: "hidden",
   },
   subItemContainer: {
     flexDirection: "row",
@@ -525,5 +310,4 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 10,
   },
-  
 });
