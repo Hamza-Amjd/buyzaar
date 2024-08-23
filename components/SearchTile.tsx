@@ -1,57 +1,72 @@
 import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image, useColorScheme } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  useColorScheme,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Colors} from "@/constants/Colors";
+import { Colors } from "@/constants/Colors";
 import { ThemedText } from "./ThemedText";
 import { numberWithCommas } from "@/utils/healper";
-type searchTileProps={
-  item:any
-}
-const SearchTile:React.FC<searchTileProps> = ({ item}) => {
+import { Link } from "expo-router";
+type searchTileProps = {
+  item: any;
+};
+const SearchTile: React.FC<searchTileProps> = ({ item }) => {
   const navigation = useNavigation();
-  const colorSchene=useColorScheme();
+  const colorSchene = useColorScheme();
   return (
-    <TouchableOpacity
-      onPress={() => {
-        //@ts-ignore
-        navigation.navigate("productdetails", { item });
-      }}
+    <Link
+      href={`/products/${item._id}`}
+      asChild
       style={{
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
       }}
     >
-      <View style={[styles.productMain,{backgroundColor:Colors[colorSchene??'light'].background3}]}>
-        <View style={styles.imgContainer}>
-          <Image
-          style={styles.imgContainer}
-          source={{ uri: item.image }}
-        />
-        </View>
-        
-
+      <TouchableOpacity>
         <View
-          style={{
-            justifyContent: "flex-start",
-            alignContent: "center",
-            marginLeft: 15,
-          }}
+          style={[
+            styles.productMain,
+            { backgroundColor: Colors[colorSchene ?? "light"].background3 },
+          ]}
         >
-          <ThemedText style={styles.text}>
-            {item.title?.length > 40
-              ? item.title.slice(0, 38) + "..."
-              : item.title}
-          </ThemedText>
-          <View style={{ flexDirection: "row" }}>
-            <Text style={styles.pricetext}>
-            <Text style={{fontSize: 12}}> Rs. </Text>{numberWithCommas(item.price)}
-            </Text>
-            <ThemedText style={{lineHeight:18}}>{item.quantity && " x" + item.quantity}</ThemedText>
+          <View style={styles.imgContainer}>
+            <Image
+              style={styles.imgContainer}
+              source={{ uri: item.media[0] }}
+            />
+          </View>
+
+          <View
+            style={{
+              justifyContent: "flex-start",
+              alignContent: "center",
+              marginLeft: 15,
+            }}
+          >
+            <ThemedText style={styles.text}>
+              {item.title?.length > 40
+                ? item.title.slice(0, 38) + "..."
+                : item.title}
+            </ThemedText>
+            <View style={{ flexDirection: "row" }}>
+              <Text style={styles.pricetext}>
+                <Text style={{ fontSize: 12 }}> Rs. </Text>
+                {numberWithCommas(item.price)}
+              </Text>
+              <ThemedText style={{ lineHeight: 18 }}>
+                {item.quantity && " x" + item.quantity}
+              </ThemedText>
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Link>
   );
 };
 
@@ -59,18 +74,18 @@ export default SearchTile;
 
 const styles = StyleSheet.create({
   productMain: {
-    width:'100%',
+    width: "100%",
     flexDirection: "row",
     borderRadius: 10,
     marginVertical: 5,
     padding: 5,
   },
-  imgContainer:{
+  imgContainer: {
     width: 40,
     height: 40,
     resizeMode: "contain",
-    backgroundColor:"#fff",
-    borderRadius:7,
+    backgroundColor: "#fff",
+    borderRadius: 7,
   },
   text: {
     fontSize: 14,

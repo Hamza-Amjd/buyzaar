@@ -21,6 +21,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import * as webBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import Header from "@/components/Header";
 
 
 webBrowser.maybeCompleteAuthSession();
@@ -98,13 +99,7 @@ export default function Login() {
   };
   return (
     <ThemedView style={{flex:1,paddingTop:40,paddingLeft:20}}>
-        <TouchableOpacity
-          onPress={() => {
-            router.replace('/(tabs)');
-          }}
-        >
-          <ThemedText type="title"><Ionicons name="arrow-back" size={30} /></ThemedText>
-        </TouchableOpacity>
+        <Header onBackPress={()=>router.replace('/(tabs)')}/>
       <View style={{alignItems:"center",justifyContent:"center",marginBottom:90,marginTop:80}}>
         <View style={{flexDirection:"row",alignItems:"center",justifyContent:"center",marginBottom:15 }}>
           <Image source={require('@/assets/images/logo.png')} style={{width:50,height:50,borderRadius:100}}/>

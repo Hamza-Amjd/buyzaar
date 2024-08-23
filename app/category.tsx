@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import Product from "@/components/Product";
+import Product from "@/components/ProductCard";
 import axios from "axios";
 
 import { Ionicons } from "@expo/vector-icons";

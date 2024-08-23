@@ -7,47 +7,19 @@ import {
   useColorScheme,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import { useDispatch, useSelector } from "react-redux";
-import Product from "../components/Product";
+import Product from "../components/ProductCard";
 import AnimatedLottieView from "lottie-react-native";
-import { router } from "expo-router";
-import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
+import Header from "@/components/Header";
+import useCart from "@/hooks/useCart";
 
-const favorities = () => {
-  const dispatch = useDispatch();
-  const [products, setProducts] = useState([]);
-  const favorite = useSelector((state: any) => state.favorite.favorite);
-  useEffect(() => {
-    setProducts(favorite);
-  }, []);
+const wishlist = () => {
+  const wishlist=useCart().wishlist;
   const colorScheme = useColorScheme();
   return (
     <ThemedView style={{flex:1, paddingTop:35}}>
-      <View style={styles.bar}>
-        <TouchableOpacity
-          onPress={() => {
-            router.back();
-          }}
-        >
-          <Ionicons
-            name="arrow-back"
-            size={35}
-            color={Colors[colorScheme ?? "light"].text}
-          />
-        </TouchableOpacity>
-        <ThemedText
-          type="subtitle"
-          style={{
-            margin: 10,
-          }}
-        >
-          {"  "}Favoraties
-        </ThemedText>
-      </View>
-      {favorite.length == 0 && (
+      <Header title="Wishlist"/>
+      {wishlist.length == 0 && (
         <AnimatedLottieView
           autoPlay
           loop
@@ -57,7 +29,7 @@ const favorities = () => {
         />
       )}
       <FlatList
-        data={products}
+        data={wishlist}
         keyExtractor={(item: any) => item._id}
         renderItem={({ item }) => <Product item={item} />}
         numColumns={2}
@@ -71,7 +43,6 @@ const favorities = () => {
     </ThemedView>
   );
 };
-export default favorities;
 const styles = StyleSheet.create({
   bar: {
     margin: 10,
@@ -79,3 +50,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+
+export default wishlist;

@@ -13,26 +13,17 @@ import axios from "axios";
 import {useBottomTabBarHeight} from '@react-navigation/bottom-tabs'
 import SearchTile from "@/components/SearchTile";
 import { ThemedView } from "@/components/ThemedView";
+import { getSearchedProducts } from "@/utils/actions";
 
 const search = () => {
-  const[searchKey,setSearchKey]=useState<any>()
+  const[searchKey,setSearchKey]=useState("")
   const[searchResults,setSearchResults]=useState([])
   const tabBarHieght=useBottomTabBarHeight();
   const search=async()=>{
-      await axios.get(`https://buyzaar-backend.vercel.app/api/admin/items?limit=100&search=${searchKey}`).then((response)=> {
-        if ((response.status = 200)) {
-          setSearchResults(response.data.item);
-        }
-      })
-      .catch((error) => {
-        console.log("fetching products failed", error.message);
-      })
-      
-    
+      await getSearchedProducts(searchKey).then((results)=>setSearchResults(results))
   }
   useEffect(() => {
-    search();
-    if(searchKey?.length==0){setSearchResults([])}
+    if(searchKey.length>0)search();
   }, [searchKey])
   
   return (

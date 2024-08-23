@@ -8,217 +8,193 @@ import {
   Image,
   useColorScheme,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  decrementQuantity,
-  incrementQuantity,
-  removeFromCart,
-} from "../redux/CartReducer";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 import AnimatedLottieView from "lottie-react-native";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 import { numberWithCommas } from "@/utils/healper";
+import Header from "@/components/Header";
+import useCart, { CartItem } from "@/hooks/useCart";
 
 export default function cart() {
-  const navigation = useNavigation();
-  const colorScheme=useColorScheme();
-  const dispatch = useDispatch();
-  const [products, setProducts] = useState([]);
+  const colorScheme = useColorScheme();
+  const [products, setProducts] = useState<CartItem[]>([]);
   //@ts-ignore
-  const cart = useSelector((state) => state.cart.cart);
-  //@ts-ignore
-  const total = cart.map((item) => item.price * item.quantity).reduce((curr, prev) => curr + prev, 0);
+  const cart = useCart();
+  const total = cart.cartItems.reduce(
+    (acc, cartItem) => acc + cartItem.item.price * cartItem.quantity,
+    0
+  );
 
-  const handleCart = async () => {
-    const userId = await AsyncStorage.getItem("userId");
-    if (userId) {
-      axios
-        .post(`https://buyzaar-backend.vercel.app/api/shop/addtocart`, {
-          userId: userId,
-          cart: cart,
-        })
-        .then((response) => {})
-        .catch((error) => {
-          console.log("failed to add item", error);
-        });
-    }
-  };
-  const fetchCart = async () => {
-    const userId = await AsyncStorage.getItem("userId");
-    if (userId) {
-      await axios
-        .get(`https://buyzaar-backend.vercel.app/api/shop/cart/${userId}`)
-        .then((response) => {
-          if ((response.status = 200)) {
-            console.log(response.data);
-            setProducts(response.data);
-          }
-        })
-        .catch((error) => {
-          console.log("registration failed", error);
-        });
-    }
-  };
-
-  //@ts-ignore
-  const onRemoveFromCart = (item) => {
-    dispatch(removeFromCart(item));
-  };
-  //@ts-ignore
-  const onIncreseQuantity = (item) => {
-    dispatch(incrementQuantity(item));
-  };
-  //@ts-ignore
-  const ondecreseQuantity = (item) => {
-    if (item.quantity == 1) {
-      dispatch(removeFromCart(item));
-    } else {
-      dispatch(decrementQuantity(item));
-    }
-  };
-  //@ts-ignore
-  const renderItem= ({ item }) => {
-    return (
-    <TouchableOpacity
-      onPress={() => {
-        //@ts-ignore
-        navigation.navigate("productdetails", { item });
-      }}
-      style={[styles.productContainer,{backgroundColor:Colors[colorScheme??'light'].background2}]}
-    >
-      <View style={styles.imgContainer}>
-        <Image
-          style={{
-            width: 100,
-            height: 100,
-            resizeMode: "contain",
-            borderRadius: 10,
-          }}
-          source={{ uri: item.image }}
-        />
-        </View>
-      <View
-        style={{
-          justifyContent: "space-around",
-          alignContent: "center",
-        }}
-      >
-        <View style={{  }}>
-          <ThemedText numberOfLines={2} type="defaultSemiBold" style={{paddingRight:10,width:"70%"}}>
-            {item.title}
-          </ThemedText>
-        </View>
-        <ThemedText type="defaultSemiBold" style={{color:Colors.light.tertiary}}><Text style={{fontSize: 18}}>Rs. </Text>{numberWithCommas(item.price)}</ThemedText>
-        <View style={{ flexDirection:"row", marginVertical: 5,alignSelf:'center',width:"70%",paddingRight:10 }}>
-          {item.quantity !== 1 ? (
-            <TouchableOpacity onPress={() => ondecreseQuantity(item)}>
-              <Feather
-                name="minus"
-                size={23}
-                color="white"
-                style={{
-                  borderTopLeftRadius: 3,
-                  borderBottomLeftRadius: 5,
-                  backgroundColor: Colors.light.primary,
-                }}
-              />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={() => onRemoveFromCart(item)}>
-              <MaterialCommunityIcons
-                name="delete"
-                size={20}
-                color="white"
-                style={{
-                  backgroundColor: Colors.light.primary,
-                  borderTopLeftRadius: 3,
-                  borderBottomLeftRadius: 3,
-                  padding:2
-                }}
-              />
-            </TouchableOpacity>
-          )}
-
-          <ThemedText
-            style={{
-              fontSize: 16,
-              borderTopWidth: 0.8,
-              borderColor: Colors.light.primary,
-              borderBottomWidth: 0.8,
-              paddingHorizontal: 10,
-              lineHeight:22
-            }}
-          >
-            {item.quantity}
-          </ThemedText>
-          <TouchableOpacity onPress={() => onIncreseQuantity(item)}>
-            <Feather
-              name="plus"
-              size={23}
-              color="white"
-              style={{
-                borderTopRightRadius: 3,
-                borderBottomRightRadius: 3,
-                backgroundColor: Colors.light.primary,
-              }}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </TouchableOpacity>
-  )}
+  const renderItem = ({ cartItem }: { cartItem: CartItem }) => {};
   useEffect(() => {
-    setProducts(cart);
-    handleCart();
+    setProducts(cart.cartItems);
   }, [cart]);
   return (
     <ThemedView style={styles.container}>
-          <View style={{flex:1}}>
-        <TouchableOpacity
-          style={{marginLeft:15}}
-            onPress={() => {
-              router.back();
+      <Header title="Cart" color="white" />
+      <View style={{ flex: 1 }}>
+        {cart.cartItems.length == 0 ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              paddingTop: 150,
             }}
           >
-            <Ionicons name="arrow-back" size={35} color={Colors[colorScheme??'light'].text} />
-          </TouchableOpacity>
-        {cart.length == 0 && (
-          <View style={{flex:1,justifyContent:'center',alignItems:'center',paddingTop:150}}>
             <AnimatedLottieView
-            autoPlay
-            loop
-            speed={0.3}
-            style={{ height: 150, width: 150 }}
-            source={require("../assets/images/emptyCart.json")}
-          />
+              autoPlay
+              loop
+              speed={0.3}
+              style={{ height: 150, width: 150 }}
+              source={require("../assets/images/emptyCart.json")}
+            />
           </View>
+        ) : (
+          cart.cartItems.map((cartItem: CartItem) => {
+            return (
+              <Link
+                key={cartItem.item._id}
+                href={`/products/${cartItem.item._id}`}
+                asChild
+                style={[
+                  styles.productContainer,
+                  {
+                    backgroundColor: Colors[colorScheme ?? "light"].background2,
+                  },
+                ]}
+              >
+                <TouchableOpacity>
+                  <View style={styles.imgContainer}>
+                    <Image
+                      style={styles.imgContainer}
+                      source={{ uri: cartItem.item.media[0] }}
+                    />
+                  </View>
+                  <View>
+                      <ThemedText type="defaultSemiBold">
+                        {cartItem.item.title}
+                      </ThemedText>
+                    {cartItem?.color && (
+                      <ThemedText type="default">
+                        Color: {cartItem.color.toUpperCase()}
+                      </ThemedText>
+                    )}
+                    {cartItem?.size && (
+                      <ThemedText type="default">
+                        Varient: {cartItem.size.toUpperCase()}
+                      </ThemedText>
+                    )}
+                    <ThemedText
+                      type="defaultSemiBold"
+                      style={{ color: Colors.light.tertiary }}
+                    >
+                      <Text style={{ fontSize: 18 }}>Rs. </Text>
+                      {numberWithCommas(cartItem?.item?.price)}
+                    </ThemedText>
+                    <View
+                      style={styles.quantityRow}
+                    >
+                      {cartItem.quantity !== 1 ? (
+                        <TouchableOpacity
+                          onPress={() =>
+                            cart.decreaseQuantity(cartItem.item._id)
+                          }
+                        >
+                          <Feather
+                            name="minus"
+                            size={23}
+                            color="white"
+                            style={{
+                              borderTopLeftRadius: 3,
+                              borderBottomLeftRadius: 5,
+                              backgroundColor: Colors.light.primary,
+                            }}
+                          />
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          onPress={() => cart.removeItem(cartItem.item._id)}
+                        >
+                          <MaterialCommunityIcons
+                            name="delete"
+                            size={20}
+                            color="white"
+                            style={{
+                              backgroundColor: Colors.light.primary,
+                              borderTopLeftRadius: 3,
+                              borderBottomLeftRadius: 3,
+                              padding: 2,
+                            }}
+                          />
+                        </TouchableOpacity>
+                      )}
+
+                      <ThemedText
+                        style={{
+                          fontSize: 16,
+                          borderTopWidth: 0.8,
+                          borderColor: Colors.light.primary,
+                          borderBottomWidth: 0.8,
+                          paddingHorizontal: 10,
+                          lineHeight: 22,
+                        }}
+                      >
+                        {cartItem.quantity}
+                      </ThemedText>
+                      <TouchableOpacity
+                        onPress={() => cart.increaseQuantity(cartItem.item._id)}
+                      >
+                        <Feather
+                          name="plus"
+                          size={23}
+                          color="white"
+                          style={{
+                            borderTopRightRadius: 3,
+                            borderBottomRightRadius: 3,
+                            backgroundColor: Colors.light.primary,
+                          }}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </Link>
+            );
+          })
         )}
-        <FlatList
-          data={products}
-          keyExtractor={(item:any) => item._id}
-          style={{marginBottom:100}}
-          renderItem={renderItem}
-        />
       </View>
-      <View style={{position:'absolute',bottom:15,width:"97%",alignSelf:'center'}}>
+      <View
+        style={{
+          position: "absolute",
+          bottom: 15,
+          width: "97%",
+          alignSelf: "center",
+        }}
+      >
         <View style={styles.titleRow}>
-          <ThemedText type="defaultSemiBold" >SubTotal :</ThemedText>
-          <ThemedText type="subtitle" style={{color:Colors.light.tertiary}} ><Text style={{fontSize: 14}}>Rs. </Text>{numberWithCommas(total)}</ThemedText>
+          <ThemedText type="defaultSemiBold">SubTotal :</ThemedText>
+          <ThemedText type="subtitle" style={{ color: Colors.light.tertiary }}>
+            <Text style={{ fontSize: 14 }}>Rs. </Text>
+            {numberWithCommas(total)}
+          </ThemedText>
         </View>
 
         <TouchableOpacity
           onPress={() => router.push("/confirmorder")}
           disabled={total == 0}
-          style={[styles.buyRow,total != 0 ? {backgroundColor:Colors.light.primary}:{backgroundColor: Colors.light.gray}]}
+          style={[
+            styles.buyRow,
+            total != 0
+              ? { backgroundColor: Colors.light.primary }
+              : { backgroundColor: Colors.light.gray },
+          ]}
         >
           <MaterialCommunityIcons
-            style={{  bottom: 3 }}
+            style={{ bottom: 3 }}
             name="cart-arrow-right"
             size={24}
             color={total != 0 ? Colors.light.secondary : Colors.light.white}
@@ -242,26 +218,27 @@ export default function cart() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent:'space-between',
-    paddingTop:35
+    justifyContent: "space-between",
+    paddingTop: 35,
   },
   productContainer: {
     flexDirection: "row",
     justifyContent: "flex-start",
+    alignItems:'center',
     borderRadius: 15,
     marginHorizontal: 10,
-    padding:5,
+    padding: 5,
     marginVertical: 10,
     elevation: 5,
     overflow: "hidden",
   },
-  imgContainer:{
-    width:100,
-    height:100,
-    borderRadius:10,
-    resizeMode:'contain',
-    backgroundColor:'#FFFFFF',
-    marginRight:10
+  imgContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    resizeMode: "contain",
+    backgroundColor: "#FFFFFF",
+    marginRight: 10,
   },
   titleRow: {
     marginTop: 10,
@@ -270,12 +247,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  buyRow:{
+  quantityRow:{
+    flexDirection: "row",
+    marginVertical: 5,
+    alignSelf: "center",
+    justifyContent:'center',
+    width: "100%",
+    paddingRight: 10,
+  },
+  buyRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 30,
-    padding:10,
+    padding: 10,
     width: "95%",
     alignSelf: "center",
   },

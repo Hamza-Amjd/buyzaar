@@ -12,9 +12,8 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Provider } from "react-redux";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import store from "@/redux/store";
 import { ModalPortal } from "react-native-modals";
-import { usePushNotifications } from "@/components/usePushNotification";
+import { usePushNotifications } from "@/hooks/usePushNotification";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -49,23 +48,22 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Provider store={store}>
+        
           <Stack
-            initialRouteName={isLoggedIn?"/(tabs)/index":"(auth)"}
+            initialRouteName={"(tabs)"}
             screenOptions={{ headerShown: false }}
           >
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="address" />
             <Stack.Screen name="category" />
-            <Stack.Screen name="productdetails" />
             <Stack.Screen name="cart" />
             <Stack.Screen name="confirmorder" />
             <Stack.Screen name="orders" />
-            <Stack.Screen name="favorities" />
+            <Stack.Screen name="wishlist" />
+            <Stack.Screen name="onboarding" />
           </Stack>
           <ModalPortal />
-        </Provider>
       </GestureHandlerRootView>
     </ThemeProvider>
   );

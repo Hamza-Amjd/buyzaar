@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator, useColorScheme } from 'react-native'
+import { Image, StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator, useColorScheme, Linking } from 'react-native'
 import React, {useEffect,useState} from 'react'
 import { Colors } from "@/constants/Colors";
 import { useNavigation } from '@react-navigation/native'
@@ -49,37 +49,39 @@ const profile = () => {
       checkUserExist()
     }, [])
     const menuitems=[
-        {name:'Favoraties' ,icon:'heart',"function":()=>router.push('/favorities')},
+        {name:'Wishlist' ,icon:'bookmark-sharp',"function":()=>router.push('/wishlist')},
         {name:'Cart' ,icon:'cart',"function":()=>router.push('/cart')},
         {name:'Orders' ,icon:'bag',"function":()=>router.push('/orders')},
-        {name:'To Review' ,icon:'star',"function":null},
+        {name:'To Review' ,icon:'star',"function":()=>router.push('/orders')},
+        {name:'Payment info' ,icon:'card',"function":null},
         {name:'Settings' ,icon:'settings',"function":null},
+        {name:'Privacy policy' ,icon:'shield-checkmark',"function":()=>Linking.openURL('https://www.google.com/')},
         {name:'Log out' ,icon:'log-out',"function":logout},
     ]
   return (
     <ThemedView style={styles.container}>
         <View style={styles.userDetails}>
         <Image style={styles.dp} source={require('@/assets/images/userDefault.png')}/>
-        {loading? <ActivityIndicator />:
+        {loading? <ActivityIndicator style={{height:100}}/>:
         userLogin?
         
-        < >
+        <View style={{height:100,alignItems:'center',justifyContent:'center'}} >
             <View style={{borderColor:Colors[colorScheme ?? 'light'].text,
-            borderWidth:1,
+            borderWidth:2,
             borderRadius:25,
-            padding:5}}>
-                <ThemedText type='defaultSemiBold' >{userData.name}</ThemedText>
+            padding:10}}>
+                <ThemedText type='subtitle' >{userData.name}</ThemedText>
             </View>
             <View style={{flexDirection:"row"}}>
                 <ThemedText type='defaultSemiBold'>{userLogin && userData.email}</ThemedText>
                 {userData.verified && <MaterialIcons name="verified-user" size={24} color="cyan" />}
             </View>
-        </>:
+        </View>:
         <TouchableOpacity style={{borderColor:Colors[colorScheme ?? 'light'].text,
-        borderWidth:1,
+        borderWidth:2,
         borderRadius:25,
-        padding:5}} onPress={()=>router.push("/(auth)")}>
-            <ThemedText type='defaultSemiBold'>Sign Up</ThemedText>
+        padding:10}} onPress={()=>router.push("/(auth)")}>
+            <ThemedText type='subtitle'>Signup to your account</ThemedText>
         </TouchableOpacity>
         }
         
@@ -87,7 +89,7 @@ const profile = () => {
          
         <View style={styles.menu}>
             {/* @ts-ignore */}
-            {menuitems.map((menu,index) => {return <TouchableOpacity key={index} onPress={menu.function} style={[styles.menuItem,{borderBottomColor:Colors[colorScheme ?? 'light'].text}]}>
+            {menuitems.map((menu,index) => {return <TouchableOpacity key={index} onPress={menu.function} style={[styles.menuItem,{backgroundColor:Colors[colorScheme ?? 'light'].background2}]}>
                 {/* @ts-ignore */}
                 <Ionicons name={menu.icon} size={25} color={Colors[colorScheme ?? 'light'].text}/>
                 <ThemedText type='subtitle' >   {menu.name}</ThemedText>
@@ -121,10 +123,9 @@ const styles = StyleSheet.create({
        alignItems:'flex-start',
        marginTop:50
     },
-    menuItem: {
-        borderBottomWidth:0.9,
+    menuItem: {padding:5,borderRadius:10,
         width:'100%',
-        marginBottom:20,
+        marginBottom:10,
         flexDirection:'row',
     },
 })

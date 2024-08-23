@@ -15,90 +15,49 @@ import React, { useEffect, useState } from "react";
 import {
   Ionicons,
   MaterialCommunityIcons,
-  EvilIcons,
   AntDesign,
+  EvilIcons,
 } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  addToCart,
-  clearCart,
-  decrementQuantity,
-  incrementQuantity,
-} from "../redux/CartReducer";
-import { addTofavorite } from "../redux/FavorateReducer";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { router } from "expo-router";
-import ProductVarients from "@/components/ProductVarients";
+import { router, useLocalSearchParams } from "expo-router";
 import { numberWithCommas } from "@/utils/healper";
-import axios from "axios";
-import Product from "@/components/Product";
+import Product from "@/components/ProductCard";
+import Carousel from "react-native-reanimated-carousel";
+import { getProductDetails, getRelatedProducts } from "@/utils/actions";
+import Header from "@/components/Header";
+import WishlistButton from "@/components/WishlistButton";
+import useCart from "@/hooks/useCart";
 
 const productDetails = () => {
-  const route = useRoute();
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
+  const { productId } = useLocalSearchParams<{ productId: string }>();
   const colorScheme = useColorScheme();
-  const [selectedVarient, setSelectedVarient] = useState("S");
-  const [suggestedproducts, setSuggestedproducts] = useState([]);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [product, setProduct] = useState<any>({});
   const [loading, setLoading] = useState(false);
-  // @ts-ignore
-  const { item } = route.params;
-  const [quantity, setQuantity] = useState(item?.quantity ? item.quantity : 0);
-  // @ts-ignore
-  const favorite = useSelector((state) => state.favorite.favorite);
-  // @ts-ignore
-  const cart = useSelector((state) => state.cart.cart);
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
   const [showfulldesc, setshowfulldesc] = useState(false);
-  // @ts-ignore
-  const onAddToCart = (item) => {
-    dispatch(addToCart(item));
-  };
-  // @ts-ignore
-  const onAddToFavorite = (item) => {
-    dispatch(addTofavorite(item));
-  };
-  // @ts-ignore
-  const onIncreseQuantity = (item) => {
-    setQuantity(quantity + 1);
-    if (!cart.some((value: any) => value._id == item._id))
-      dispatch(addToCart(item));
-    else dispatch(incrementQuantity(item));
-  };
-  // @ts-ignore
-  const ondecreseQuantity = (item) => {
-    if (item.quantity == 1) {
-      // @ts-ignore
-      dispatch(removeFromCart(item));
-    } else {
-      dispatch(decrementQuantity(item));
-    }
-  };
-  const fetchSuggestions = async () => {
-    setLoading(true);
-    await axios
-      .get(
-        `https://buyzaar-backend.vercel.app/api/admin/items?limit=100&category=${item.category}`
-      )
-      .then((response) => {
-        if ((response.status = 200)) {
-          setSuggestedproducts(response.data.item);
-          // setSuggestedproducts(suggestedproducts.filter((product:any)=>{return product._id !== item._id}));
-        }
-      })
-      .catch((error) => {
-        console.log("fetching suggested products failed", error.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+
   useEffect(() => {
-    fetchSuggestions();
+    setLoading(true);
+    getProductDetails(productId).then((product) => {
+      setProduct(product);
+      setSelectedColor(product.colors[0]);
+      setSelectedSize(product.sizes[0]);
+      setLoading(false);
+    });
+    getRelatedProducts(productId).then((relatedProducts) =>
+      setRelatedProducts(relatedProducts)
+    );
   }, []);
+  const [quantity, setQuantity] = useState(
+    product?.quantity ? product.quantity : 1
+  );
+  // @ts-ignore
+  const cart = useCart();
 
   const width = Dimensions.get("screen").width;
   return (
@@ -106,14 +65,16 @@ const productDetails = () => {
       <ParallaxScrollView
         headerImage={
           <View style={{ width: width, height: 393 }}>
-            <Image
-              style={{
-                width: "100%",
-                height: "100%",
-                resizeMode: "contain",
-                backgroundColor: "#fff",
-              }}
-              source={{ uri: item?.image }}
+            <Carousel
+              width={width}
+              height={393}
+              data={product.media}
+              renderItem={({ item }) => (
+                <TouchableOpacity style={{ flex: 1 }}>
+                  {/* @ts-ignore */}
+                  <Image style={{ flex: 1 }} source={{ uri: item }} />
+                </TouchableOpacity>
+              )}
             />
           </View>
         }
@@ -131,7 +92,7 @@ const productDetails = () => {
         >
           <View style={styles.titleRow}>
             <ThemedText type="subtitle" style={{ flex: 1 }}>
-              {item?.title}
+              {product?.title}
             </ThemedText>
           </View>
           <View style={styles.titleRow}>
@@ -144,7 +105,7 @@ const productDetails = () => {
                 }}
               >
                 <Text style={{ fontSize: 18 }}>Rs. </Text>
-                {numberWithCommas(item?.price)}
+                {product?.price && numberWithCommas(product?.price)}
               </Text>
               <Text
                 style={{
@@ -153,12 +114,12 @@ const productDetails = () => {
                   textDecorationLine: "line-through",
                 }}
               >
-                {numberWithCommas(((item?.price - 10) * 2).toString())}
+                {product?.price && numberWithCommas((product?.price - 10) * 2)}
               </Text>
               <ThemedText type="defaultSemiBold"> -51%</ThemedText>
             </View>
-            {item?.soldQuantity ? (
-              <ThemedText>{item?.soldQuantity} Sold</ThemedText>
+            {product?.soldQuantity ? (
+              <ThemedText>{product?.soldQuantity} Sold</ThemedText>
             ) : (
               <View
                 style={[
@@ -175,20 +136,23 @@ const productDetails = () => {
             )}
           </View>
           <View style={styles.titleRow}>
-            {item?.rating ? (
+            {product?.rating ? (
               <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
-                {[...new Array(5)].map((_, i) =>{
-                  let name:any= item?.rating.rate >=i ?item?.rating.rate >=(i+0.5)? "star":"star-half-outline":"star-outline"
+                {[...new Array(5)].map((_, i) => {
+                  let name: any =
+                    product?.rating.rate >= i
+                      ? product?.rating.rate >= i + 0.5
+                        ? "star"
+                        : "star-half-outline"
+                      : "star-outline";
                   return (
-                    <Ionicons
-                      key={i}
-                      name={name}
-                      size={20}
-                      color={"gold"}
-                    />
-                  );}
-                )}
-                <ThemedText type="default"> {item?.rating?.rate}/5</ThemedText>
+                    <Ionicons key={i} name={name} size={20} color={"gold"} />
+                  );
+                })}
+                <ThemedText type="default">
+                  {" "}
+                  {product?.rating?.rate}/5
+                </ThemedText>
               </View>
             ) : (
               <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
@@ -204,28 +168,25 @@ const productDetails = () => {
               </View>
             )}
             <View style={styles.flex}>
-              {item?.quantity !== 1 ? (
-                <TouchableOpacity onPress={() => ondecreseQuantity(item)}>
-                  <EvilIcons
-                    name="minus"
-                    size={25}
-                    color={Colors[colorScheme ?? "light"].text}
-                  />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity disabled={true} onPress={() => {}}>
-                  <EvilIcons
-                    name="minus"
-                    size={25}
-                    color={Colors[colorScheme ?? "light"].gray}
-                  />
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                disabled={quantity == 1}
+                onPress={() => setQuantity(quantity - 1)}
+              >
+                <EvilIcons
+                  name="minus"
+                  size={25}
+                  color={
+                    quantity !== 1
+                      ? Colors[colorScheme ?? "light"].text
+                      : Colors[colorScheme ?? "light"].gray
+                  }
+                />
+              </TouchableOpacity>
 
               <ThemedText type="default" style={{ marginHorizontal: 5 }}>
                 {quantity}
               </ThemedText>
-              <TouchableOpacity onPress={() => onIncreseQuantity(item)}>
+              <TouchableOpacity onPress={() => setQuantity(quantity + 1)}>
                 <EvilIcons
                   name="plus"
                   size={25}
@@ -250,27 +211,80 @@ const productDetails = () => {
               textAlign: "justify",
             }}
           >
-            {item?.description}
+            {product?.description}
           </ThemedText>
-          {/* <ThemedText
-            type="subtitle"
-            style={styles.titleRow}
-          >
-            Specification
-          </ThemedText>
-          <ThemedText
-            type="subtitle"
-            style={styles.titleRow}
-          >
-            Varients
-          </ThemedText>
-          <ProductVarients selected={selectedVarient} setSelected={setSelectedVarient} /> 
-          <ThemedText
-            type="subtitle"
-            style={styles.titleRow}
-          >
-            Rating
-          </ThemedText>*/}
+          {product?.colors?.length > 0 && (
+            <View>
+              <ThemedText type="subtitle" style={styles.titleRow}>
+                Colors
+              </ThemedText>
+              <View
+                style={{
+                  paddingHorizontal: 15,
+                  paddingVertical: 10,
+                  flexDirection: "row",
+                  gap: 10,
+                }}
+              >
+                {product.colors.map((color: string, index: string) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => setSelectedColor(color)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionsItem,
+                        { borderColor: Colors[colorScheme ?? "light"].text },
+                        selectedColor == color && {
+                          backgroundColor:
+                            Colors[colorScheme ?? "light"].tertiary,
+                          color: "white",
+                        },
+                      ]}
+                    >
+                      {color}
+                    </ThemedText>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+          {product?.sizes?.length > 0 && (
+            <View>
+              <ThemedText type="subtitle" style={styles.titleRow}>
+                Varients
+              </ThemedText>
+              <View
+                style={{
+                  paddingHorizontal: 15,
+                  paddingVertical: 10,
+                  flexDirection: "row",
+                  gap: 10,
+                }}
+              >
+                {product.sizes.map((size: string, index: string) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => setSelectedSize(size)}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.optionsItem,
+                        { borderColor: Colors[colorScheme ?? "light"].text },
+                        selectedSize == size && {
+                          backgroundColor:
+                            Colors[colorScheme ?? "light"].tertiary,
+                          color: "white",
+                        },
+                      ]}
+                    >
+                      {size}
+                    </ThemedText>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
           <View
             style={[
               styles.titleRow,
@@ -302,7 +316,7 @@ const productDetails = () => {
           ) : (
             <FlatList
               scrollEnabled={false}
-              data={suggestedproducts}
+              data={relatedProducts}
               keyExtractor={(item: any) => `${item._id}`}
               renderItem={({ item }) => <Product item={item} />}
               numColumns={2}
@@ -317,31 +331,10 @@ const productDetails = () => {
         </ThemedView>
       </ParallaxScrollView>
       <View style={styles.bar}>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.goBack();
-          }}
-        >
-          <Ionicons name="arrow-back" size={30} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <AntDesign
-            onPress={() => {
-              onAddToFavorite(item);
-            }}
-            name={
-              favorite.some((value: any) => value._id == item._id)
-                ? "heart"
-                : "hearto"
-            }
-            size={30}
-            color={
-              favorite.some((value: any) => value._id == item._id)
-                ? "red"
-                : Colors.light.primary
-            }
-          />
-        </TouchableOpacity>
+        <Header
+          headerRight={<WishlistButton product={product} />}
+          color={Colors.light.primary}
+        />
       </View>
       <ThemedView
         style={[
@@ -350,12 +343,6 @@ const productDetails = () => {
         ]}
       >
         <TouchableOpacity
-          onPress={() => {
-            dispatch(clearCart());
-            onAddToCart(item);
-            //@ts-ignore
-            navigation.navigate("confirmorder");
-          }}
           style={[styles.buybtn, { width: "40%" }]}
         >
           <Text style={styles.btntxt}>
@@ -367,7 +354,7 @@ const productDetails = () => {
             BUY NOW
           </Text>
         </TouchableOpacity>
-        {cart.some((value: any) => value._id == item._id) ? (
+        {cart.cartItems.some((value: any) => value._id == product._id) ? (
           <TouchableOpacity
             onPress={() => router.push("/cart")}
             style={[styles.buybtn, { width: "55%" }]}
@@ -383,7 +370,14 @@ const productDetails = () => {
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            onPress={() => onAddToCart(item)}
+            onPress={() =>
+              cart.addItem({
+                item: product,
+                quantity,
+                color: selectedColor,
+                size: selectedSize,
+              })
+            }
             style={[styles.buybtn, { width: "55%" }]}
           >
             <Text style={styles.btntxt}>
@@ -410,13 +404,8 @@ const styles = StyleSheet.create({
     paddingTop: 30,
   },
   bar: {
-    padding: 12,
     position: "absolute",
     top: 30,
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
   },
   flex: {
     flexDirection: "row",
@@ -425,11 +414,21 @@ const styles = StyleSheet.create({
   },
   titleRow: {
     flex: 1,
-    marginTop: 14,
+    marginTop: 10,
     marginHorizontal: 16,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  optionsItem: {
+    borderWidth: 2,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    textTransform: "capitalize",
+    fontWeight: "800",
+    lineHeight: 20,
   },
   inventoryStatus: {
     borderWidth: 1,

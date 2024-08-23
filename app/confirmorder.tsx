@@ -1,10 +1,8 @@
 import {
   TouchableOpacity,
-  ScrollView,
   StyleSheet,
   Text,
   View,
-  Alert,
   ActivityIndicator,
   useColorScheme,
   BackHandler,
@@ -13,11 +11,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { Entypo, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { clearCart } from "../redux/CartReducer";
 import AnimatedLottieView from "lottie-react-native";
-import SearchTile from "@/components/SearchTile";
 import { router, useFocusEffect } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
@@ -26,19 +20,21 @@ import Step1 from "@/components/ConfirmOrder/Step1";
 import Step2 from "@/components/ConfirmOrder/Step2";
 import Step3 from "@/components/ConfirmOrder/Step3";
 import Step4 from "@/components/ConfirmOrder/Step4";
+import useCart from "@/hooks/useCart";
+
 const confirmorder = () => {
   const colorScheme = useColorScheme();
   const [currentStep, setCurrentStep] = useState(0);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAdress] = useState<any>();
   const [loading, setLoading] = useState(false);
-  const [deliveryOption, setDeliveryOption] = useState(false);
-  const [selectedPaymentOption, setSelectedPaymentOption] = useState("");
-  //@ts-ignore
-  const cart = useSelector((state) => state.cart.cart);
-  const dispatch = useDispatch();
-  //@ts-ignore
-  const totalPrice = cart?.map((item) => item.price * item.quantity).reduce((curr, prev) => curr + prev, 0);
+  const [deliveryOption, setDeliveryOption] = useState(true);
+  const [selectedPaymentOption, setSelectedPaymentOption] = useState("cash on delivery");
+  const cart = useCart()
+  const totalPrice = cart.cartItems.reduce(
+    (acc, cartItem) => acc + cartItem.item.price * cartItem.quantity,
+    0
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -80,7 +76,7 @@ const confirmorder = () => {
       })
       .then((response) => {
         console.log(response.data)
-        dispatch(clearCart());
+        cart.clearCart()
         setTimeout(() => {
           router.replace("/orders");
         }, 100);
@@ -103,6 +99,7 @@ const confirmorder = () => {
       .then((response) => {
         if ((response.status = 200)) {
           setAddresses(response.data);
+          setSelectedAdress(response.data[0]); 
           setLoading(false);
         }
       })

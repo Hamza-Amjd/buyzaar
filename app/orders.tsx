@@ -21,6 +21,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import CenterModal from "@/components/CenterModal";
 import ReviewModal from "@/components/ReviewModal";
+import Header from "@/components/Header";
 
 const OrdersScreen = () => {
   const [orders, setOrders] = useState([]);
@@ -113,27 +114,7 @@ const OrdersScreen = () => {
   return (
     <>
       <ThemedView style={{ flex: 1, paddingTop: 35, paddingHorizontal: 10 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            paddingVertical: 15,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => {
-              //@ts-ignore
-              router.replace("/(tabs)/profile");
-            }}
-          >
-            <Ionicons
-              name="arrow-back"
-              size={30}
-              color={Colors[colorScheme ?? "light"].text}
-            />
-          </TouchableOpacity>
-          <ThemedText type="subtitle">{"   "}Orders</ThemedText>
-        </View>
+        <Header title="Orders" onBackPress={()=>router.replace('/(tabs)/profile')} />
         {loading ? (
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
