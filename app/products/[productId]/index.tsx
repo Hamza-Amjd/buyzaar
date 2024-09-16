@@ -2,7 +2,7 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
+  Pressable,
   Image,
   ScrollView,
   StatusBar,
@@ -10,6 +10,7 @@ import {
   Dimensions,
   FlatList,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -29,18 +30,20 @@ import Carousel from "react-native-reanimated-carousel";
 import { getProductDetails, getRelatedProducts } from "@/utils/actions";
 import Header from "@/components/Header";
 import WishlistButton from "@/components/WishlistButton";
-import useCart from "@/hooks/useCart";
+import useCart, { CartItem } from "@/hooks/useCart";
+import ImageView from "react-native-image-viewing";
 
 const productDetails = () => {
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const colorScheme = useColorScheme();
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [product, setProduct] = useState<any>({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [showfulldesc, setshowfulldesc] = useState(false);
-
+  const [showImageModal, setshowImageModal] = useState(false);
+  const [selectedImageIndex, setSeletedImageIndex] = useState(0);
   useEffect(() => {
     setLoading(true);
     getProductDetails(productId).then((product) => {
@@ -59,8 +62,27 @@ const productDetails = () => {
   // @ts-ignore
   const cart = useCart();
 
+  const handleAddToCart = () => {
+    cart.addItem({
+      item: product,
+      quantity,
+      color: selectedColor,
+      size: selectedSize,
+    });
+  };
+
+  const handleBuynow = () => {
+    cart.clearCart();
+    handleAddToCart();
+    router.push("/confirmorder");
+  };
+
   const width = Dimensions.get("screen").width;
-  return (
+  return loading ? (
+    <View style={styles.container}>
+      <ActivityIndicator size={"large"} />
+    </View>
+  ) : (
     <>
       <ParallaxScrollView
         headerImage={
@@ -69,13 +91,24 @@ const productDetails = () => {
               width={width}
               height={393}
               data={product.media}
-              renderItem={({ item }) => (
-                <TouchableOpacity style={{ flex: 1 }}>
-                  {/* @ts-ignore */}
-                  <Image style={{ flex: 1 }} source={{ uri: item }} />
-                </TouchableOpacity>
+              onSnapToItem={(index)=>setSeletedImageIndex(index)}
+              renderItem={({ item, index}) => (
+                <Pressable
+                  style={{ flex: 1 }}
+                  key={index}
+                  onPress={() => {
+                    setshowImageModal(true);
+                    setSeletedImageIndex(index);
+                  }}
+                >
+                  <Image style={{ flex: 1 }} source={{ uri: item as string }} />
+                  
+                </Pressable>
               )}
             />
+            <View style={{flexDirection:'row',gap:2,position:"absolute",bottom:20,right:10}}>
+                    {product.media.map((img:string,i:number)=><Image style={{ width:50,height:50,borderWidth:selectedImageIndex==i?1.5:0.3,borderColor:"black",borderRadius:3 }} key={img} source={{ uri:img}} />)}
+                  </View>
           </View>
         }
       >
@@ -114,9 +147,10 @@ const productDetails = () => {
                   textDecorationLine: "line-through",
                 }}
               >
-                {product?.price && numberWithCommas((product?.price - 10) * 2)}
+                {product?.price &&
+                  numberWithCommas((product?.price * 1.12).toFixed(0))}
               </Text>
-              <ThemedText type="defaultSemiBold"> -51%</ThemedText>
+              <ThemedText type="defaultSemiBold"> -12%</ThemedText>
             </View>
             {product?.soldQuantity ? (
               <ThemedText>{product?.soldQuantity} Sold</ThemedText>
@@ -344,6 +378,7 @@ const productDetails = () => {
       >
         <TouchableOpacity
           style={[styles.buybtn, { width: "40%" }]}
+          onPress={handleBuynow}
         >
           <Text style={styles.btntxt}>
             <MaterialCommunityIcons
@@ -354,7 +389,9 @@ const productDetails = () => {
             BUY NOW
           </Text>
         </TouchableOpacity>
-        {cart.cartItems.some((value: any) => value._id == product._id) ? (
+        {cart.cartItems.some(
+          (item: CartItem) => item.item._id == product._id
+        ) ? (
           <TouchableOpacity
             onPress={() => router.push("/cart")}
             style={[styles.buybtn, { width: "55%" }]}
@@ -370,15 +407,9 @@ const productDetails = () => {
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            onPress={() =>
-              cart.addItem({
-                item: product,
-                quantity,
-                color: selectedColor,
-                size: selectedSize,
-              })
-            }
+            onPress={handleAddToCart}
             style={[styles.buybtn, { width: "55%" }]}
+            disabled={loading}
           >
             <Text style={styles.btntxt}>
               <MaterialCommunityIcons
@@ -391,6 +422,19 @@ const productDetails = () => {
           </TouchableOpacity>
         )}
       </ThemedView>
+      <ImageView
+        presentationStyle="overFullScreen"
+        swipeToCloseEnabled
+        backgroundColor={Colors[colorScheme ?? "light"].background2}
+        imageIndex={selectedImageIndex}
+        visible={showImageModal}
+        onRequestClose={() => setshowImageModal(false)}
+        images={[
+          ...product.media.map((img: any) => {
+            return { uri: img };
+          }),
+        ]}
+      />
     </>
   );
 };
@@ -400,8 +444,8 @@ export default productDetails;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.white,
-    paddingTop: 30,
+    alignItems: "center",
+    justifyContent: "center",
   },
   bar: {
     position: "absolute",

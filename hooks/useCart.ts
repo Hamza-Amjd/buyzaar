@@ -4,22 +4,6 @@ import {ToastAndroid} from "react-native"
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export interface ProductType  {
-  _id: string;
-  title: string;
-  description: string;
-  media: [string];
-  category: string;
-  collections: [string];
-  tags: [string];
-  price: number;
-  cost: number;
-  sizes: [string];
-  colors: [string];
-  createdAt: string;
-  updatedAt: string;
-};
-
 export interface CartItem {
   item: ProductType;
   quantity: number;
@@ -137,4 +121,3 @@ const useCart = create(
 );
 
 export default useCart;
-

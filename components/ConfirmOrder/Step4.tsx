@@ -5,6 +5,7 @@ import { Colors } from '@/constants/Colors'
 import { MaterialIcons } from '@expo/vector-icons'
 import SearchTile from '../SearchTile'
 import { numberWithCommas } from '@/utils/healper'
+import { CartItem } from '@/hooks/useCart'
 
 type step4props ={
   styles: any,
@@ -16,7 +17,6 @@ type step4props ={
 
 const Step4:React.FC<step4props> = ({styles,selectedAddress,totalPrice,cart,handleSubmit}) => {
   const colorScheme = useColorScheme();
-
   return (
     <View style={styles.detailsContainer}>
           <View>
@@ -61,8 +61,8 @@ const Step4:React.FC<step4props> = ({styles,selectedAddress,totalPrice,cart,hand
                 </ThemedText>
               </View>
               <View >
-                  {cart.map((item:any)=>{
-                      return<SearchTile key={item._id} item={item}/>
+                  {cart.cartItems.map((item:CartItem)=>{
+                      return<SearchTile key={item.item._id} item={item.item} quantity={item.quantity}/>
                   })}
                 </View>
                 

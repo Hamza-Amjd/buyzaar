@@ -21,12 +21,13 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 import { BottomModal, ModalContent, SlideAnimation } from "react-native-modals";
 import Collections from "@/components/Collections";
 import ProductCard from "@/components/ProductCard";
 import useCart, { ProductType } from "@/hooks/useCart";
 import AddressBottomModal from "@/components/AddressBottomModal";
+import { getProducts } from "@/utils/actions";
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -39,44 +40,10 @@ export default function Home() {
   const [addresses, setAddresses] = useState<any>([]);
   const [selectedAddress, setSelectedAdress] = useState(addresses[0]);
   const [userId, setUserId] = useState("");
-  const getProducts = async () => {
+  const fetchProducts = async () => {
     setLoading(true);
-    await axios
-      .get(`https://buyzaar-admin.vercel.app/api/products`)
-      .then((response) => {
-        return setProducts(response.data);
-      })
-      .catch((error) => console.error(error))
-      .finally(() => setLoading(false));
-    // await axios
-    //   .get(`https://buyzaar-backend.vercel.app/api/admin/items?page=1&limit=8`)
-    //   .then((response) => {
-    //     if ((response.status = 200)) {
-    //       setProducts(response.data.item);
-    //       // console.log(response.data.categories)
-    //       setCategoriesName(response.data.categories)
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     console.log("fetching products failed", error.message);
-    //   })
+    await getProducts().then((res)=>setProducts(res)).catch((err) =>console.log(err)).finally(()=>setLoading(false));
   };
-  // const updateProducts = async () => {
-  //   setFooterLoading(true);
-  //   await axios
-  //     .get(
-  //       `https://buyzaar-backend.vercel.app/api/admin/items?page=${currentPage}&limit=8`
-  //     )
-  //     .then((response) => {
-  //       if ((response.status = 200)) {
-  //         setProducts([...products, ...response.data.item]);
-  //         setFooterLoading(false);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.log("fetching products failed", error.message);
-  //     });
-  // };
   const loadMoreItems = () => {
     setCurrentPage(currentPage + 1);
   };
@@ -101,7 +68,7 @@ export default function Home() {
   const cart = useCart();
 
   useEffect(() => {
-    getProducts();
+    fetchProducts();
     getAddress();
   }, []);
   useEffect(() => {
@@ -112,28 +79,24 @@ export default function Home() {
   };
   const categories = [
     {
-      name: categoriesName[0],
+      name: "men's clothing",
       icon: <Ionicons name="shirt-sharp" size={35} color="white" />,
-      label: "Men's",
     },
     {
-      name: categoriesName[1],
+      name: "men's clothing",
       icon: (
         <MaterialCommunityIcons name="tshirt-crew" size={35} color="white" />
       ),
-      label: "Women's",
     },
     {
-      name: categoriesName[2],
+      name: "electronics",
       icon: (
         <MaterialCommunityIcons name="power-plug" size={35} color="white" />
       ),
-      label: "Electronics",
     },
     {
-      name: categoriesName[3],
+      name: "jewelery",
       icon: <MaterialCommunityIcons name="necklace" size={35} color="white" />,
-      label: "Jewelery",
     },
   ];
   const handleAddAddress = () => {
@@ -216,30 +179,37 @@ export default function Home() {
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {categories.map((category, index) => {
                   return (
-                    <TouchableOpacity
+                    <Link
+                      href={`/category?name=${category.name}`}
                       key={index}
-                      style={{
-                        justifyContent: "center",
-                        alignItems: "center",
-                        paddingHorizontal: 5,
-                      }}
-                      onPress={() => {
-                        router.push(`/category?category=${category.name}`);
-                      }}
+                      asChild
                     >
-                      <View
-                        style={[
-                          styles.category,
-                          {
-                            backgroundColor:
-                              Colors[colorScheme ?? "light"].primary,
-                          },
-                        ]}
+                      <TouchableOpacity
+                        style={{
+                          justifyContent: "center",
+                          alignItems: "center",
+                          paddingHorizontal: 5,
+                        }}
                       >
-                        {category.icon}
-                      </View>
-                      <ThemedText type="default">{category.label}</ThemedText>
-                    </TouchableOpacity>
+                        <View
+                          style={[
+                            styles.category,
+                            {
+                              backgroundColor:
+                                Colors[colorScheme ?? "light"].primary,
+                            },
+                          ]}
+                        >
+                          {category.icon}
+                        </View>
+                        <ThemedText
+                          type="default"
+                          style={{ textTransform: "capitalize" }}
+                        >
+                          {category.name.replace(/ .*/, "")}
+                        </ThemedText>
+                      </TouchableOpacity>
+                    </Link>
                   );
                 })}
               </ScrollView>
@@ -267,14 +237,16 @@ export default function Home() {
             </View>
           }
           onEndReached={loadMoreItems}
-          ListFooterComponent={()=>{
-            return footerLoading && (
-              <ActivityIndicator
-                size={"large"}
-                style={{ alignSelf: "center" }}
-              />
-            )}
-          }
+          ListFooterComponent={() => {
+            return (
+              footerLoading && (
+                <ActivityIndicator
+                  size={"large"}
+                  style={{ alignSelf: "center" }}
+                />
+              )
+            );
+          }}
           numColumns={2}
           contentContainerStyle={{
             columnGap: 16,

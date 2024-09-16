@@ -6,23 +6,21 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import Product from "@/components/ProductCard";
 import axios from "axios";
 
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import Header from "@/components/Header";
 
 export default function category() {
-  const route = useRoute();
-  const { category } = useLocalSearchParams<{category:string}>();
+  const  {name}  = useLocalSearchParams<{ name: string }>();
   const [products, setProducts] = useState([]);
-  const navigation = useNavigation();
   const updateProducts = async () => {
-    await axios.get(`https://buyzaar-backend.vercel.app/api/admin/items?limit=100&category=${category}`).then((response)=> {
+    await axios.get(`https://buyzaar-backend.vercel.app/api/admin/items?limit=100t`).then((response)=> {
       if ((response.status = 200)) {
-        setProducts(response.data.item);
+        console.log(response.data.item);
       }
     })
     .catch((error) => {
@@ -37,30 +35,12 @@ export default function category() {
 
   return (
     <View style={{paddingTop:25,paddingBottom:30 }}>
-      <View style={styles.bar}>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.goBack();
-          }}
-        >
-          <ThemedText
-      type="title"><Ionicons name="arrow-back" size={30} /></ThemedText>
-          
-        </TouchableOpacity>
-      <ThemedText
-      type="subtitle"
-        style={{
-          margin: 10,
-        }}
-      >
-       {category?.toUpperCase()}
-      </ThemedText>
-      </View>
+      <Header title={name}/>
       
       <FlatList
         data={products}
         keyExtractor={(item:any,index) => item._id+index}
-        renderItem={({ item }) => <Product item={item}/>}
+        renderItem={({ item }) => <ThemedText >{'abt'}</ThemedText>}
         numColumns={2}
         contentContainerStyle={{
           columnGap: 15,

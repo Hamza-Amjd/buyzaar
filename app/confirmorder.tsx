@@ -69,7 +69,7 @@ const confirmorder = () => {
     axios
       .post(`https://buyzaar-backend.vercel.app/api/shop/order`, {
         userId: userId,
-        cart: cart,
+        cart: cart.cartItems,
         totalPrice: totalPrice,
         shippingAddress: selectedAddress,
         paymentMethod: selectedPaymentOption,

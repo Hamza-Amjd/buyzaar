@@ -1,13 +1,14 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import React from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
+import { ThemedText } from "./ThemedText";
 
 const Header = ({
   title,
-  color='#fff',
+  color,
   headerRight,
   onBackPress=()=>router.back()
 }: {
@@ -16,15 +17,16 @@ const Header = ({
   headerRight?: React.ReactNode;
   onBackPress?: ()=>void;
 }) => {
+  const colorScheme = useColorScheme();
   return (
     <View style={styles.bar}>
       <View style={{ flexDirection: "row", gap: 15 }}>
         <TouchableOpacity
           onPress={onBackPress}
         >
-          <Ionicons name="arrow-back" size={30} color={color}/>
+          <Ionicons name="arrow-back" size={30} color={color?color:Colors[colorScheme??'light'].text}/>
         </TouchableOpacity>
-        {title && <Text style={[styles.title,{color}]}>{title}</Text>}
+        {title && <ThemedText style={[styles.title,{color:color?color:Colors[colorScheme??'light'].text}]}>{title}</ThemedText>}
       </View>
       {headerRight && <View>{headerRight}</View>}
     </View>
@@ -42,7 +44,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
+    lineHeight:28,
     fontWeight: "bold",
+    textTransform:"capitalize"
   },
 });

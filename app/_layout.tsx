@@ -15,6 +15,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ModalPortal } from "react-native-modals";
 import { usePushNotifications } from "@/hooks/usePushNotification";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StripeProvider } from "@stripe/stripe-react-native";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -48,7 +49,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        
+        <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string}>
           <Stack
             initialRouteName={"(tabs)"}
             screenOptions={{ headerShown: false }}
@@ -64,6 +65,7 @@ export default function RootLayout() {
             <Stack.Screen name="onboarding" />
           </Stack>
           <ModalPortal />
+          </StripeProvider>
       </GestureHandlerRootView>
     </ThemeProvider>
   );

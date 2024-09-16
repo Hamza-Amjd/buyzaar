@@ -7,17 +7,13 @@ import {
   Image,
   useColorScheme,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { Colors } from "@/constants/Colors";
 import { ThemedText } from "./ThemedText";
 import { numberWithCommas } from "@/utils/healper";
 import { Link } from "expo-router";
-type searchTileProps = {
-  item: any;
-};
-const SearchTile: React.FC<searchTileProps> = ({ item }) => {
-  const navigation = useNavigation();
-  const colorSchene = useColorScheme();
+
+const SearchTile = ({ item }: { item: ProductType }) => {
+  const colorScheme = useColorScheme();
   return (
     <Link
       href={`/products/${item._id}`}
@@ -32,7 +28,7 @@ const SearchTile: React.FC<searchTileProps> = ({ item }) => {
         <View
           style={[
             styles.productMain,
-            { backgroundColor: Colors[colorSchene ?? "light"].background3 },
+            { backgroundColor: Colors[colorScheme ?? "light"].background3 },
           ]}
         >
           <View style={styles.imgContainer}>
@@ -59,9 +55,6 @@ const SearchTile: React.FC<searchTileProps> = ({ item }) => {
                 <Text style={{ fontSize: 12 }}> Rs. </Text>
                 {numberWithCommas(item.price)}
               </Text>
-              <ThemedText style={{ lineHeight: 18 }}>
-                {item.quantity && " x" + item.quantity}
-              </ThemedText>
             </View>
           </View>
         </View>
