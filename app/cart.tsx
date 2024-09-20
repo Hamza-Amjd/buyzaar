@@ -22,41 +22,37 @@ import useCart, { CartItem } from "@/hooks/useCart";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getUser } from "@/utils/actions";
+import { useUser } from "@clerk/clerk-expo";
 
 export default function cart() {
   const colorScheme = useColorScheme();
-  const [customer, setCustomer] = useState<any>();
-  const [loading, setLoading] = useState<any>();
-  //@ts-ignore
+  const { user } = useUser();
   const cart = useCart();
   const total = cart.cartItems.reduce(
     (acc, cartItem) => acc + cartItem.item.price * cartItem.quantity,
     0
-  );
-
-  const getCustomer=async()=>{
-    await getUser().then((res:any)=>{
-      console.log(res);
-    setCustomer({
-      clerkId: res._id,
-      email: res?.email,
-      name: res?.name,
-    });})
-  }
+  ); 
 
   const handleCheckout = async () => {
-      const userId = await AsyncStorage.getItem("userId");
-      if (!userId) {
-        router.push("/(auth)");
-      } else {
-        await axios.post(`https://buyzaar-admin.vercel.app/api/checkout`, { cartItems: cart.cartItems, customer }).then((res)=>{Linking.openURL(res.data.url)}).catch(err=>console.log(err))
-      }
-
+    if (!user) {
+      router.push("/(auth)");
+    } else {
+      const customer = {
+        clerkId: user.id,
+        email: user.emailAddresses[0].emailAddress,
+        name: user.firstName + " " + user?.lastName,
+      };
+      await axios
+        .post(`https://buyzaar-admin.vercel.app/api/checkout`, {
+          cartItems: cart.cartItems,
+          customer,
+        })
+        .then((res) => {
+          Linking.openURL(res.data.url);
+        })
+        .catch((err) => console.log(err));
+    }
   };
-
-  useEffect(() => {
-    getCustomer();
-  }, []);
   const handleClearCart = () => {
     Alert.alert("Clear Cart", "Are you sure you want to clear the cart?", [
       { text: "Cancel", onPress: () => {} },
@@ -227,7 +223,7 @@ export default function cart() {
                     style={{ color: Colors.light.tertiary }}
                   >
                     <Text style={{ fontSize: 14 }}>Rs. </Text>
-                    {numberWithCommas(total+300)}
+                    {numberWithCommas(total + 300)}
                   </ThemedText>
                 </View>
               </>
@@ -298,9 +294,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  textlight: { 
+  textlight: {
     color: "grey",
-    fontSize: 14 
+    fontSize: 14,
   },
   quantityRow: {
     flexDirection: "row",

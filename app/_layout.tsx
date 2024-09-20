@@ -4,38 +4,30 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { router, Stack } from "expo-router";
+import {
+  ClerkProvider,
+  useAuth,
+} from "@clerk/clerk-expo";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { Provider } from "react-redux";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ModalPortal } from "react-native-modals";
-import { usePushNotifications } from "@/hooks/usePushNotification";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StripeProvider } from "@stripe/stripe-react-native";
+import * as SecureStore from "expo-secure-store";
+
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
-  const { expoPushToken, notification } = usePushNotifications();
-  const [isLoggedIn, setisLoggedIn] = useState(false);
+function InitialLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/Poppins-Medium.ttf"),
   });
-  useEffect(() => {
-    (async () => {
-      const userID = await AsyncStorage.getItem("userId");
-      if (!userID) {
-        setisLoggedIn(false);;
-      } else {
-        setisLoggedIn(true);
-      }
-    })();
-  }, []);
+
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -45,28 +37,71 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
+  const { isLoaded, isSignedIn } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+ 
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const inTabsGroup = segments[0] === '(tabs)';
+
+    if (isSignedIn && !inTabsGroup) {
+      router.replace('/(tabs)');
+    } else if (!isSignedIn) {
+      router.replace('/(auth)');
+    }
+  }, [isSignedIn]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string}>
-          <Stack
-            initialRouteName={"(tabs)"}
-            screenOptions={{ headerShown: false }}
-          >
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="address" />
-            <Stack.Screen name="category" />
-            <Stack.Screen name="cart" />
-            <Stack.Screen name="confirmorder" />
-            <Stack.Screen name="orders" />
-            <Stack.Screen name="wishlist" />
-            <Stack.Screen name="onboarding" />
-          </Stack>
-          <ModalPortal />
-          </StripeProvider>
-      </GestureHandlerRootView>
+      <StripeProvider
+        publishableKey={
+          process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+        }
+      >
+        <Stack
+          initialRouteName={"(tabs)"}
+          screenOptions={{ headerShown: false }}
+        >
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="address" />
+          <Stack.Screen name="category" />
+          <Stack.Screen name="cart" />
+          <Stack.Screen name="confirmorder" />
+          <Stack.Screen name="orders" />
+          <Stack.Screen name="wishlist" />
+          <Stack.Screen name="onboarding" />
+        </Stack>
+        <ModalPortal />
+      </StripeProvider>
     </ThemeProvider>
+  );
+};
+  const tokenCache = {
+    async getToken(key: string) {
+      try {
+        return SecureStore.getItemAsync(key);
+      } catch (err) {
+        return null;
+      }
+    },
+    async saveToken(key: string, value: string) {
+      try {
+        return SecureStore.setItemAsync(key, value);
+      } catch (err) {
+        return;
+      }
+    },
+  };
+export default function RootLayout() {
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+            <InitialLayout />
+      </ClerkProvider>
+    </GestureHandlerRootView>
   );
 }

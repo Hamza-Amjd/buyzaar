@@ -13,7 +13,7 @@ type customTextInputProps={
 }
 const CustomTextInput:React.FC<customTextInputProps> = ({title,touched,handleChange,value,setFieldTouched,keyboardType='default',autoComplete='off'}) => {
   return (
-    <View style={[styles.label,
+    <View style={[styles.input,
         touched && {borderColor:Colors["light"].primary } 
       ]}>
   <TextInput
@@ -32,7 +32,7 @@ const CustomTextInput:React.FC<customTextInputProps> = ({title,touched,handleCha
 }
 
 const styles = StyleSheet.create({
-    label:{
+    input:{
         alignItems: "center",
         padding: 10,
         marginBottom:20,

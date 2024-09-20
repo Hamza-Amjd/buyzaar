@@ -38,7 +38,7 @@ export const getRelatedProducts = async (productId: string) => {
 
 export const getUser = async () => {
   const token = await AsyncStorage.getItem("token");
-  if (token !== null) {
+  if (token) {
     try {
       const response = await fetch(
         `https://buyzaar-backend.vercel.app/api/auth/getuser`,

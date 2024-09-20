@@ -11,53 +11,33 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Colors } from "@/constants/Colors";
-import { useNavigation } from "@react-navigation/native";
 import {
   Ionicons,
-  MaterialCommunityIcons,
   MaterialIcons,
-  SimpleLineIcons,
 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemedText } from "@/components/ThemedText";
-import { Link, router, useRouter } from "expo-router";
+import {router} from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { getUser } from "@/utils/actions";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 
 const profile = () => {
   const colorScheme = useColorScheme();
-  const [userLogin, setUserLogin] = useState(false);
-  const [userData, setUserData] = useState<any>([]);
-  const [loading, setLoading] = useState(true);
-  const checkUserExist = async () => {
-    await getUser()
-      .then((res) => {
-        setUserLogin(true);
-        setUserData(res);
-      })
-      .catch((err) => console.log(err))
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+  const [loading, setLoading] = useState(false);
+  const { user } = useUser();
+  const { signOut } = useAuth();
+ 
   const logout = () => {
     Alert.alert("Logout", "Are you sure you want to logout", [
-      { text: "Cancel", onPress: () => {} },
+      { text: "Cancel" },
       {
         text: "Confirm",
-        onPress: async () => {
-          await AsyncStorage.removeItem("token");
-          await AsyncStorage.removeItem("userId");
-          setUserLogin(false);
-          setUserData([]);
-        },
+        onPress: () => signOut()
       },
     ]);
   };
 
-  useEffect(() => {
-    checkUserExist();
-  }, []);
   const menuitems = [
     {
       name: "Wishlist",
@@ -79,13 +59,13 @@ const profile = () => {
   return (
     <ThemedView style={styles.container}>
       <View style={styles.userDetails}>
-        <Image
+        {user && <Image
           style={styles.dp}
-          source={require("@/assets/images/userDefault.png")}
-        />
+          source={{uri:user?.imageUrl}}
+        />}
         {loading ? (
           <ActivityIndicator style={{ height: 100 }} />
-        ) : userLogin ? (
+        ) : user ? (
           <View
             style={{
               height: 100,
@@ -101,16 +81,11 @@ const profile = () => {
                 padding: 10,
               }}
             >
-              <ThemedText type="subtitle">{userData.name}</ThemedText>
+              <ThemedText type="subtitle">{user?.firstName+" "+user?.lastName}</ThemedText>
             </View>
-            <View style={{ flexDirection: "row" }}>
               <ThemedText type="defaultSemiBold">
-                {userLogin && userData.email}
+                {user && user?.emailAddresses[0].emailAddress}
               </ThemedText>
-              {userData.verified && (
-                <MaterialIcons name="verified-user" size={24} color="cyan" />
-              )}
-            </View>
           </View>
         ) : (
           <TouchableOpacity

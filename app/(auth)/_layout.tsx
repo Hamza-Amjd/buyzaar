@@ -1,7 +1,5 @@
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Stack, router } from 'expo-router'
-import React, { useEffect } from 'react'
+import { Stack } from 'expo-router'
+import React from 'react'
 
 const authLayout = () => {
   
@@ -10,6 +8,7 @@ const authLayout = () => {
     <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="register" options={{ headerShown: false }} />
+        <Stack.Screen name="reset" options={{ headerShown: false }} />
       </Stack>
   )
 }

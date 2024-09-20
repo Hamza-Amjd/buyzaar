@@ -32,12 +32,13 @@ import Header from "@/components/Header";
 import WishlistButton from "@/components/WishlistButton";
 import useCart, { CartItem } from "@/hooks/useCart";
 import ImageView from "react-native-image-viewing";
+import PagerView from "react-native-pager-view";
 
 const productDetails = () => {
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const colorScheme = useColorScheme();
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [product, setProduct] = useState<any>({});
+  const [product, setProduct] = useState<ProductType | any>();
   const [loading, setLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
@@ -56,13 +57,11 @@ const productDetails = () => {
       setRelatedProducts(relatedProducts)
     );
   }, []);
-  const [quantity, setQuantity] = useState(
-    product?.quantity ? product.quantity : 1
-  );
-  // @ts-ignore
+  const [quantity, setQuantity] = useState(1);
   const cart = useCart();
 
   const handleAddToCart = () => {
+    //@ts-ignore
     cart.addItem({
       item: product,
       quantity,
@@ -98,7 +97,6 @@ const productDetails = () => {
                   key={index}
                   onPress={() => {
                     setshowImageModal(true);
-                    setSeletedImageIndex(index);
                   }}
                 >
                   <Image style={{ flex: 1 }} source={{ uri: item as string }} />
@@ -106,23 +104,40 @@ const productDetails = () => {
                 </Pressable>
               )}
             />
-            <View style={{flexDirection:'row',gap:2,position:"absolute",bottom:20,right:10}}>
-                    {product.media.map((img:string,i:number)=><Image style={{ width:50,height:50,borderWidth:selectedImageIndex==i?1.5:0.3,borderColor:"black",borderRadius:3 }} key={img} source={{ uri:img}} />)}
-                  </View>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 2,
+                position: "absolute",
+                bottom: 20,
+                right: 10,
+              }}
+            >
+              {product?.media.map((img: string, i: number) => (
+                <Image
+                  style={{
+                    width: 50,
+                    height: 50,
+                    borderWidth: selectedImageIndex == i ? 1.5 : 0.3,
+                    borderColor: "black",
+                    borderRadius: 3,
+                  }}
+                  key={img}
+                  source={{ uri: img }}
+                />
+              ))}
+            </View>
           </View>
         }
       >
         <StatusBar translucent backgroundColor={"transparent"} />
         <ThemedView
-          style={{
-            width: "100%",
-            flex: 1,
-            borderTopLeftRadius: 15,
-            borderTopRightRadius: 15,
-            paddingBottom: 140,
-            backgroundColor: Colors[colorScheme ?? "light"].background2,
-          }}
+          style={[
+            styles.infoContainer,
+            { backgroundColor: Colors[colorScheme ?? "light"].background2 },
+          ]}
         >
+          
           <View style={styles.titleRow}>
             <ThemedText type="subtitle" style={{ flex: 1 }}>
               {product?.title}
@@ -238,16 +253,11 @@ const productDetails = () => {
             type="default"
             onPress={() => setshowfulldesc(!showfulldesc)}
             numberOfLines={showfulldesc ? 10 : 5}
-            style={{
-              fontWeight: "regular",
-              fontSize: 14,
-              margin: 15,
-              textAlign: "justify",
-            }}
+            style={styles.desc}
           >
             {product?.description}
           </ThemedText>
-          {product?.colors?.length > 0 && (
+          {product?.colors.length>0 && (
             <View>
               <ThemedText type="subtitle" style={styles.titleRow}>
                 Colors
@@ -283,7 +293,7 @@ const productDetails = () => {
               </View>
             </View>
           )}
-          {product?.sizes?.length > 0 && (
+          {product?.sizes?.length>0 && (
             <View>
               <ThemedText type="subtitle" style={styles.titleRow}>
                 Varients
@@ -390,7 +400,7 @@ const productDetails = () => {
           </Text>
         </TouchableOpacity>
         {cart.cartItems.some(
-          (item: CartItem) => item.item._id == product._id
+          (item: CartItem) => item.item._id == product?._id
         ) ? (
           <TouchableOpacity
             onPress={() => router.push("/cart")}
@@ -446,6 +456,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  infoContainer: {
+    width: "100%",
+    flex: 1,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    paddingBottom: 140,
+  },
+  desc: {
+    fontWeight: "regular",
+    fontSize: 14,
+    margin: 15,
+    textAlign: "justify",
   },
   bar: {
     position: "absolute",

@@ -11,7 +11,7 @@ import React, { useState, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import AnimatedLottieView from "lottie-react-native";
 import SearchTile from "../components/SearchTile";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -20,28 +20,106 @@ import Header from "@/components/Header";
 import { getOrders } from "@/utils/actions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { numberWithCommas } from "@/utils/healper";
+import { useUser } from "@clerk/clerk-expo";
 
 const OrdersScreen = () => {
+  const colorScheme = useColorScheme();
+  const {user} = useUser();
+
   const [orders, setOrders] = useState([]);
   const [loading, setloading] = useState(true);
   const [showRatingModal, setShowRatingModal] = useState(false);
 
   const fetchOrders = async () => {
-    let userId = await AsyncStorage.getItem("userId");
-    if (!userId) {
+    
+    if (!user) {
       router.replace("/(auth)");
       return;
     }
-    await getOrders(userId)
+    console.log(user.id)
+    await getOrders(user.id)
       .then((res) => setOrders(res))
       .finally(() => setloading(false));
   };
 
   useEffect(() => {
-    fetchOrders()
+    fetchOrders();
   }, []);
 
-  const colorScheme = useColorScheme();
+  const renderItem = ({ item }: { item: OrderType }) => {
+    return (
+      <View
+        style={[styles.itemContainer,{backgroundColor: Colors[colorScheme ?? "light"].background2}]}
+        key={item._id}
+      >
+        <View>
+          <View
+            style={[styles.titleRow,{borderBottomColor: Colors[colorScheme ?? "light"].text}]}
+          >
+            <ThemedText type="defaultSemiBold">Awaitng delivey</ThemedText>
+            <ThemedText type="defaultSemiBold">
+              {new Date(item.createdAt).toDateString()}
+            </ThemedText>
+          </View>
+
+          <ThemedText type="default">
+            {/* @ts-ignore */}
+            {`Deliver at ${item.shippingAddress?.street}, ${item.shippingAddress?.city}, ${item.shippingAddress?.country}`}
+          </ThemedText>
+          <ThemedText
+            type="defaultSemiBold"
+            style={{ color: Colors.light.tertiary }}
+          >
+            Total amount : Rs {numberWithCommas(item.totalAmount)}
+          </ThemedText>
+        </View>
+        {item.products.map((product: OrderItemType) => {
+          return (
+            <Link href={`/products/${product.product._id}`} style={[styles.productContainer,{backgroundColor: Colors[colorScheme ?? "light"].background3}]} key={product._id}>
+              <View style={[{flexDirection:"row",gap:5}]}
+              >
+                <Image
+                  style={styles.imgContainer}
+                  source={{ uri: product.product.media[0] }}
+                />
+                <View style={{ gap: 5 }}>
+                  <ThemedText type="defaultSemiBold">
+                    {product.product.title.length > 27
+                      ? product.product.title.slice(0, 27) + "..."
+                      : product.product.title}
+                  </ThemedText>
+                  <ThemedText
+                    type="default"
+                    style={{ textTransform: "capitalize" }}
+                  >
+                    Color : {product.color}
+                  </ThemedText>
+                  <ThemedText type="default">
+                    Price : Rs {numberWithCommas(product.product.price)} x{" "}
+                    {product.quantity}
+                  </ThemedText>
+                </View>
+              </View>
+            </Link>
+          );
+        })}
+        <ThemedText>
+          All Orders will be shipped in 2-6 working days after placing order
+        </ThemedText>
+        <TouchableOpacity
+          onPress={() => setShowRatingModal(true)}
+          style={{
+            alignSelf: "flex-end",
+            padding: 8,
+            backgroundColor: Colors[colorScheme ?? "light"].primary,
+            borderRadius: 20,
+          }}
+        >
+          <Text style={{ color: "white", fontSize: 12 }}>Write Review</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <ThemedView style={{ flex: 1, paddingTop: 35, paddingHorizontal: 10 }}>
@@ -64,99 +142,12 @@ const OrdersScreen = () => {
           source={require("../assets/images/emptyCart.json")}
         />
       ) : (
-        orders.map((order: OrderType) => {
-          return (
-            <View
-              style={{
-                backgroundColor: Colors[colorScheme ?? "light"].background2,
-                padding: 8,
-                borderRadius: 10,
-                marginBottom: 15,
-              }}
-              key={order._id}
-            >
-              <View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    borderBottomWidth: 0.5,
-                    borderBottomColor: Colors[colorScheme ?? "light"].text,
-                    marginBottom: 10,
-                  }}
-                >
-                  <ThemedText type="defaultSemiBold">
-                    Awaitng delivey
-                  </ThemedText>
-                  <ThemedText type="defaultSemiBold">
-                    {new Date(order.createdAt).toDateString()}
-                  </ThemedText>
-                </View>
-
-                <ThemedText type="default">
-                  {/* @ts-ignore */}
-                  {`Deliver at ${order.shippingAddress?.street}, ${order.shippingAddress?.city}, ${order.shippingAddress?.country}`}
-                </ThemedText>
-                <ThemedText type="default">Phone no. : ********969</ThemedText>
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={{ color: Colors.light.tertiary }}
-                >
-                  Total amount : Rs {numberWithCommas(order.totalAmount)}
-                </ThemedText>
-              </View>
-              {order.products.map((product: OrderItemType) => {
-                return (
-                  <View
-                    key={product._id}
-                    style={{
-                      backgroundColor:
-                        Colors[colorScheme ?? "light"].background3,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      padding:8,
-                      borderRadius:5,
-                      marginBottom:10,
-                      gap:5
-                    }}
-                  >
-                    <Image
-                      style={styles.imgContainer}
-                      source={{ uri: product.product.media[0] }}
-                    />
-                    <View style={{gap:5}}>
-                      <ThemedText type="defaultSemiBold">{product.product.title.length>30?product.product.title.slice(0,30)+"...":product.product.title}</ThemedText>
-                      <ThemedText type="default" style={{textTransform:'capitalize'}}>
-                        Color : {product.color}
-                      </ThemedText>
-                      <ThemedText type="default">
-                        Price : Rs {numberWithCommas(product.product.price)} x {product.quantity}
-                      </ThemedText>
-                    </View>
-                  </View>
-                );
-              })}
-              <ThemedText>
-                All Orders will be shipped in 2-6 working days after placing
-                order
-              </ThemedText>
-              <TouchableOpacity
-                onPress={() => setShowRatingModal(true)}
-                style={{
-                  alignSelf: "flex-end",
-                  padding: 8,
-                  backgroundColor: Colors[colorScheme ?? "light"].primary,
-                  borderRadius: 20,
-                }}
-              >
-                <Text style={{ color: "white", fontSize: 12 }}>
-                  Write Review
-                </Text>
-              </TouchableOpacity>
-            </View>
-          );
-        })
+        <FlatList
+          data={orders}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item._id}
+          renderItem={renderItem}
+        />
       )}
       <ReviewModal
         isVisible={showRatingModal}
@@ -167,16 +158,28 @@ const OrdersScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  productContainer:{
+  itemContainer:{
+    padding: 8,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  titleRow:{
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 0.5,
+    marginBottom: 10,
+  },
+  productContainer: {
+      alignItems: "center",
+      padding: 8,
+      borderRadius: 5,
+      marginBottom: 10,
   },
   imgContainer: {
     width: 80,
     height: 80,
     resizeMode: "contain",
-    backgroundColor: "#fff",
     borderRadius: 7,
   },
 });

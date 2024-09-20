@@ -1,12 +1,9 @@
 import {
-  View,
-  Text,
   StyleSheet,
-  TouchableOpacity,
   FlatList,
   useColorScheme,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Product from "../components/ProductCard";
 import AnimatedLottieView from "lottie-react-native";
 import { ThemedView } from "@/components/ThemedView";

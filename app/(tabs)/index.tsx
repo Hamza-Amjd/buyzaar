@@ -9,67 +9,73 @@ import {
   useColorScheme,
   StatusBar,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   AntDesign,
-  Entypo,
   Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { Link, router } from "expo-router";
-import { BottomModal, ModalContent, SlideAnimation } from "react-native-modals";
+import { Link, router, useFocusEffect } from "expo-router";
 import Collections from "@/components/Collections";
 import ProductCard from "@/components/ProductCard";
-import useCart, { ProductType } from "@/hooks/useCart";
+import useCart from "@/hooks/useCart";
 import AddressBottomModal from "@/components/AddressBottomModal";
 import { getProducts } from "@/utils/actions";
+import * as Location from "expo-location";
 
 export default function Home() {
   const colorScheme = useColorScheme();
   const [products, setProducts] = useState<any>([]);
-  const [categoriesName, setCategoriesName] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const [footerLoading, setFooterLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [modalVisible, setModalVisible] = useState(false);
   const [addresses, setAddresses] = useState<any>([]);
   const [selectedAddress, setSelectedAdress] = useState(addresses[0]);
-  const [userId, setUserId] = useState("");
+  const [locationPermissionStatus, setLocationPermissionStatus] =
+    useState("undetermined");
+  const [location, setLocation] = useState<any>();
+
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        try {
+          let { status } = await Location.requestForegroundPermissionsAsync();
+          setLocationPermissionStatus(status); // Update the location permission status
+
+          if (status === "granted") {
+            let location = await Location.getCurrentPositionAsync({});
+            const locationCoords = {
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            };
+            let regionName = await Location.reverseGeocodeAsync(locationCoords);
+            setLocation(regionName[0]);
+          }
+        } catch (error) {
+          console.log(error); 
+        }
+      })();
+    }, [])
+  );
   const fetchProducts = async () => {
     setLoading(true);
-    await getProducts().then((res)=>setProducts(res)).catch((err) =>console.log(err)).finally(()=>setLoading(false));
+    await getProducts()
+      .then((res) => setProducts(res))
+      .catch((err) => console.log(err))
+      .finally(() => setLoading(false));
   };
   const loadMoreItems = () => {
     setCurrentPage(currentPage + 1);
-  };
-  const getAddress = async () => {
-    const userId1: any = await AsyncStorage.getItem("userId");
-    setUserId(userId1);
-    if (userId1) {
-      await axios
-        .get(`https://buyzaar-backend.vercel.app/api/shop/addresses/${userId1}`)
-        .then((response) => {
-          if ((response.status = 200)) {
-            setAddresses(response.data);
-            setSelectedAdress(response.data[0]);
-          }
-        })
-        .catch((error) => {
-          console.log("fetching addresses failed", error.message);
-        });
-    }
   };
 
   const cart = useCart();
 
   useEffect(() => {
     fetchProducts();
-    getAddress();
   }, []);
   useEffect(() => {
     // updateProducts();
@@ -101,11 +107,7 @@ export default function Home() {
   ];
   const handleAddAddress = () => {
     setModalVisible(false);
-    if (!userId) {
-      router.push("/(auth)");
-    } else {
-      router.push("/address");
-    }
+    router.push("/address");
   };
 
   return (
@@ -128,8 +130,7 @@ export default function Home() {
             setModalVisible(!modalVisible);
           }}
         >
-          {selectedAddress &&
-            selectedAddress.city + ", " + selectedAddress.country}
+          {location && location.district + ", " + location.city}
         </ThemedText>
         <TouchableOpacity
           onPress={() => {

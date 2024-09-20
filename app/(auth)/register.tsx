@@ -8,78 +8,128 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  Button,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons,Feather, FontAwesome } from "@expo/vector-icons";
-import {Colors} from "@/constants/Colors";
+import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
+import { Colors } from "@/constants/Colors";
 import { Formik } from "formik";
-import { useNavigation } from "@react-navigation/native";
 import * as Yup from "yup";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import jwtDecode from "jwt-decode";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import Header from "@/components/Header";
+import AuthTextInput from "@/components/AuthTextInput";
+import CustomButton from "@/components/CustomButton";
+import { useSignUp } from "@clerk/clerk-expo";
+import ConfirmationCodeInput from "@/components/ConfirmationCodeInput";
 
 const validationSchema = Yup.object().shape({
-  name:Yup.string().required("Please enter your name"),
+  firstName: Yup.string().required("Please enter your firstname"),
+  lastName: Yup.string().required("Please enter your lastname"),
   email: Yup.string().email("Invalid email address").required("Required"),
   password: Yup.string()
     .min(8, "Password must be atleast 8 characters")
     .required("Required"),
-    confirmPassword: Yup.string().when('password', (password, field) =>
-    password ? field.required("Required").oneOf([Yup.ref('password')]) : field
-  )
+  confirmPassword: Yup.string().when("password", (password, field) =>
+    password ? field.required("Required").oneOf([Yup.ref("password")],"Password did'nt match") : field
+  ),
 });
 
 export default function RegisterationScreen() {
-    const router =useRouter();
-    const navigation = useNavigation();
-    const [loader, setLoader] = useState(false);
-    const [responseData, setResponseData] = useState(null);
-    const [obsecurePass, setobsecurePass] = useState(true);
-    const [obsecureCpass, setobsecureCpass] = useState(true);
-    const handleRegister=async(values:any)=>{
-      axios.post(`https://buyzaar-backend.vercel.app/api/auth/register`, values).then((response:any) => {
-        setLoader(false);
-        console.log(response.data)
-        if (response.success == true) {
-          Alert.alert("Registration successful","Please check your email for verification", [{text:'ok',onPress:()=>router.back()}]
-        );
-        }
-        //@ts-ignore
-      })
-      .catch((error) => {
-        Alert.alert(
-          "Registration Error",
-          `${error}`
-        );
-        console.log("registration failed", error);
+  const { isLoaded, signUp, setActive } = useSignUp();
+
+  const [loading, setLoading] = useState(false);
+  const [obsecurePass, setobsecurePass] = useState(true);
+  const [obsecureCpass, setobsecureCpass] = useState(true);
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [code, setCode] = useState('');
+  const handleRegister = async (values: any) => {
+    if (!isLoaded) {
+      return;
+    }
+    setLoading(true);
+
+    try {
+      // Create the user on Clerk
+      await signUp.create({
+        username:values.username,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        emailAddress:values.email,
+        password:values.password,
       });
-  }
-       
-  
+
+      // Send verification Email
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+
+      // change the UI to verify the email address
+      setPendingVerification(true);
+    } catch (err: any) {
+      alert(err.errors[0].message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onPressVerify = async () => {
+    if (!isLoaded) {
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const completeSignUp = await signUp.attemptEmailAddressVerification({
+        code,
+      });
+
+      await setActive({ session: completeSignUp.createdSessionId }).catch((err)=>alert(err));
+    } catch (err: any) {
+      alert(err.errors[0].message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onBackPress=()=>{
+    if(pendingVerification){
+      setPendingVerification(false);
+    }else{
+      router.back();
+    }
+  };
   return (
-    <ThemedView style={{flex:1,paddingLeft:20,paddingTop:40}}>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.goBack();
-          }}
-        >
-          <ThemedText type="title"><Ionicons name="arrow-back" size={30} /></ThemedText>
-        </TouchableOpacity>
-      <View style={{alignItems:"center",justifyContent:"center",marginBottom:50,marginTop:70}}>
-      <View style={{flexDirection:"row",alignItems:"center",justifyContent:"center",marginBottom:15 }}>
-          <Image source={require('@/assets/images/logo.png')} style={{width:50,height:50,borderRadius:100}}/>
-          <ThemedText type="title">  Buyzaar</ThemedText>
+    <ThemedView style={{ flex: 1, paddingTop: 40 }}>
+      <Header onBackPress={onBackPress}/>
+      <View style={{flex:1,alignItems:'center',justifyContent:'center'}}>
+       
+      <View style={styles.info}>
+        <View style={styles.logoRow}>
+          <Image
+            source={require("@/assets/images/logo.png")}
+            style={styles.logo}
+          />
+          <ThemedText type="title"> Buyzaar</ThemedText>
         </View>
-        <ThemedText type="subtitle">Create a new account</ThemedText>
+        <ThemedText type="subtitle">{pendingVerification?"Verification code sent to your email":"Create a new account"}</ThemedText>
       </View>
-      <Formik
-        initialValues={{name:'', email: "", password: "" ,confirmPassword:""}}
+      
+      {pendingVerification ? (
+        <View style={{ paddingHorizontal: 20 ,gap:40}}>
+          <ConfirmationCodeInput code={code} setCode={setCode}/>
+          <CustomButton onPress={onPressVerify} title="Verify Email"/>
+        </View>
+      ):<Formik
+        initialValues={{
+          firstName: "",
+          lastName: "",
+          username: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        }}
         validationSchema={validationSchema}
         onSubmit={(values) => handleRegister(values)}
-        style={{alignItems:"center",justifyContent:"center"}}
       >
         {({
           handleChange,
@@ -88,144 +138,52 @@ export default function RegisterationScreen() {
           touched,
           setFieldTouched,
           errors,
-          isValid
+          isValid,
         }) => (
-          <View>
-            <View style={[styles.label,
-                  touched.name && {borderColor:Colors["light"].primary } 
-                ]}>
-            {!touched.name &&<FontAwesome name="user" size={15} color={Colors['light'].primary} />}
-            <TextInput
-              style={{flex:1}}
-              placeholder=" Enter name"
-              onChangeText={handleChange("name")}
-              value={values.name}
-              // @ts-ignore
-              onBlur={() => setFieldTouched("name", "")}
-              onFocus={() => setFieldTouched("name")}
-            />
+          <View style={{ paddingHorizontal: 20 }}>
+            <View style={{flexDirection:"row",width:'100%',gap:5}}>
+              <AuthTextInput handleChange={handleChange} iconName={'account'} setFieldTouched={setFieldTouched} title="firstName" touched={touched.firstName} value={values.firstName} isPassword={false}  error={errors.firstName} autoCapitalize={"words"} placeholder="Enter firstname" style={{flex:1}}/>
+              <AuthTextInput handleChange={handleChange} setFieldTouched={setFieldTouched} title="lastName" touched={touched.lastName} value={values.lastName} isPassword={false}  error={errors.lastName} autoCapitalize={"words"} placeholder="Enter lastname" style={{flex:1}}/>
             </View>
-            <View style={styles.errorContainer}>
-                {touched.name && errors.name && <Text style={styles.errorMessage}>{errors.name}</Text>}
-            </View>
-
-
-            <View style={[styles.label,
-                  touched.email && {borderColor:Colors["light"].primary } 
-                ]}>
-            {!touched.email &&<MaterialCommunityIcons name="email" size={15} color={Colors['light'].primary} />}
-            <TextInput
-              style={{flex:1}}
-              placeholder=" Email"
-              onChangeText={handleChange("email")}
-              value={values.email}
-              // @ts-ignore
-              onBlur={() => setFieldTouched("email", "")}
-              onFocus={() => setFieldTouched("email")}
-              autoCapitalize="none"
-            />
-            </View>
-            <View style={styles.errorContainer}>
-                {touched.email && errors.email && <Text style={styles.errorMessage}>{errors.email}</Text>}
-            </View>
-            <View style={[styles.label,
-                  touched.password && {borderColor:Colors["light"].primary } 
-                ]}>
-            {!touched.password &&<MaterialCommunityIcons name="form-textbox-password" size={15} color={Colors['light'].primary} />}
-            <TextInput
-              style={{flex:1}}
-              placeholder=" Password"
-              onChangeText={handleChange("password")}
-              value={values.password}
-              // @ts-ignore
-              onBlur={() => setFieldTouched("password", "")}
-              onFocus={() => setFieldTouched("password")}
-              autoCapitalize='none'
-              autoCorrect={false}
-              secureTextEntry={obsecurePass}
-            />
-            <TouchableOpacity onPress={()=>{setobsecurePass(!obsecurePass)}}>
-                <MaterialCommunityIcons name={obsecurePass?'eye-outline':'eye-off-outline'} size={20} color={Colors['light'].gray}/>
-            </TouchableOpacity>
-            </View>
-            <View style={styles.errorContainer}>
-            {touched.password && errors.password && <Text style={styles.errorMessage}>{errors.password}</Text>}
-            </View>
-
-            
-            <View style={[styles.label,
-                  touched.confirmPassword && {borderColor:Colors["light"].primary } 
-                ]}>
-            {!touched.confirmPassword && <MaterialCommunityIcons name="form-textbox-password" size={15} color={Colors['light'].primary} />}
-            <TextInput
-              style={{flex:1}}
-              placeholder=" Confirm Password"
-              onChangeText={handleChange("confirmPassword")}
-              value={values.confirmPassword}
-              // @ts-ignore
-              onBlur={() => setFieldTouched("confirmPassword", "")}
-              onFocus={() => setFieldTouched("confirmPassword")}
-              autoCapitalize='none'
-              autoCorrect={false}
-              secureTextEntry={obsecureCpass}
-            />
-            <TouchableOpacity onPress={()=>{setobsecureCpass(!obsecureCpass)}}>
-                <MaterialCommunityIcons name={obsecureCpass?'eye-outline':'eye-off-outline'} size={20} color={Colors['light'].gray}/>
-            </TouchableOpacity>
-            </View>
-            <View style={styles.errorContainer}>
-            {touched.confirmPassword && errors.confirmPassword && <Text style={styles.errorMessage}>{errors.confirmPassword}</Text>}
-            </View>
-
-                {/* @ts-ignore */}
-            <TouchableOpacity disabled={!isValid} onPress={handleSubmit} style={[styles.registerBtn,isValid && {backgroundColor: Colors["light"].primary}]}>
-              <Text
-                style={{
-                  fontWeight: "bold",
-                  fontSize: 16,
-                  color: "white",
-                }}
+            <AuthTextInput handleChange={handleChange} iconName={'account'} setFieldTouched={setFieldTouched} title="username" touched={touched.username} value={values.username} isPassword={false}  error={errors.username} autoCapitalize={"words"} placeholder="Enter unique username"/>
+            <AuthTextInput handleChange={handleChange} iconName={'email'} setFieldTouched={setFieldTouched} title="email" touched={touched.email} value={values.email} isPassword={false} error={errors.email}/>
+            <AuthTextInput handleChange={handleChange} iconName={'form-textbox-password'} setFieldTouched={setFieldTouched} title="password" touched={touched.password} value={values.password} isPassword={true} obsecurePass={obsecurePass} setobsecurePass={setobsecurePass} error={errors.password}/>
+            <AuthTextInput handleChange={handleChange} iconName={'form-textbox-password'} setFieldTouched={setFieldTouched} title="confirmPassword" touched={touched.confirmPassword} value={values.confirmPassword} isPassword={true} obsecurePass={obsecureCpass} setobsecurePass={setobsecureCpass} error={errors.confirmPassword} placeholder="Confirm password"/>
+            <CustomButton isValid={isValid} isLoading={loading} onPress={handleSubmit} title={"S I G N   U P"} />
+            <TouchableOpacity onPress={() => router.back()}>
+              <ThemedText
+                type="defaultSemiBold"
+                style={{ textAlign: "center", marginTop: 15 }}
               >
-                {loader?<ActivityIndicator/>:'S I G N   U P'}
-              </Text>
+                Already have an account?
+              </ThemedText>
             </TouchableOpacity>
-            <TouchableOpacity
-                onPress={() => router.back()}
-              >
-                <ThemedText type="defaultSemiBold" style={{textAlign:'center',marginTop:15}}>Already have an account?</ThemedText>
-              </TouchableOpacity>
-              
           </View>
         )}
-      </Formik>
+      </Formik>} 
+      </View>
     </ThemedView>
   );
 }
 const styles = StyleSheet.create({
-  container: {
-    paddingLeft:20
+
+  info: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 50,
   },
-  bar: {
-    margin: 10,
+  logoRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-  }, 
-  form:{
-    top:150
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 15,
   },
-  errorContainer: {
-    height:15,
-    margin:7
+  logo: {
+    width: 50,
+    height: 50,
+    borderRadius: 100,
   },
-  errorMessage: {
-    fontSize: 12,
-    color:'red',
-    alignItems: "flex-start",
-    fontWeight: "bold",
-  },
-  label:{
-    alignItems:'center',
-    width: "95%",
+  input: {
     height: 50,
     padding: 10,
     borderColor: Colors["light"].white,
@@ -233,14 +191,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors["light"].gray2,
     borderWidth: 1,
     flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  registerBtn:  {
-    width: "95%",
-    height: 50,
-    borderRadius: 20,
-    backgroundColor: Colors["light"].gray,
-    justifyContent: "center",
     alignItems: "center",
+    gap: 10,
+    bottom:10
   },
 });
