@@ -35,25 +35,3 @@ export const getRelatedProducts = async (productId: string) => {
   const relatedProducts = await axios.get(`https://buyzaar-admin.vercel.app/api/products/${productId}/related`).then((response) =>{return response.data}).catch((error) =>(console.error(error)));
   return relatedProducts
 }
-
-export const getUser = async () => {
-  const token = await AsyncStorage.getItem("token");
-  if (token) {
-    try {
-      const response = await fetch(
-        `https://buyzaar-backend.vercel.app/api/auth/getuser`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "auth-token": token,
-          },
-        }
-      );
-      const json = await response.json();
-      return json
-    } catch (error) {
-      console.log(error);
-    }
-  }
-};

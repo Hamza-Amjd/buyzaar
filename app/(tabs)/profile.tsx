@@ -1,7 +1,6 @@
 import {
   Image,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
   Alert,
@@ -13,13 +12,10 @@ import React, { useEffect, useState } from "react";
 import { Colors } from "@/constants/Colors";
 import {
   Ionicons,
-  MaterialIcons,
 } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemedText } from "@/components/ThemedText";
 import {router} from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
-import { getUser } from "@/utils/actions";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 
 const profile = () => {
@@ -33,7 +29,7 @@ const profile = () => {
       { text: "Cancel" },
       {
         text: "Confirm",
-        onPress: () => signOut()
+        onPress: async() => await signOut()
       },
     ]);
   };
@@ -46,13 +42,13 @@ const profile = () => {
     },
     { name: "Cart", icon: "cart", function: () => router.push("/cart") },
     { name: "Orders", icon: "bag", function: () => router.push("/orders") },
-    { name: "To Review", icon: "star", function: () => {} },
+    { name: "To Review", icon: "star", function: () => router.push("/orders") },
     { name: "Payment info", icon: "card", function: () => {} },
-    { name: "Settings", icon: "settings", function: () => {} },
+    { name: "Settings", icon: "settings", function: () => router.push("/settings") },
     {
       name: "Privacy policy",
       icon: "shield-checkmark",
-      function: () => Linking.openURL("https://buyzaar.vercel.app/"),
+      function: () => Linking.openURL("https://buyzaar.vercel.app/site/privacypolicy"),
     },
     { name: "Log out", icon: "log-out", function: logout },
   ];

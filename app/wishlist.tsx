@@ -1,5 +1,4 @@
 import {
-  StyleSheet,
   FlatList,
   useColorScheme,
 } from "react-native";
@@ -12,7 +11,6 @@ import useCart from "@/hooks/useCart";
 
 const wishlist = () => {
   const wishlist=useCart().wishlist;
-  const colorScheme = useColorScheme();
   return (
     <ThemedView style={{flex:1, paddingTop:35}}>
       <Header title="Wishlist"/>
@@ -31,21 +29,12 @@ const wishlist = () => {
         renderItem={({ item }) => <Product item={item} />}
         numColumns={2}
         contentContainerStyle={{
-          columnGap: 15,
-          rowGap: 10,
+           marginHorizontal:'auto',justifyContent:'space-evenly'
         }}
         columnWrapperStyle={{ marginHorizontal: 10 }}
-        style={{ marginBottom: 60 }}
       />
     </ThemedView>
   );
 };
-const styles = StyleSheet.create({
-  bar: {
-    margin: 10,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-});
 
 export default wishlist;

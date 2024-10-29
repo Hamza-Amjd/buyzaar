@@ -20,7 +20,7 @@ const Header = ({
   const colorScheme = useColorScheme();
   return (
     <View style={styles.bar}>
-      <View style={{ flexDirection: "row", gap: 15 }}>
+      <View style={{ flexDirection: "row", gap: 15 ,alignItems:'center'}}>
         <TouchableOpacity
           onPress={onBackPress}
         >
@@ -28,7 +28,7 @@ const Header = ({
         </TouchableOpacity>
         {title && <ThemedText style={[styles.title,{color:color?color:Colors[colorScheme??'light'].text}]}>{title}</ThemedText>}
       </View>
-      {headerRight && <View>{headerRight}</View>}
+      {headerRight && headerRight}
     </View>
   );
 };
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     lineHeight:28,
     fontWeight: "bold",
     textTransform:"capitalize"

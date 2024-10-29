@@ -1,132 +1,188 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native'
-import React, { useState } from 'react'
-import { BottomModal, ModalContent, SlideAnimation } from 'react-native-modals';
-import { Colors } from '@/constants/Colors';
-import { ThemedText } from './ThemedText';
-import { Entypo } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  useColorScheme,
+} from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
-type addressBottomModalProps = {
-    addresses: any[],
-    isVisible: boolean,
-    handleClose: () => void,
-    handleAddAddress: () => void,
-    selectedAddress: any,
-    setSelectedAdress: (address: any) => void,
-}
+import {
+  Feather,
+  FontAwesome5,
+  Ionicons,
+  MaterialIcons,
+} from "@expo/vector-icons";
+import { BottomModal, ModalContent } from "react-native-modals";
+import { ThemedView } from "./ThemedView";
+import { ThemedText } from "./ThemedText";
+import { Colors } from "@/constants/Colors";
+import useLocation from "@/hooks/useLocation";
+import { router } from "expo-router";
 
-const AddressBottomModal = ({isVisible,handleClose,addresses,handleAddAddress,selectedAddress,setSelectedAdress}:addressBottomModalProps) => {
-    const colorScheme = useColorScheme();
+type addressModalProps = {
+  isVisible: boolean;
+  handleClose: () => void;
+};
+
+export default function AddressBottomModal({
+  isVisible,
+  handleClose,
+}: addressModalProps) {
+  const colorScheme = useColorScheme();
+  const { location, locationCords } = useLocation();
+  const [selectedAddress, setSelectedAddress] = useState<number>(0);
+  const addresses = [
+    { id: 1, title: "Home", address: "WAPDA Hospital Dispensary Lahore" },
+    { id: 2, title: "Work", address: "WAPDA Hospital Dispensary Lahore" },
+    { id: 3, title: "Hamza", address: "WAPDA Hospital Dispensary Lahore" },
+  ];
+
   return (
     <BottomModal
-        //@ts-ignore
-        onHardwareBackPress={handleClose}
-        visible={isVisible}
-        modalAnimation={new SlideAnimation({ slideFrom: "bottom" })}
-        onTouchOutside={handleClose}
-        swipeDirection={["up", "down"]}
-        swipeThreshold={200}
-        onSwipeOut={handleClose}
+      visible={isVisible}
+      onTouchOutside={handleClose}
+      onSwipeOut={handleClose}
+      style={{borderRadius: 100}}
+    >
+      <ModalContent
+        style={{ backgroundColor: Colors[colorScheme ?? "light"].background }}
       >
-        <ModalContent
-          style={{
-            width: "100%",
-            height: 300,
-            backgroundColor: Colors[colorScheme ?? "light"].background,
-          }}
-        >
-          <View style={{ marginBottom: 8 }}>
-            <ThemedText style={{ fontSize: 16, fontWeight: "500" }}>
-              Choose your Location
-            </ThemedText>
-
-            <Text style={{ marginTop: 5, fontSize: 16, color: "gray" }}>
-              Select a delivery location to see product availabilty and delivery
-              options
-            </Text>
-          </View>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {/* @ts-ignore */}
-            {addresses.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => setSelectedAdress(item)}
-                style={[
-                  styles.addressContainer,
-                  {
-                    backgroundColor:
-                      selectedAddress === item ? "#FBCEB1" : "white",
-                  },
-                ]}
-              >
-                <View style={styles.row}>
-                  <Text style={{ fontSize: 13, fontWeight: "bold" }}>
-                    {item.name}
-                  </Text>
-                  <Entypo name="location-pin" size={24} color="red" />
+        {locationCords ? (
+          <MapView
+            style={styles.map}
+            initialRegion={locationCords}
+            scrollEnabled={false}
+          >
+            <Marker coordinate={locationCords} />
+          </MapView>
+        ) : (
+          <View style={styles.map} />
+        )}
+        <ThemedView style={styles.content}>
+          <TouchableOpacity onPress={()=>setSelectedAddress(0)} style={styles.currentLocation}>
+            <MaterialIcons
+              name="my-location"
+              color={selectedAddress === 0 ? Colors[colorScheme ?? "light"].primary : Colors[colorScheme ?? "light"].text}
+              size={24}
+            />
+            <View style={styles.locationThemedText}>
+              <ThemedText type="defaultSemiBold">Current Location</ThemedText>
+              <ThemedText style={styles.text}>
+                {location?.formattedAddress?.slice(10)}
+              </ThemedText>
+            </View>
+          </TouchableOpacity>
+          <ScrollView style={styles.addressList}>
+            {addresses.map((address) => (
+              <TouchableOpacity onPress={()=>setSelectedAddress(address.id)} key={address.id} style={styles.addressItem}>
+                {selectedAddress === address.id ? (
+                  <FontAwesome5
+                    name="dot-circle"
+                    color={Colors[colorScheme ?? "light"].primary}
+                    size={20}
+                    style={{ marginRight: 10 }}
+                  />
+                ) : (
+                  <FontAwesome5
+                    name="circle"
+                    color={Colors[colorScheme ?? "light"].text}
+                    size={20}
+                    style={{ marginRight: 10 }}
+                  />
+                )}
+                {address.title === "Home" ? (
+                  <FontAwesome5 name="home" color="#6B7280" size={24} />
+                ) : address.title === "Work" ? (
+                  <FontAwesome5 name="briefcase" color="#6B7280" size={24} />
+                ) : (
+                  <FontAwesome5 name="map-marker-alt" color="#6B7280" size={24}/>
+                )}
+                <View style={styles.addressThemedText}>
+                  <ThemedText type="defaultSemiBold">
+                    {address.title}
+                  </ThemedText>
+                  <ThemedText style={styles.text}>{address.address}</ThemedText>
                 </View>
-
-                <Text
-                  numberOfLines={1}
-                  style={{ width: 130, fontSize: 13, textAlign: "center" }}
-                >
-                  {item.streetAddress}
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  style={{ width: 130, fontSize: 13, textAlign: "center" }}
-                >
-                  {item.city}, {item.country}
-                </Text>
+                <TouchableOpacity>
+                  <MaterialIcons name="edit" color="#6B7280" size={20} />
+                </TouchableOpacity>
               </TouchableOpacity>
             ))}
-
-            <TouchableOpacity
-              onPress={handleAddAddress}
-              style={styles.addAddressContainer}
-            >
-              <Text style={styles.addAddressTxt}>
-                Add an Address or pick-up point
-              </Text>
-            </TouchableOpacity>
           </ScrollView>
-        </ModalContent>
-      </BottomModal>
-  )
+          <TouchableOpacity onPress={()=>router.push(`/addAddress?locationCords=${JSON.stringify(locationCords)}`)} style={styles.addButton}>
+            <Ionicons
+              name="add"
+              color={Colors[colorScheme ?? "light"].primary}
+              size={24}
+            />
+            <ThemedText
+              type="defaultSemiBold"
+              style={{ color: Colors[colorScheme ?? "light"].primary }}
+            >
+              Add New Address
+            </ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+      </ModalContent>
+    </BottomModal>
+  );
 }
 
-export default AddressBottomModal
-
 const styles = StyleSheet.create({
-    addressContainer: {
-        width: 140,
-        height: 140,
-        borderColor: "#D0D0D0",
-        borderWidth: 1,
-        padding: 10,
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 3,
-        marginRight: 15,
-        marginTop: 10,
-        borderRadius: 10,
-      },
-      row: { flexDirection: "row", alignItems: "center", gap: 3 },
-      addAddressContainer: {
-        width: 140,
-        height: 140,
-        borderColor: "#D0D0D0",
-        marginTop: 10,
-        borderWidth: 1,
-        padding: 10,
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: 10,
-      },
-      addAddressTxt: {
-        textAlign: "center",
-        color: "#0066b2",
-        fontWeight: "500",
-      },
-})
+  map: {
+    height: 200,
+    backgroundColor: "#e9e7eb",
+    borderRadius: 16,
+  },
+  content: {
+    padding: 16,
+    overflow: "hidden",
+  },
+  currentLocation: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  locationThemedText: {
+    marginLeft: 12,
+  },
+  text: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  addressList: {
+    maxHeight: 200,
+  },
+  addressItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  addressIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#E5E7EB",
+  },
+  addressThemedText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: "#e9e7eb",
+    borderRadius: 8,
+  },
+  addButtonThemedText: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#",
+  },
+});

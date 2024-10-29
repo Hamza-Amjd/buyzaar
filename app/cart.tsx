@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,7 +8,7 @@ import {
   Image,
   useColorScheme,
   Alert,
-  Linking,
+  ToastAndroid,
 } from "react-native";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import AnimatedLottieView from "lottie-react-native";
@@ -20,43 +20,102 @@ import { numberWithCommas } from "@/utils/healper";
 import Header from "@/components/Header";
 import useCart, { CartItem } from "@/hooks/useCart";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getUser } from "@/utils/actions";
 import { useUser } from "@clerk/clerk-expo";
+import { AddressSheet, useStripe, } from "@stripe/stripe-react-native";
+import useLocation from "@/hooks/useLocation";
 
 export default function cart() {
   const colorScheme = useColorScheme();
+  const { location } = useLocation();
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const [loading, setLoading] = useState(false);
+  const [showAddressSheet, setShowAddressSheet] = useState(false);
+  const [address, setAddress] = useState<any>();
+
   const { user } = useUser();
-  const cart = useCart();
-  const total = cart.cartItems.reduce(
+  const cartHook = useCart();
+  const subtotal = cartHook.cartItems.reduce(
     (acc, cartItem) => acc + cartItem.item.price * cartItem.quantity,
     0
-  ); 
-
-  const handleCheckout = async () => {
+  );
+  const total = subtotal + 300;
+  const customerInfo = {
+    clerkId: user?.id,
+    email: user?.emailAddresses[0].emailAddress,
+    name: user?.firstName + " " + user?.lastName,
+  };
+  const fetchPaymentSheetParams = async () => {
     if (!user) {
-      router.push("/(auth)");
+      Alert.alert("Error", "You must be logged in to proceed with checkout.");
+      return;
+    }
+    const response = await fetch(
+      `https://buyzaar-admin.vercel.app/api/mobile/checkout`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: total,
+          address,
+        }),
+      }
+    );
+    const { paymentIntent} = await response.json();
+
+    return {
+      paymentIntent
+    };
+  };
+
+  const initializePaymentSheet = async () => {
+    //@ts-ignore
+    const { paymentIntent } = await fetchPaymentSheetParams();
+
+    const { error } = await initPaymentSheet({
+      merchantDisplayName: user?.fullName!,
+      paymentIntentClientSecret: paymentIntent,
+      allowsDelayedPaymentMethods: true,
+      defaultBillingDetails: {address:{country:'PK'}},
+      
+    });
+    if (!error) {
+      setLoading(true);
+    }
+  };
+  const openPaymentSheet = async () => {
+    const { error } = await presentPaymentSheet();
+
+    if (error) {
+      Alert.alert(`Error code: ${error.code}`, error.message);
     } else {
-      const customer = {
-        clerkId: user.id,
-        email: user.emailAddresses[0].emailAddress,
-        name: user.firstName + " " + user?.lastName,
-      };
+      console.log(address)
       await axios
-        .post(`https://buyzaar-admin.vercel.app/api/checkout`, {
-          cartItems: cart.cartItems,
-          customer,
+        .post(`https://buyzaar-admin.vercel.app/api/mobile/createorder`, {
+          cartItems: cartHook.cartItems,
+          customerInfo,
+          total,
+          address,
         })
-        .then((res) => {
-          Linking.openURL(res.data.url);
-        })
-        .catch((err) => console.log(err));
+        .then(() => cartHook.clearCart())
+        .catch((error) =>{
+          Alert.alert(
+            `Error code: ${error.code}`,
+            "Some error occurred while creating order your payment will be returned"
+          );console.log(error);}
+        );
+      Alert.alert("Success", "Your order is confirmed!");
     }
   };
   const handleClearCart = () => {
     Alert.alert("Clear Cart", "Are you sure you want to clear the cart?", [
       { text: "Cancel", onPress: () => {} },
-      { text: "Confirm", onPress: () => cart.clearCart() },
+      { text: "Confirm", onPress: () => {cartHook.clearCart();ToastAndroid.showWithGravity(
+        "Cart cleared successfully",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      );} },
     ]);
   };
   const renderItem = ({ item }: { item: CartItem }) => {
@@ -104,7 +163,7 @@ export default function cart() {
             <View style={styles.quantityRow}>
               {item.quantity !== 1 ? (
                 <TouchableOpacity
-                  onPress={() => cart.decreaseQuantity(item.item._id)}
+                  onPress={() => cartHook.decreaseQuantity(item.item._id)}
                 >
                   <Feather
                     name="minus"
@@ -119,7 +178,7 @@ export default function cart() {
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
-                  onPress={() => cart.removeItem(item.item._id)}
+                  onPress={() => cartHook.removeItem(item.item._id)}
                 >
                   <MaterialCommunityIcons
                     name="delete"
@@ -148,7 +207,7 @@ export default function cart() {
                 {item.quantity}
               </ThemedText>
               <TouchableOpacity
-                onPress={() => cart.increaseQuantity(item.item._id)}
+                onPress={() => cartHook.increaseQuantity(item.item._id)}
               >
                 <Feather
                   name="plus"
@@ -168,97 +227,132 @@ export default function cart() {
     );
   };
   return (
-    <ThemedView style={styles.container}>
-      <Header
-        title="Cart"
-        headerRight={
-          <TouchableOpacity onPress={handleClearCart}>
-            <Ionicons
-              name="trash-bin"
-              color={Colors[colorScheme ?? "light"].text}
-              size={25}
+    <>
+      <ThemedView style={styles.container}>
+        <Header
+          title="Cart"
+          headerRight={
+            <TouchableOpacity onPress={handleClearCart}>
+              <Ionicons
+                name="trash-bin"
+                color={Colors[colorScheme ?? "light"].text}
+                size={25}
+              />
+            </TouchableOpacity>
+          }
+        />
+        <View style={{ flex: 1 }}>
+          {cartHook.cartItems.length == 0 ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <AnimatedLottieView
+                autoPlay
+                loop
+                speed={0.3}
+                style={{ height: 150, width: 150 }}
+                source={require("../assets/images/emptyCart.json")}
+              />
+            </View>
+          ) : (
+            <FlatList
+              data={cartHook.cartItems}
+              showsVerticalScrollIndicator={false}
+              keyExtractor={(item) => item.item._id}
+              renderItem={renderItem}
+              ListFooterComponent={() => (
+                <>
+                  <View style={styles.titleRow}>
+                    <ThemedText style={styles.textlight}>SubTotal :</ThemedText>
+                    <ThemedText style={styles.textlight}>
+                      Rs. {numberWithCommas(subtotal)}
+                    </ThemedText>
+                  </View>
+                  <View style={styles.titleRow}>
+                    <ThemedText style={styles.textlight}>Delivery :</ThemedText>
+                    <ThemedText style={styles.textlight}>Rs. 300</ThemedText>
+                  </View>
+                  <View style={styles.titleRow}>
+                    <ThemedText type="defaultSemiBold">Total :</ThemedText>
+                    <ThemedText
+                      type="subtitle"
+                      style={{ color: Colors.light.tertiary }}
+                    >
+                      <Text style={{ fontSize: 14 }}>Rs. </Text>
+                      {numberWithCommas(total)}
+                    </ThemedText>
+                  </View>
+                </>
+              )}
             />
-          </TouchableOpacity>
-        }
-      />
-      <View style={{ flex: 1 }}>
-        {cart.cartItems.length == 0 ? (
-          <View
+          )}
+        </View>
+
+        <TouchableOpacity
+          onPress={async () => {
+            if(!user){
+              router.replace("/(auth)")
+            }
+            if(!address){
+            setShowAddressSheet(true);
+            await initializePaymentSheet();
+          }else{
+            await initializePaymentSheet().then(async()=>await openPaymentSheet())
+          }
+          }}
+          disabled={subtotal == 0}
+          style={[styles.buyRow,{backgroundColor: subtotal == 0?Colors.light.gray:Colors.light.primary  }]}
+        >
+          <MaterialCommunityIcons
+            name="cart-arrow-right"
+            size={24}
+            color={total != 0 ? Colors.light.secondary : Colors.light.white}
+          />
+          <Text
             style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
+              marginLeft: 10,
+              fontWeight: "bold",
+              fontSize: 18,
+              color: total != 0 ? Colors.light.secondary : Colors.light.white,
             }}
           >
-            <AnimatedLottieView
-              autoPlay
-              loop
-              speed={0.3}
-              style={{ height: 150, width: 150 }}
-              source={require("../assets/images/emptyCart.json")}
-            />
-          </View>
-        ) : (
-          <FlatList
-            data={cart.cartItems}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => item.item._id}
-            renderItem={renderItem}
-            ListFooterComponent={() => (
-              <>
-                <View style={styles.titleRow}>
-                  <ThemedText style={styles.textlight}>SubTotal :</ThemedText>
-                  <ThemedText style={styles.textlight}>
-                    Rs. {numberWithCommas(total)}
-                  </ThemedText>
-                </View>
-                <View style={styles.titleRow}>
-                  <ThemedText style={styles.textlight}>Delivery :</ThemedText>
-                  <ThemedText style={styles.textlight}>Rs. 300</ThemedText>
-                </View>
-                <View style={styles.titleRow}>
-                  <ThemedText type="defaultSemiBold">Total :</ThemedText>
-                  <ThemedText
-                    type="subtitle"
-                    style={{ color: Colors.light.tertiary }}
-                  >
-                    <Text style={{ fontSize: 14 }}>Rs. </Text>
-                    {numberWithCommas(total + 300)}
-                  </ThemedText>
-                </View>
-              </>
-            )}
-          />
-        )}
-      </View>
-
-      <TouchableOpacity
-        onPress={handleCheckout}
-        disabled={total == 0}
-        style={[
-          styles.buyRow,
-          total != 0
-            ? { backgroundColor: Colors.light.primary }
-            : { backgroundColor: Colors.light.gray },
-        ]}
-      >
-        <MaterialCommunityIcons
-          name="cart-arrow-right"
-          size={24}
-          color={total != 0 ? Colors.light.secondary : Colors.light.white}
-        />
-        <Text
-          style={{
-            marginLeft: 10,
-            fontWeight: "bold",
-            fontSize: 18,
-            color: total != 0 ? Colors.light.secondary : Colors.light.white,
-          }}
-        >
-          C H E A K O U T
-        </Text>
-      </TouchableOpacity>
-    </ThemedView>
+            C H E A K O U T
+          </Text>
+        </TouchableOpacity>
+      </ThemedView>
+      <AddressSheet
+        visible={showAddressSheet}
+        presentationStyle="popover"
+        appearance={{colors:{primary:Colors[colorScheme ?? "light"].primary}}}
+        onSubmit={(e) => {
+          setAddress(e);
+          setShowAddressSheet(false);
+        }}
+        onError={(err) => {
+          console.log(err);
+          setShowAddressSheet(false);
+        }}
+        additionalFields={{
+          phoneNumber: 'required',
+        }}
+        allowedCountries={["PK"]}
+        defaultValues={
+          address
+            ? address
+            : {
+                address: {
+                  line1: location?.district ?? "",
+                  city: location?.city ?? "",
+                },
+                name: user?.fullName ?? "",
+              }
+        }
+      />
+    </>
   );
 }
 
@@ -317,3 +411,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
+
+// const handleCheckout = async () => {
+//   if (!user) {
+//     router.push("/(auth)");
+//   } else {
+//     await axios
+//       .post(`http://192.168.0.101:3000/api/mobile/checkout`, {
+//         cartItems: cart.cartItems,
+//         customer:customerInfo,
+//       })
+//       .then((res) => {
+//         Linking.openURL(res.data.url);
+//       })
+//       .catch((err) => console.log(err));
+//   }
+// };

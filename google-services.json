@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "985275296337",
+    "project_id": "buyzar-88e72",
+    "storage_bucket": "buyzar-88e72.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:985275296337:android:6478f2c0296afe02abe670",
+        "android_client_info": {
+          "package_name": "com.hamzaamjd.buyzaar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbg7VNLplzSfPofpsJBG40Ip81VIEengA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -15,11 +15,11 @@ import ProductCard from "@/components/ProductCard";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 
 const page = () => {
-  const { collectionId } = useLocalSearchParams<{ collectionId: string }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [collectionDetails, setCollectionDetails] = useState<any>({});
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    getCollectionDetails(collectionId)
+    getCollectionDetails(id)
       .then((res) => setCollectionDetails(res))
       .finally(() => setLoading(false));
   }, []);
@@ -46,7 +46,7 @@ const page = () => {
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => <ProductCard item={item} />}
             numColumns={2}
-            contentContainerStyle={{ padding: 10 }}
+            contentContainerStyle={{ marginHorizontal:'auto',justifyContent:'space-evenly'}}
             scrollEnabled={false}
           />
         </ParallaxScrollView>

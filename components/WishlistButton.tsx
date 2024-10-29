@@ -1,28 +1,28 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native'
 import React from 'react'
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import useCart from '@/hooks/useCart';
 
 const WishlistButton = ({product}:{product:any}) => {
   const cart =useCart();
-  
+  const colorScheme = useColorScheme();
   return (
     <TouchableOpacity onPress={() => {
               cart.toggleWishlist(product);
             }}>
-          <AntDesign
+          <FontAwesome
             
             name={
               cart.wishlist.some((value: any) => value._id == product._id)
-                ? "heart"
-                : "hearto"
+                ? "bookmark"
+                : "bookmark-o"
             }
-            size={30}
+            size={27}
             color={
               cart.wishlist.some((value: any) => value._id == product._id)
-                ? "red"
-                : Colors.light.primary
+                ? "orange"
+                : "grey"
             }
           />
         </TouchableOpacity>

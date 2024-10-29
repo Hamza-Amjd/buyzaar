@@ -81,7 +81,9 @@ const PwReset = () => {
                   placeholder="New password"
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  autoCapitalize="none"
+                  autoComplete="new-password"
+                  secureTextEntry={obsecurePass}
                   style={{ flex: 1 }}
                 />
                 <TouchableOpacity

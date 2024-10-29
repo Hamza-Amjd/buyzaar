@@ -2,13 +2,11 @@ import { Stack } from 'expo-router'
 import React from 'react'
 
 const authLayout = () => {
-  
-  
   return (
-    <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="register" options={{ headerShown: false }} />
-        <Stack.Screen name="reset" options={{ headerShown: false }} />
+    <Stack screenOptions={{headerShown: false}}>
+        <Stack.Screen name="index"  />
+        <Stack.Screen name="register"  />
+        <Stack.Screen name="reset"  />
       </Stack>
   )
 }

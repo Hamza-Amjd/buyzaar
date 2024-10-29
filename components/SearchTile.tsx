@@ -28,7 +28,7 @@ const SearchTile = ({ item }: { item: ProductType }) => {
         <View
           style={[
             styles.productMain,
-            { backgroundColor: Colors[colorScheme ?? "light"].background3 },
+            { backgroundColor: Colors[colorScheme ?? "light"].background2 },
           ]}
         >
           <View style={styles.imgContainer}>

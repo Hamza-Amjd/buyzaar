@@ -5,6 +5,7 @@ import {
   Image,
   TouchableOpacity,
   useColorScheme,
+  Dimensions,
 } from "react-native";
 import React from "react";
 import { Colors } from "@/constants/Colors";
@@ -17,6 +18,12 @@ import WishlistButton from "./WishlistButton";
 type productProps = {
   item: any;
 };
+
+const { width: screenWidth } = Dimensions.get('window');
+const cardMargin = 10;
+const cardsPerRow = 2;
+const cardWidth = (screenWidth - cardMargin * (cardsPerRow + 1)) / cardsPerRow;
+
 const ProductCard: React.FC<productProps> = ({ item }) => {
   const { title, media, price, rating } = item;
   const colorScheme = useColorScheme();
@@ -26,14 +33,14 @@ const ProductCard: React.FC<productProps> = ({ item }) => {
       asChild
       style={[
         styles.productContainer,
-        { backgroundColor: Colors[colorScheme ?? "light"].background3 },
+        { width: cardWidth },
       ]}
     >
       <TouchableOpacity>
         <View
           style={[
             styles.imgContainer,
-            { backgroundColor: Colors["light"].white },
+            { backgroundColor: "white" },
           ]}
         >
           <View style={styles.fav}>
@@ -71,21 +78,14 @@ const ProductCard: React.FC<productProps> = ({ item }) => {
 
 const styles = StyleSheet.create({
   productContainer: {
-    width: 182,
-    height: 240,
-    backgroundColor: Colors["light"].background,
-    borderRadius: 16,
-    marginRight: 5,
-    marginBottom: 5,
+    height: cardWidth * 1.3,
     overflow: "hidden",
-    elevation: 5,
+    margin: cardMargin / 2,
   },
   imgContainer: {
-    width: 170,
-    height: 170,
+    width: cardWidth - 10,
+    height: cardWidth-10,
     overflow: "hidden",
-    marginLeft: 5,
-    marginTop: 5,
     borderRadius: 10,
   },
   img: {

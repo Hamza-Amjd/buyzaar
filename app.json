@@ -21,6 +21,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FF8E31"
       },
+      "googleServicesFile": "./google-services.json",
       "package": "com.hamzaamjd.buyzaar"
     },
     "web": {
@@ -30,7 +31,6 @@
     },
     "plugins": [
       "expo-router",
-      "@react-native-google-signin/google-signin",
       "expo-font",
       [
         "expo-location",

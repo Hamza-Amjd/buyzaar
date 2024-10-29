@@ -51,7 +51,7 @@ const onboardingSteps = [
   },
 ];
 
-export default function OnboardingScreen() {
+export default function onboarding() {
   const colorScheme = useColorScheme();
   const [screenIndex, setScreenIndex] = useState(0);
 
@@ -75,8 +75,8 @@ export default function OnboardingScreen() {
   };
 
   const endOnboarding = () => {
-    AsyncStorage.setItem("@secondopen", "true");
-    router.replace("/(tabs)");
+    AsyncStorage.setItem("@firstopen", "false");
+    router.replace("/(auth)");
   };
 
   const swipes = Gesture.Simultaneous(

@@ -2,15 +2,14 @@ import {
   StyleSheet,
   Text,
   View,
-  Pressable,
   Image,
-  ScrollView,
   StatusBar,
   useColorScheme,
   Dimensions,
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
+  TouchableWithoutFeedback,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -32,10 +31,10 @@ import Header from "@/components/Header";
 import WishlistButton from "@/components/WishlistButton";
 import useCart, { CartItem } from "@/hooks/useCart";
 import ImageView from "react-native-image-viewing";
-import PagerView from "react-native-pager-view";
+import Animated from "react-native-reanimated";
 
 const productDetails = () => {
-  const { productId } = useLocalSearchParams<{ productId: string }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const colorScheme = useColorScheme();
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [product, setProduct] = useState<ProductType | any>();
@@ -47,13 +46,13 @@ const productDetails = () => {
   const [selectedImageIndex, setSeletedImageIndex] = useState(0);
   useEffect(() => {
     setLoading(true);
-    getProductDetails(productId).then((product) => {
+    getProductDetails(id).then((product) => {
       setProduct(product);
       setSelectedColor(product.colors[0]);
       setSelectedSize(product.sizes[0]);
       setLoading(false);
     });
-    getRelatedProducts(productId).then((relatedProducts) =>
+    getRelatedProducts(id).then((relatedProducts) =>
       setRelatedProducts(relatedProducts)
     );
   }, []);
@@ -73,14 +72,14 @@ const productDetails = () => {
   const handleBuynow = () => {
     cart.clearCart();
     handleAddToCart();
-    router.push("/confirmorder");
+    router.push('/cart')
   };
 
   const width = Dimensions.get("screen").width;
   return loading ? (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <ActivityIndicator size={"large"} />
-    </View>
+    </ThemedView>
   ) : (
     <>
       <ParallaxScrollView
@@ -92,16 +91,16 @@ const productDetails = () => {
               data={product.media}
               onSnapToItem={(index)=>setSeletedImageIndex(index)}
               renderItem={({ item, index}) => (
-                <Pressable
+                <TouchableWithoutFeedback
                   style={{ flex: 1 }}
                   key={index}
                   onPress={() => {
                     setshowImageModal(true);
                   }}
                 >
-                  <Image style={{ flex: 1 }} source={{ uri: item as string }} />
+                  <Animated.Image style={{ flex: 1 }} source={{ uri: item as string }} sharedTransitionTag={""}/>
                   
-                </Pressable>
+                </TouchableWithoutFeedback>
               )}
             />
             <View
@@ -134,7 +133,7 @@ const productDetails = () => {
         <ThemedView
           style={[
             styles.infoContainer,
-            { backgroundColor: Colors[colorScheme ?? "light"].background2 },
+            { backgroundColor: Colors[colorScheme ?? "light"].background3 },
           ]}
         >
           
@@ -263,31 +262,24 @@ const productDetails = () => {
                 Colors
               </ThemedText>
               <View
-                style={{
-                  paddingHorizontal: 15,
-                  paddingVertical: 10,
-                  flexDirection: "row",
-                  gap: 10,
-                }}
+                style={styles.colorContainer}
               >
                 {product.colors.map((color: string, index: string) => (
                   <TouchableOpacity
                     key={index}
                     onPress={() => setSelectedColor(color)}
+                    style={{alignItems:'center',justifyContent:'center',gap:5}}
                   >
-                    <ThemedText
+                    <View
                       style={[
-                        styles.optionsItem,
-                        { borderColor: Colors[colorScheme ?? "light"].text },
-                        selectedColor == color && {
-                          backgroundColor:
-                            Colors[colorScheme ?? "light"].tertiary,
-                          color: "white",
-                        },
+                        styles.colorOption,
+                        { backgroundColor: color },
+                        selectedColor === color && {borderColor: Colors.dark.primary},
                       ]}
                     >
-                      {color}
-                    </ThemedText>
+                      {selectedColor === color && <Ionicons name="checkmark" size={20} color={Colors.dark.primary} />}
+                    </View>
+                    <ThemedText type='default' style={{textTransform:'capitalize',textAlign:'center'}}>{color}</ThemedText>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -299,12 +291,7 @@ const productDetails = () => {
                 Varients
               </ThemedText>
               <View
-                style={{
-                  paddingHorizontal: 15,
-                  paddingVertical: 10,
-                  flexDirection: "row",
-                  gap: 10,
-                }}
+                style={styles.colorContainer}
               >
                 {product.sizes.map((size: string, index: string) => (
                   <TouchableOpacity
@@ -365,11 +352,8 @@ const productDetails = () => {
               renderItem={({ item }) => <Product item={item} />}
               numColumns={2}
               contentContainerStyle={{
-                paddingTop: 10,
-                columnGap: 16,
-                rowGap: 10,
+                 marginHorizontal:'auto',justifyContent:'space-evenly'
               }}
-              columnWrapperStyle={{ marginHorizontal: 10 }}
             />
           )}
         </ThemedView>
@@ -377,7 +361,7 @@ const productDetails = () => {
       <View style={styles.bar}>
         <Header
           headerRight={<WishlistButton product={product} />}
-          color={Colors.light.primary}
+          color={"grey"}
         />
       </View>
       <ThemedView
@@ -393,7 +377,7 @@ const productDetails = () => {
           <Text style={styles.btntxt}>
             <MaterialCommunityIcons
               name="shopping"
-              size={24}
+              size={22}
               color={Colors.light.secondary}
             />
             BUY NOW
@@ -409,7 +393,7 @@ const productDetails = () => {
             <Text style={styles.btntxt}>
               <MaterialCommunityIcons
                 name="cart-check"
-                size={24}
+                size={22}
                 color={Colors.light.secondary}
               />
               ADDED TO CART
@@ -424,7 +408,7 @@ const productDetails = () => {
             <Text style={styles.btntxt}>
               <MaterialCommunityIcons
                 name="cart"
-                size={24}
+                size={22}
                 color={Colors.light.secondary}
               />
               ADD TO CART
@@ -433,6 +417,7 @@ const productDetails = () => {
         )}
       </ThemedView>
       <ImageView
+        animationType="slide"
         presentationStyle="overFullScreen"
         swipeToCloseEnabled
         backgroundColor={Colors[colorScheme ?? "light"].background2}
@@ -462,7 +447,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
-    paddingBottom: 140,
+    paddingBottom: 60,
   },
   desc: {
     fontWeight: "regular",
@@ -486,6 +471,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  colorContainer:{
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    flexDirection: "row",
+    gap: 10,
   },
   optionsItem: {
     borderWidth: 2,
@@ -522,8 +513,17 @@ const styles = StyleSheet.create({
   },
   btntxt: {
     fontWeight: "bold",
-    fontSize: 18,
+    fontSize: 17,
     textAlign: "center",
     color: Colors.light.secondary,
+  },
+  colorOption: {
+    width: 50,
+    height: 50,
+    borderRadius: 30,
+    borderWidth: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: "grey",
   },
 });

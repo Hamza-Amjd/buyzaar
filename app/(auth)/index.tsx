@@ -2,29 +2,24 @@ import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
-  TextInput,
   View,
   TouchableOpacity,
-  ActivityIndicator,
-  Alert,
   Image,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import jwtDecode from "jwt-decode";
 import { useRouter } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import * as webBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
 import Header from "@/components/Header";
 import AuthTextInput from "@/components/AuthTextInput";
 import CustomButton from "@/components/CustomButton";
-import { useSignIn } from "@clerk/clerk-expo";
+import {  useOAuth, useSignIn } from "@clerk/clerk-expo";
+import * as WebBrowser from 'expo-web-browser'
+import * as Linking from 'expo-linking'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 webBrowser.maybeCompleteAuthSession();
 
@@ -35,12 +30,25 @@ const validationSchema = Yup.object().shape({
     .required("Required"),
 });
 
+export const useWarmUpBrowser = () => {
+  useEffect(() => {
+    void WebBrowser.warmUpAsync()
+    return () => {
+      void WebBrowser.coolDownAsync()
+    }
+  }, [])
+}
+
+WebBrowser.maybeCompleteAuthSession()
+
 export default function Login() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [obsecurePass, setobsecurePass] = useState(true);
-
+  
   const { signIn, setActive, isLoaded } = useSignIn();
+  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' })
+  useWarmUpBrowser()
 
   const handleLogin =async (values: any) => {
     if (!isLoaded) {
@@ -61,9 +69,32 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-  const handleGoogleSignIn = async () => {
-    
-  }
+
+  useEffect(() => {
+    (async()=>{
+      const firstopen = await AsyncStorage.getItem("@firstopen")
+      if(!firstopen){
+        router.replace("/onboarding")
+      }
+    })()
+  }, []);
+
+  const handleGoogleSignIn = React.useCallback(async () => {
+    try {
+      const { createdSessionId, signIn, signUp, setActive } = await startOAuthFlow({
+        redirectUrl: Linking.createURL('/(tabs)', { scheme: "buyzaar" }),
+      })
+
+      if (createdSessionId) {
+        setActive!({ session: createdSessionId })
+      } else {
+        
+      }
+    } catch (err) {
+      console.error('OAuth error', err)
+    }
+  }, [])
+
   return (
     <ThemedView style={styles.container}>
       <Header onBackPress={() => router.replace("/(tabs)")} />

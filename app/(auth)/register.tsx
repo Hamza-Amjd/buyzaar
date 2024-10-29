@@ -27,6 +27,7 @@ import ConfirmationCodeInput from "@/components/ConfirmationCodeInput";
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("Please enter your firstname"),
   lastName: Yup.string().required("Please enter your lastname"),
+  username: Yup.string().required("Please enter a unique username"),
   email: Yup.string().email("Invalid email address").required("Required"),
   password: Yup.string()
     .min(8, "Password must be atleast 8 characters")

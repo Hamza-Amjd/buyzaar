@@ -1,63 +1,71 @@
 import {
-  StyleSheet,
-  Text,
   View,
   FlatList,
-  TouchableOpacity,
+  ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import Product from "@/components/ProductCard";
-import axios from "axios";
-
-import { Ionicons } from "@expo/vector-icons";
+import {  MaterialCommunityIcons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
-import { router, useLocalSearchParams } from "expo-router";
+import {  useLocalSearchParams } from "expo-router";
 import Header from "@/components/Header";
+import { getSearchedProducts } from "@/utils/actions";
+import ProductCard from "@/components/ProductCard";
 
 export default function category() {
-  const  {name}  = useLocalSearchParams<{ name: string }>();
+  const { name } = useLocalSearchParams<{ name: string }>();
   const [products, setProducts] = useState([]);
-  const updateProducts = async () => {
-    await axios.get(`https://buyzaar-backend.vercel.app/api/admin/items?limit=100t`).then((response)=> {
-      if ((response.status = 200)) {
-        console.log(response.data.item);
-      }
-    })
-    .catch((error) => {
-      console.log("fetching products failed", error.message);
-    })
-    
-  };
-
+  const [loading, setLoading] = useState(true);
+  const height= Dimensions.get('screen').height;
   useEffect(() => {
-    updateProducts();
+    (async () => {
+      await getSearchedProducts(name)
+        .then((results) => setProducts(results))
+        .finally(() => setLoading(false));
+    })();
   }, []);
 
   return (
-    <View style={{paddingTop:25,paddingBottom:30 }}>
-      <Header title={name}/>
-      
+    <View style={{ flex: 1, paddingTop: 35 }}>
+      <Header title={name} />
+
       <FlatList
         data={products}
-        keyExtractor={(item:any,index) => item._id+index}
-        renderItem={({ item }) => <ThemedText >{'abt'}</ThemedText>}
+        keyExtractor={(item: any, index) => item._id + index}
+        renderItem={({ item }) => <ProductCard item={item} />}
+        ListEmptyComponent={() => (
+          <View
+            style={{
+              height:height-60,
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 20,
+            }}
+          >
+            {loading ? (
+              <ActivityIndicator size={"large"} />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name={"text-box-search"}
+                  color={"grey"}
+                  size={80}
+                />
+
+                <ThemedText type="defaultSemiBold" style={{ color: "grey" }}>
+                  Nothing found.
+                </ThemedText>
+              </>
+            )}
+          </View>
+        )}
         numColumns={2}
         contentContainerStyle={{
           columnGap: 15,
           rowGap: 12,
         }}
-        columnWrapperStyle={{ marginHorizontal: 10 }}
-        style={{paddingBottom:30}}
+        style={{paddingHorizontal:10}}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  bar: {
-    margin: 15,
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems:'center'
-  },
-});

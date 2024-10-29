@@ -10,7 +10,6 @@ import {
 import React, { useState, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import AnimatedLottieView from "lottie-react-native";
-import SearchTile from "../components/SearchTile";
 import { Link, router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
@@ -18,25 +17,21 @@ import { ThemedText } from "@/components/ThemedText";
 import ReviewModal from "@/components/ReviewModal";
 import Header from "@/components/Header";
 import { getOrders } from "@/utils/actions";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { numberWithCommas } from "@/utils/healper";
 import { useUser } from "@clerk/clerk-expo";
 
 const OrdersScreen = () => {
   const colorScheme = useColorScheme();
   const {user} = useUser();
-
   const [orders, setOrders] = useState([]);
   const [loading, setloading] = useState(true);
   const [showRatingModal, setShowRatingModal] = useState(false);
 
   const fetchOrders = async () => {
-    
     if (!user) {
       router.replace("/(auth)");
       return;
     }
-    console.log(user.id)
     await getOrders(user.id)
       .then((res) => setOrders(res))
       .finally(() => setloading(false));
@@ -61,10 +56,13 @@ const OrdersScreen = () => {
               {new Date(item.createdAt).toDateString()}
             </ThemedText>
           </View>
-
           <ThemedText type="default">
             {/* @ts-ignore */}
-            {`Deliver at ${item.shippingAddress?.street}, ${item.shippingAddress?.city}, ${item.shippingAddress?.country}`}
+            {`Deliver to "${item.shippingAddress.name}" at "${item.shippingAddress?.line1}, ${item.shippingAddress?.line2.length>0?item.shippingAddress?.line2+", ":""}${item.shippingAddress?.city}, ${item.shippingAddress?.country}"`}
+          </ThemedText>
+          <ThemedText type="default">
+            {/* @ts-ignore */}
+            {`Phone no. ${item.shippingAddress?.phone}`}
           </ThemedText>
           <ThemedText
             type="defaultSemiBold"
@@ -106,17 +104,19 @@ const OrdersScreen = () => {
         <ThemedText>
           All Orders will be shipped in 2-6 working days after placing order
         </ThemedText>
+        <View style={{flexDirection:'row',gap:10,alignSelf:'flex-end'}}>
+        <TouchableOpacity
+          onPress={() => router.push('/orders/10023')}
+          style={{padding: 8,borderRadius: 20,backgroundColor: Colors[colorScheme ?? "light"].primary}}
+        >
+          <Text style={{ color: "white", fontSize: 12 }}>Track Order</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setShowRatingModal(true)}
-          style={{
-            alignSelf: "flex-end",
-            padding: 8,
-            backgroundColor: Colors[colorScheme ?? "light"].primary,
-            borderRadius: 20,
-          }}
+          style={{padding: 8,borderRadius: 20,backgroundColor: Colors[colorScheme ?? "light"].primary}}
         >
           <Text style={{ color: "white", fontSize: 12 }}>Write Review</Text>
-        </TouchableOpacity>
+        </TouchableOpacity></View>
       </View>
     );
   };
@@ -139,11 +139,13 @@ const OrdersScreen = () => {
           loop
           speed={0.3}
           style={{ height: 150, width: 150, alignSelf: "center", top: "30%" }}
-          source={require("../assets/images/emptyCart.json")}
+          source={require("@/assets/images/emptyCart.json")}
         />
       ) : (
         <FlatList
           data={orders}
+          onRefresh={fetchOrders}
+          refreshing={loading}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item._id}
           renderItem={renderItem}

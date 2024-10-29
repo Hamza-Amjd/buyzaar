@@ -52,5 +52,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors["light"].gray,
     justifyContent: "center",
     alignItems: "center",
+    elevation:5
   },
 });
