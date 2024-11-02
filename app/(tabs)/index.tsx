@@ -5,27 +5,22 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  ScrollView,
   useColorScheme,
   StatusBar,
 } from "react-native";
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  AntDesign,
-  FontAwesome5,
-  Ionicons,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
+import { AntDesign, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { Link, Redirect, router } from "expo-router";
+import { router } from "expo-router";
 import Collections from "@/components/Collections";
 import ProductCard from "@/components/ProductCard";
 import useCart from "@/hooks/useCart";
 import AddressBottomModal from "@/components/AddressBottomModal";
 import { getCollectionDetails, getProducts } from "@/utils/actions";
 import useLocation from "@/hooks/useLocation";
+import CategoryList from "@/components/CategoryList";
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -38,8 +33,6 @@ export default function Home() {
   const [footerLoading, setFooterLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [modalVisible, setModalVisible] = useState(false);
-  const [addresses, setAddresses] = useState<any>([]);
-  const [selectedAddress, setSelectedAdress] = useState(addresses[0]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -60,32 +53,6 @@ export default function Home() {
   const renderItem = ({ item }: { item: ProductType }) => {
     return <ProductCard item={item} />;
   };
-  const categories = [
-    {
-      name: "men's clothing",
-      icon: <Ionicons name="shirt-sharp" size={35} color="white" />,
-    },
-    {
-      name: "women's clothing",
-      icon: (
-        <MaterialCommunityIcons name="tshirt-crew" size={35} color="white" />
-      ),
-    },
-    {
-      name: "electronics",
-      icon: (
-        <MaterialCommunityIcons name="power-plug" size={35} color="white" />
-      ),
-    },
-    {
-      name: "jewelery",
-      icon: <MaterialCommunityIcons name="necklace" size={35} color="white" />,
-    },
-  ];
-  const handleAddAddress = () => {
-    setModalVisible(false);
-    router.push("/addAddress");
-  };
 
   return (
     <ThemedView style={{ flex: 1, paddingTop: StatusBar.currentHeight }}>
@@ -102,8 +69,8 @@ export default function Home() {
           />
         </TouchableOpacity>
         <ThemedText
-          type="defaultSemiBold"
-          style={{ textTransform: "capitalize" }}
+          type="mediumSemiBold"
+          style={{ textTransform: "capitalize",fontSize:16 }}
           onPress={() => {
             setModalVisible(!modalVisible);
           }}
@@ -143,44 +110,7 @@ export default function Home() {
             >
               Categories
             </ThemedText>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {categories.map((category, index) => {
-                return (
-                  <Link
-                    href={`/category?name=${category.name}`}
-                    key={index}
-                    asChild
-                  >
-                    <TouchableOpacity
-                      style={{
-                        justifyContent: "center",
-                        alignItems: "center",
-                        paddingHorizontal: 5,
-                      }}
-                    >
-                      <View
-                        style={[
-                          styles.category,
-                          {
-                            backgroundColor:
-                              Colors[colorScheme ?? "light"].primary,
-                          },
-                        ]}
-                      >
-                        {category.icon}
-                      </View>
-                      <ThemedText
-                        type="default"
-                        style={{ textTransform: "capitalize" }}
-                      >
-                        {category.name.replace(/ .*/, "")}
-                      </ThemedText>
-                    </TouchableOpacity>
-                  </Link>
-                );
-              })}
-            </ScrollView>
-
+            <CategoryList />
             <ThemedText
               type="title"
               style={{ paddingLeft: 10, paddingTop: 10 }}
@@ -221,7 +151,6 @@ export default function Home() {
         numColumns={2}
         contentContainerStyle={{
           columnGap: 5,
-          rowGap: 5,
         }}
         columnWrapperStyle={{ marginHorizontal: 10 }}
       />
@@ -252,17 +181,5 @@ const styles = StyleSheet.create({
   },
   cartno: {
     color: "white",
-  },
-  categorytxt: {
-    fontSize: 32,
-    fontWeight: "bold",
-    paddingHorizontal: 7,
-  },
-  category: {
-    borderWidth: 1,
-    borderRadius: 50,
-    padding: 7,
-    margin: 5,
-    marginVertical: 10,
   },
 });

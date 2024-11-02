@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   registerBtn: {
     height: 50,
     borderRadius: 20,
-    backgroundColor: Colors["light"].gray,
+    backgroundColor: Colors["dark"].gray,
     justifyContent: "center",
     alignItems: "center",
     elevation:5

@@ -154,10 +154,10 @@ export default function cart() {
               </ThemedText>
             )}
             <ThemedText
-              type="defaultSemiBold"
+              type="mediumSemiBold"
               style={{ color: Colors.light.tertiary }}
             >
-              <Text style={{ fontSize: 18 }}>Rs. </Text>
+              <Text style={{ fontSize: 16 }}>Rs. </Text>
               {numberWithCommas(item?.item?.price)}
             </ThemedText>
             <View style={styles.quantityRow}>

@@ -27,7 +27,7 @@ export default function category() {
 
   return (
     <View style={{ flex: 1, paddingTop: 35 }}>
-      <Header title={name} />
+      <Header/>
 
       <FlatList
         data={products}
@@ -36,7 +36,7 @@ export default function category() {
         ListEmptyComponent={() => (
           <View
             style={{
-              height:height-60,
+              height:height-150,
               alignItems: "center",
               justifyContent: "center",
               gap: 20,

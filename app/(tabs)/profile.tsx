@@ -58,6 +58,7 @@ const profile = () => {
         {user && <Image
           style={styles.dp}
           source={{uri:user?.imageUrl}}
+          defaultSource={require('@/assets/images/userDefault.png')}
         />}
         {loading ? (
           <ActivityIndicator style={{ height: 100 }} />
@@ -70,12 +71,7 @@ const profile = () => {
             }}
           >
             <View
-              style={{
-                borderColor: Colors[colorScheme ?? "light"].text,
-                borderWidth: 2,
-                borderRadius: 25,
-                padding: 10,
-              }}
+              style={[styles.nameTxt,{ borderColor: Colors[colorScheme ?? "light"].text}]}
             >
               <ThemedText type="subtitle">{user?.firstName+" "+user?.lastName}</ThemedText>
             </View>
@@ -85,12 +81,7 @@ const profile = () => {
           </View>
         ) : (
           <TouchableOpacity
-            style={{
-              borderColor: Colors[colorScheme ?? "light"].text,
-              borderWidth: 2,
-              borderRadius: 25,
-              padding: 10,
-            }}
+            style={[styles.nameTxt,{ borderColor: Colors[colorScheme ?? "light"].text}]}
             onPress={() => router.push("/(auth)")}
           >
             <ThemedText type="subtitle">Signup to your account</ThemedText>
@@ -140,6 +131,7 @@ const styles = StyleSheet.create({
   dp: {
     width: 100,
     height: 100,
+    backgroundColor:'#FFF',
     bottom: 10,
     borderRadius: 100,
   },
@@ -154,4 +146,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     flexDirection: "row",
   },
+  nameTxt: {
+    borderWidth: 2,
+    borderRadius: 25,
+    padding: 10,
+    marginBottom: 10,
+  }
 });
