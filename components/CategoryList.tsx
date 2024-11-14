@@ -4,22 +4,12 @@ import { Entypo, FontAwesome, Ionicons, MaterialCommunityIcons, MaterialIcons } 
 import { Link } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 const categories = [
-    {
-      name: "men's ",
-      icon: <Ionicons name="shirt-sharp" size={35} color="white" />,
-    },
-    {
-      name: "women's",
-      icon: (
-        <MaterialCommunityIcons name="tshirt-crew" size={35} color="white" />
-      ),
-    },
-    {
-      name: "electronics",
-      icon: (
-        <MaterialCommunityIcons name="power-plug" size={35} color="white" />
-      ),
-    },
+  {
+    name: "electronics",
+    icon: (
+      <MaterialCommunityIcons name="power-plug" size={35} color="white" />
+    ),
+  },
     {
       name: "Mobile",
       icon: (
@@ -33,9 +23,19 @@ const categories = [
       ),
     },
     {
-      name: "Screens",
+      name: "moniter",
       icon: (
         <FontAwesome name="tv" size={35} color="white" />
+      ),
+    },
+    {
+      name: "men's ",
+      icon: <Ionicons name="shirt-sharp" size={35} color="white" />,
+    },
+    {
+      name: "women's",
+      icon: (
+        <MaterialCommunityIcons name="tshirt-crew" size={35} color="white" />
       ),
     },
     {

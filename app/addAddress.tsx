@@ -6,20 +6,17 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
-  Button,
-  TextInput,
   TouchableOpacity,
-  LayoutAnimation,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import axios from "axios";
-import { useAuth } from "@clerk/clerk-expo";
+import { useUser } from "@clerk/clerk-expo";
 
 const AddAddressScreen = () => {
-  const user = useAuth();
+  const {user} = useUser();
   const { address, edit } = useLocalSearchParams<{ address: string ,edit:string }>();
   const addres=JSON.parse(address)
   const [title, setTitle] = useState(addres.title || "");
@@ -51,7 +48,7 @@ const AddAddressScreen = () => {
   const handleAddAddress = async () => {
     await axios
       .post(`https://buyzaar.vercel.app/api/users/address`, {
-        userId: user.userId,
+        userId: user?.id,
         address: {
           title,
           address: selectedLocationName.formattedAddress,
@@ -72,7 +69,7 @@ const AddAddressScreen = () => {
 
   const handleUpdateAddress = async () => {
     let values={
-      userId: user.userId,
+      userId: user?.id,
       addressId:addres._id,
       updatedAddress: {
         title,
@@ -87,14 +84,12 @@ const AddAddressScreen = () => {
         },
       },
     }
-    console.log(values);
     await axios
       .put(`https://buyzaar.vercel.app/api/users/address`, values, {
         headers: {
           'Content-Type': 'application/json'
         }
       })
-      .then((response) => console.log(response.data))
       .then((res) => router.back())
       .catch((error) => console.log(error));
   };

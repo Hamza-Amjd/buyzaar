@@ -2,7 +2,6 @@ node_modules/
 android/
 .env
 buyzar-88e72-firebase-adminsdk-v8qmj-b450e54f3b.json
-google-services.json
 .expo/
 dist/
 npm-debug.*

@@ -35,7 +35,7 @@ const useLocation = ():LocationParameters => {
     
     requestLocationPermission();
   }, []);
-  
+  //@ts-ignore
   return { location, locationCords, errorMsg };
 };
 

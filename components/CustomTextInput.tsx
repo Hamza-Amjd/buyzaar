@@ -61,7 +61,7 @@ const CustomTextInput: React.FC<customTextInputProps> = ({
   return (
     <ThemedView style={[styles.inputContainer,!title && {height:60}]}>
       {/* {title && <Animated.Text style={labelStyle}>{title}</Animated.Text>} */}
-      {value&&<ThemedText type='defaultSemiBold' style={{marginLeft:10}}>{title}</ThemedText>}
+      <ThemedText type='defaultSemiBold' style={{marginLeft:10}}>{title}</ThemedText>
       <View style={[
         styles.input
       ]}>

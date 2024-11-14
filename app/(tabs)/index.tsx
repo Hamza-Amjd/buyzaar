@@ -24,10 +24,10 @@ import CategoryList from "@/components/CategoryList";
 
 export default function Home() {
   const colorScheme = useColorScheme();
-  const { location, errorMsg } = useLocation();
   const cart = useCart();
 
   const [products, setProducts] = useState<any>();
+  const [address, setAddress] = useState<any>();
   const [discountItems, setDiscountItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [footerLoading, setFooterLoading] = useState(false);
@@ -75,7 +75,7 @@ export default function Home() {
             setModalVisible(!modalVisible);
           }}
         >
-          {location && location.district + ", " + location.city}
+          {address && address.city + ", " + address.country}
         </ThemedText>
         <TouchableOpacity
           onPress={() => {
@@ -157,6 +157,7 @@ export default function Home() {
       <AddressBottomModal
         isVisible={modalVisible}
         handleClose={() => setModalVisible(false)}
+        setAddress={setAddress}
       />
     </ThemedView>
   );

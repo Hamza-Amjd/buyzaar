@@ -10,11 +10,9 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Colors } from "@/constants/Colors";
-import {
-  Ionicons,
-} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
-import {router} from "expo-router";
+import { router } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 
@@ -23,13 +21,13 @@ const profile = () => {
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
   const { signOut } = useAuth();
- 
+
   const logout = () => {
     Alert.alert("Logout", "Are you sure you want to logout", [
       { text: "Cancel" },
       {
         text: "Confirm",
-        onPress: async() => await signOut()
+        onPress: async () => await signOut(),
       },
     ]);
   };
@@ -44,22 +42,34 @@ const profile = () => {
     { name: "Orders", icon: "bag", function: () => router.push("/orders") },
     { name: "To Review", icon: "star", function: () => router.push("/orders") },
     { name: "Payment info", icon: "card", function: () => {} },
-    { name: "Settings", icon: "settings", function: () => router.push("/settings") },
+    {
+      name: "Settings",
+      icon: "settings",
+      function: () => router.push("/settings"),
+    },
     {
       name: "Privacy policy",
       icon: "shield-checkmark",
-      function: () => Linking.openURL("https://buyzaar.vercel.app/site/privacypolicy"),
+      function: () =>
+        Linking.openURL("https://buyzaar.vercel.app/site/privacypolicy"),
     },
     { name: "Log out", icon: "log-out", function: logout },
   ];
   return (
     <ThemedView style={styles.container}>
       <View style={styles.userDetails}>
-        {user && <Image
-          style={styles.dp}
-          source={{uri:user?.imageUrl}}
-          defaultSource={require('@/assets/images/userDefault.png')}
-        />}
+        {user?.id ? (
+          <Image
+            style={styles.dp}
+            source={{ uri: user?.imageUrl }}
+            loadingIndicatorSource={require("@/assets/images/userDefault.png")}
+          />
+        ) : (
+          <Image
+            style={styles.dp}
+            source={require("@/assets/images/userDefault.png")}
+          />
+        )}
         {loading ? (
           <ActivityIndicator style={{ height: 100 }} />
         ) : user ? (
@@ -71,17 +81,25 @@ const profile = () => {
             }}
           >
             <View
-              style={[styles.nameTxt,{ borderColor: Colors[colorScheme ?? "light"].text}]}
+              style={[
+                styles.nameTxt,
+                { borderColor: Colors[colorScheme ?? "light"].text },
+              ]}
             >
-              <ThemedText type="subtitle">{user?.firstName+" "+user?.lastName}</ThemedText>
-            </View>
-              <ThemedText type="defaultSemiBold">
-                {user && user?.emailAddresses[0].emailAddress}
+              <ThemedText type="subtitle">
+                {user?.firstName + " " + user?.lastName}
               </ThemedText>
+            </View>
+            <ThemedText type="defaultSemiBold">
+              {user && user?.emailAddresses[0].emailAddress}
+            </ThemedText>
           </View>
         ) : (
           <TouchableOpacity
-            style={[styles.nameTxt,{ borderColor: Colors[colorScheme ?? "light"].text}]}
+            style={[
+              styles.nameTxt,
+              { borderColor: Colors[colorScheme ?? "light"].text },
+            ]}
             onPress={() => router.push("/(auth)")}
           >
             <ThemedText type="subtitle">Signup to your account</ThemedText>
@@ -100,8 +118,8 @@ const profile = () => {
                 { backgroundColor: Colors[colorScheme ?? "light"].background2 },
               ]}
             >
-              {/* @ts-ignore */}
-              <Ionicons name={menu.icon}
+              <Ionicons
+                name={menu.icon as any}
                 size={25}
                 color={Colors[colorScheme ?? "light"].text}
               />
@@ -131,7 +149,7 @@ const styles = StyleSheet.create({
   dp: {
     width: 100,
     height: 100,
-    backgroundColor:'#FFF',
+    backgroundColor: "#FFF",
     bottom: 10,
     borderRadius: 100,
   },
@@ -151,5 +169,5 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 10,
     marginBottom: 10,
-  }
+  },
 });

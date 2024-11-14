@@ -310,15 +310,10 @@ export default function cart() {
           <MaterialCommunityIcons
             name="cart-arrow-right"
             size={24}
-            color={total != 0 ? Colors.light.secondary : Colors.light.white}
+            color={"#fff"}
           />
           <Text
-            style={{
-              marginLeft: 10,
-              fontWeight: "bold",
-              fontSize: 18,
-              color: total != 0 ? Colors.light.secondary : Colors.light.white,
-            }}
+            style={styles.cheakoutBtn}
           >
             C H E A K O U T
           </Text>
@@ -326,8 +321,8 @@ export default function cart() {
       </ThemedView>
       <AddressSheet
         visible={showAddressSheet}
-        presentationStyle="popover"
-        appearance={{colors:{primary:Colors[colorScheme ?? "light"].primary}}}
+        presentationStyle="pageSheet"
+        appearance={{colors:{primary:Colors.light.primary}}}
         onSubmit={(e) => {
           setAddress(e);
           setShowAddressSheet(false);
@@ -410,20 +405,10 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 10,
   },
+  cheakoutBtn:{
+    marginLeft: 10,
+    fontWeight: "bold",
+    fontSize: 18,
+    color: "#fff" ,
+  }
 });
-
-// const handleCheckout = async () => {
-//   if (!user) {
-//     router.push("/(auth)");
-//   } else {
-//     await axios
-//       .post(`http://192.168.0.101:3000/api/mobile/checkout`, {
-//         cartItems: cart.cartItems,
-//         customer:customerInfo,
-//       })
-//       .then((res) => {
-//         Linking.openURL(res.data.url);
-//       })
-//       .catch((err) => console.log(err));
-//   }
-// };

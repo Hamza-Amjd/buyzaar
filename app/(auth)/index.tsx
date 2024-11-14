@@ -71,13 +71,18 @@ export default function Login() {
   };
 
   useEffect(() => {
-    (async()=>{
-      const firstopen = await AsyncStorage.getItem("@firstopen")
-      if(!firstopen){
-        router.replace("/onboarding")
+    const checkFirstOpen = async () => {
+      try {
+        const firstOpen = await AsyncStorage.getItem("@firstopen");
+        if (!firstOpen) {
+          router.replace("/onboarding");
+        }
+      } catch (error) {
+        console.error("Error checking first open status:", error);
       }
-    })()
-  }, []);
+    };
+    checkFirstOpen();
+  }, [router]);
 
   const handleGoogleSignIn = React.useCallback(async () => {
     try {
