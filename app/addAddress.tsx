@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import axios from "axios";
 import { useUser } from "@clerk/clerk-expo";
+import { StatusBar } from "react-native";
 
 const AddAddressScreen = () => {
   const {user} = useUser();
@@ -96,7 +97,7 @@ const AddAddressScreen = () => {
   return (
     <ThemedView style={styles.container}>
       <TouchableOpacity
-        style={{ position: "absolute", top: 45, left: 20, zIndex: 100 }}
+        style={{ position: "absolute", top: 10, left: 20, zIndex: 100 }}
         onPress={() => router.back()}
       >
         <Ionicons name="arrow-back" size={30} color={Colors.light.primary} />
@@ -105,6 +106,8 @@ const AddAddressScreen = () => {
         style={styles.map}
         initialRegion={selectedLocation}
         onPress={handleMapPress}
+        showsUserLocation
+        showsMyLocationButton
       >
         <Marker coordinate={selectedLocation} />
       </MapView>
@@ -148,6 +151,8 @@ const styles = StyleSheet.create({
   },
   form: {
     padding: 20,
+    borderTopLeftRadius:15,
+    borderTopRightRadius:15,
   },
   input: {
     borderColor: "#ccc",

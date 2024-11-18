@@ -15,7 +15,6 @@ import React, { useEffect, useState } from "react";
 import {
   Ionicons,
   MaterialCommunityIcons,
-  AntDesign,
   EvilIcons,
 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
@@ -129,7 +128,6 @@ const productDetails = () => {
           </View>
         }
       >
-        <StatusBar translucent backgroundColor={"transparent"} />
         <ThemedView
           style={[
             styles.infoContainer,
@@ -418,7 +416,7 @@ const productDetails = () => {
       </ThemedView>
       <ImageView
         animationType="slide"
-        presentationStyle="overFullScreen"
+        presentationStyle="fullScreen"
         swipeToCloseEnabled
         backgroundColor={Colors[colorScheme ?? "light"].background2}
         imageIndex={selectedImageIndex}

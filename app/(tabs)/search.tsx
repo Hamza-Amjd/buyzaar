@@ -30,7 +30,7 @@ const search = () => {
   }, [searchKey]);
 
   return (
-    <ThemedView style={{ flex: 1, padding: 10, paddingTop: 50 }}>
+    <ThemedView style={{ flex: 1, padding: 10 }}>
       <View style={styles.searchbar}>
         <TextInput
           style={styles.searchInput}
@@ -54,12 +54,7 @@ const search = () => {
         )
       ) : (
         <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 20,
-          }}
+          style={styles.emptyContainer}
         >
           <EvilIcons name={"search"} color={"grey"} size={80} />
 
@@ -93,5 +88,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 15,
   },
+  emptyContainer:{
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 20,
+  }
 });
 export default search;

@@ -122,7 +122,7 @@ const OrdersScreen = () => {
   };
 
   return (
-    <ThemedView style={{ flex: 1, paddingTop: 35, paddingHorizontal: 10 }}>
+    <ThemedView style={{ flex: 1, paddingHorizontal: 10 }}>
       <Header
         title="Orders"
         onBackPress={() => router.replace("/(tabs)/profile")}

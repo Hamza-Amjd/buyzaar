@@ -38,6 +38,7 @@ export default Header;
 const styles = StyleSheet.create({
   bar: {
     padding: 12,
+    paddingTop:0,
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",

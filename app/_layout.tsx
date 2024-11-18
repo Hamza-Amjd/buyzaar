@@ -14,14 +14,24 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ModalPortal } from "react-native-modals";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { tokenCache } from "@/utils/healper";
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from 'react-native-reanimated';
+import { Colors } from "@/constants/Colors";
 
+// This is the default configuration
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false, // Reanimated runs in strict mode by default
+});
 SplashScreen.preventAutoHideAsync();
 function InitialLayout() {
   const colorScheme = useColorScheme();
   
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack initialRouteName={"(tabs)"} screenOptions={{ headerShown: false }}>
+      <Stack initialRouteName={"(tabs)"} screenOptions={{ headerShown: false,statusBarBackgroundColor:Colors[colorScheme??'light'].background,statusBarStyle:colorScheme==="dark"?"light":"dark" }} >
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="addAddress" />

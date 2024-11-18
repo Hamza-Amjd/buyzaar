@@ -2,10 +2,7 @@ import {
   Appearance,
   ColorSchemeName,
   Image,
-  Platform,
-  StatusBar,
   StyleSheet,
-  Text,
   TouchableOpacity,
   useColorScheme,
   View,
@@ -35,7 +32,7 @@ const settings = () => {
     }
   return (
     <ThemedView
-      style={{ flex: 1, paddingTop: StatusBar.currentHeight, gap: 10 }}
+      style={{ flex: 1, gap: 10 }}
     >
       <Header title="Settings"/>
       <View style={styles.userInfo}>

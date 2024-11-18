@@ -26,6 +26,7 @@ import Animated, {
   SlideOutLeft,
   BounceOutLeft,
   SlideInRight,
+  runOnJS,
 } from "react-native-reanimated";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
@@ -58,19 +59,22 @@ export default function onboarding() {
   const data = onboardingSteps[screenIndex];
 
   const onContinue = () => {
+    'worklet';
     const isLastScreen = screenIndex === onboardingSteps.length - 1;
     if (isLastScreen) {
+      runOnJS(endOnboarding)();
     } else {
-      setScreenIndex(screenIndex + 1);
+      runOnJS(setScreenIndex)(screenIndex + 1);
     }
   };
 
   const onBack = () => {
+    'worklet';
     const isFirstScreen = screenIndex === 0;
     if (isFirstScreen) {
-      endOnboarding();
+      runOnJS(endOnboarding)();
     } else {
-      setScreenIndex(screenIndex - 1);
+      runOnJS(setScreenIndex)(screenIndex - 1);
     }
   };
 

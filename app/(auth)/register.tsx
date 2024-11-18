@@ -1,20 +1,13 @@
 import React, { useState } from "react";
 import {
   StyleSheet,
-  Text,
-  TextInput,
   View,
   TouchableOpacity,
-  Alert,
-  ActivityIndicator,
   Image,
-  Button,
 } from "react-native";
-import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import axios from "axios";
 import { router } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -100,7 +93,7 @@ export default function RegisterationScreen() {
     }
   };
   return (
-    <ThemedView style={{ flex: 1, paddingTop: 40 }}>
+    <ThemedView style={{ flex: 1 }}>
       <Header onBackPress={onBackPress}/>
       <View style={{flex:1,alignItems:'center',justifyContent:'center'}}>
        

@@ -6,9 +6,8 @@ import {
   FlatList,
   ActivityIndicator,
   useColorScheme,
-  StatusBar,
 } from "react-native";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { AntDesign, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
@@ -19,7 +18,6 @@ import ProductCard from "@/components/ProductCard";
 import useCart from "@/hooks/useCart";
 import AddressBottomModal from "@/components/AddressBottomModal";
 import { getCollectionDetails, getProducts } from "@/utils/actions";
-import useLocation from "@/hooks/useLocation";
 import CategoryList from "@/components/CategoryList";
 
 export default function Home() {
@@ -55,7 +53,7 @@ export default function Home() {
   };
 
   return (
-    <ThemedView style={{ flex: 1, paddingTop: StatusBar.currentHeight }}>
+    <ThemedView style={{ flex: 1 }}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => {
@@ -149,9 +147,6 @@ export default function Home() {
           );
         }}
         numColumns={2}
-        contentContainerStyle={{
-          columnGap: 5,
-        }}
         columnWrapperStyle={{ marginHorizontal: 10 }}
       />
       <AddressBottomModal
@@ -165,7 +160,7 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   header: {
-    padding: 12,
+    padding: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

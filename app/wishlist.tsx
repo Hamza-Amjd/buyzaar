@@ -1,6 +1,5 @@
 import {
   FlatList,
-  useColorScheme,
 } from "react-native";
 import React from "react";
 import Product from "../components/ProductCard";
@@ -12,7 +11,7 @@ import useCart from "@/hooks/useCart";
 const wishlist = () => {
   const wishlist=useCart().wishlist;
   return (
-    <ThemedView style={{flex:1, paddingTop:35}}>
+    <ThemedView style={{flex:1}}>
       <Header title="Wishlist"/>
       {wishlist.length == 0 && (
         <AnimatedLottieView

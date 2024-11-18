@@ -21,9 +21,10 @@ import { Colors } from "@/constants/Colors";
 import useLocation from "@/hooks/useLocation";
 import { router, useFocusEffect } from "expo-router";
 import axios from "axios";
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useUser } from "@clerk/clerk-expo";
 import CenterModal from "./CenterModal";
 import * as Haptics from "expo-haptics";
+import CustomButton from "./CustomButton";
 
 type addressModalProps = {
   isVisible: boolean;
@@ -71,9 +72,6 @@ export default function AddressBottomModal({
       .catch((err) => console.log(err))
       .finally(() => setIsLoading(false));
   };
-  useEffect(() => {
-    setAddress(location);
-  }, []);
   useFocusEffect(
     useCallback(() => {
       if (user?.id) fetchaddresses();
@@ -249,22 +247,7 @@ export default function AddressBottomModal({
                 ))
               )}
             </View>
-            <TouchableOpacity
-              onPress={handleAddAddress}
-              style={styles.addButton}
-            >
-              <Ionicons
-                name="add"
-                color={Colors[colorScheme ?? "light"].primary}
-                size={24}
-              />
-              <ThemedText
-                type="defaultSemiBold"
-                style={{ color: Colors[colorScheme ?? "light"].primary }}
-              >
-                Add New Address
-              </ThemedText>
-            </TouchableOpacity>
+            <CustomButton title="Add New Address" onPress={handleAddAddress} icon={'plus'}/>
           </ThemedView>
         </ModalContent>
       </BottomModal>

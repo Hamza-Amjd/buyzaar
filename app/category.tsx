@@ -11,6 +11,7 @@ import {  useLocalSearchParams } from "expo-router";
 import Header from "@/components/Header";
 import { getSearchedProducts } from "@/utils/actions";
 import ProductCard from "@/components/ProductCard";
+import { ThemedView } from "@/components/ThemedView";
 
 export default function category() {
   const { name } = useLocalSearchParams<{ name: string }>();
@@ -26,7 +27,7 @@ export default function category() {
   }, []);
 
   return (
-    <View style={{ flex: 1, paddingTop: 35 }}>
+    <ThemedView style={{ flex: 1}}>
       <Header/>
 
       <FlatList
@@ -60,12 +61,8 @@ export default function category() {
           </View>
         )}
         numColumns={2}
-        contentContainerStyle={{
-          columnGap: 15,
-          rowGap: 12,
-        }}
         style={{paddingHorizontal:10}}
       />
-    </View>
+    </ThemedView>
   );
 }

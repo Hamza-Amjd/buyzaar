@@ -7,12 +7,14 @@ import {
 } from "react-native";
 import React from "react";
 import { Colors } from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 
 type customButtonProps = {
   onPress: () => void;
   isValid?: boolean;
   isLoading?: boolean;
   title: string;
+  icon?:any;
 };
 
 const CustomButton = ({
@@ -20,6 +22,7 @@ const CustomButton = ({
   isValid=true,
   isLoading,
   title,
+  icon,
 }: customButtonProps) => {
   return (
     <TouchableOpacity
@@ -30,6 +33,7 @@ const CustomButton = ({
         isValid && { backgroundColor: Colors["light"].primary },
       ]}
     >
+      {icon?<Ionicons name={icon }/>:null}
       <Text
         style={{
           fontWeight: "bold",
@@ -48,10 +52,11 @@ export default CustomButton;
 const styles = StyleSheet.create({
   registerBtn: {
     height: 50,
-    borderRadius: 20,
+    borderRadius: 16,
     backgroundColor: Colors["dark"].gray,
     justifyContent: "center",
     alignItems: "center",
+    flexDirection:'row',
     elevation:5
   },
 });

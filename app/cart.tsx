@@ -355,7 +355,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-    paddingTop: 35,
   },
   productContainer: {
     flexDirection: "row",
