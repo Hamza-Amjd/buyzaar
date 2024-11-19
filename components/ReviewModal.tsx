@@ -1,17 +1,15 @@
 import {
   StyleSheet,
-  Text,
   TextInput,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import CenterModal from "./CenterModal";
 import { ThemedText } from "./ThemedText";
-import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import { AirbnbRating, Rating } from "react-native-ratings";
+import { AirbnbRating } from "react-native-ratings";
+import CustomButton from "./CustomButton";
 interface props {
   isVisible: any;
   onClose: any;
@@ -71,7 +69,7 @@ const ReviewModal = ({ isVisible, onClose }: props) => {
           height: 60,
           borderColor: "gray",
           borderWidth: 1,
-          marginBottom: 10,
+          marginVertical: 10,
           borderRadius: 10,
           width: "100%",
           paddingHorizontal: 10,
@@ -82,26 +80,7 @@ const ReviewModal = ({ isVisible, onClose }: props) => {
         placeholderTextColor={Colors[colorScheme ?? "light"].gray}
         placeholder="Write your review here"
       />
-      <TouchableOpacity
-        onPress={onClose}
-        style={{
-          backgroundColor: Colors.light.primary,
-          padding: 12,
-          borderRadius: 25,
-          marginTop: 10,
-        }}
-      >
-        <Text
-          style={{
-            color: "white",
-            fontSize: 16,
-            textAlign: "center",
-            fontWeight: "600",
-          }}
-        >
-          Submit
-        </Text>
-      </TouchableOpacity>
+      <CustomButton onPress={onClose} title="Submit" />
     </CenterModal>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -7,11 +7,10 @@ import {
   ActivityIndicator,
   BackHandler
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 
 import {
   FontAwesome5,
-  Ionicons,
   MaterialIcons,
 } from "@expo/vector-icons";
 import { BottomModal, ModalContent } from "react-native-modals";
@@ -39,6 +38,7 @@ export default function AddressBottomModal({
 }: addressModalProps) {
   const {user} = useUser();
   const colorScheme = useColorScheme();
+  const mapRef =useRef<MapView|null>(null);
   const { location, locationCords } = useLocation();
   const [addresses, setAddresses] = useState<any[]>();
   const [selectedAddress, setSelectedAddress] = useState<any>();
@@ -112,7 +112,7 @@ export default function AddressBottomModal({
   };
 
   return (
-    <>
+    <ThemedView style={{flex:1}}>
       <BottomModal
         visible={isVisible}
         onTouchOutside={handleClose}
@@ -124,13 +124,13 @@ export default function AddressBottomModal({
         >
           <View style={styles.bar} />
           <ThemedView style={styles.content}>
-            <View style={styles.addressList}>
+            <View>
               <TouchableOpacity
                 onPress={() => {
                   setSelectedAddress(null);
                   setAddress(location);
                 }}
-                style={styles.currentLocation}
+                style={styles.addressItem}
               >
                 {!selectedAddress ? (
                   <MaterialIcons
@@ -149,7 +149,7 @@ export default function AddressBottomModal({
                     size={24}
                   />
                 )}
-                <View style={styles.locationThemedText}>
+                <View style={{marginLeft:12}}>
                   <ThemedText type="defaultSemiBold">
                     Current Location
                   </ThemedText>
@@ -171,6 +171,7 @@ export default function AddressBottomModal({
                     onPress={() => {
                       setSelectedAddress(address);
                       setAddress(address);
+                      handleClose();
                     }}
                     onLongPress={() => {
                       setSelectedAddress(address);
@@ -210,7 +211,7 @@ export default function AddressBottomModal({
                         size={24}
                       />
                     )}
-                    <View style={styles.addressThemedText}>
+                    <View style={styles.addressText}>
                       <ThemedText type="defaultSemiBold">
                         {address.title}
                       </ThemedText>
@@ -231,39 +232,31 @@ export default function AddressBottomModal({
                     >
                       <MaterialIcons name="edit" color="#6B7280" size={23} />
                     </TouchableOpacity>
-                    {showInfoModal == address._id && (
-                      <TouchableOpacity
-                        style={{ marginLeft: 10 }}
-                        onPress={handleDelete}
-                      >
-                        <MaterialIcons
-                          name="delete"
-                          color="#ff0055"
-                          size={23}
-                        />
-                      </TouchableOpacity>
-                    )}
                   </TouchableOpacity>
                 ))
               )}
             </View>
-            <CustomButton title="Add New Address" onPress={handleAddAddress} icon={'plus'}/>
+            <CustomButton title="Add New Address" onPress={handleAddAddress} icon={'add'}/>
           </ThemedView>
         </ModalContent>
       </BottomModal>
       <CenterModal
         isVisible={showInfoModal}
         onClose={() => setShowInfoModal(false)}
-        width={"95%"}
+        width={"90%"}
       >
-        {selectedAddress?.title && (
+        
+          {selectedAddress?.title && (
           <>
             <MapView
               style={styles.map}
-              initialRegion={{
-                ...selectedAddress.coordinates,
-                latitudeDelta: 0.005,
-                longitudeDelta: 0.005,
+              ref={mapRef}
+              initialCamera={{
+                center: selectedAddress.coordinates,
+                altitude: 1000,
+                heading: 0,
+                pitch: 0,
+                zoom: 16
               }}
             >
               <Marker coordinate={selectedAddress.coordinates} />
@@ -273,10 +266,7 @@ export default function AddressBottomModal({
               <ThemedText type="default">{selectedAddress.address}</ThemedText>
             </View>
           </>
-        )}
-        <ThemedView
-          style={{ alignItems: "center", padding: 20, paddingBottom: 0 }}
-        >
+        )} 
           <View style={{ flexDirection: "row", gap: 10 }}>
             <TouchableOpacity
               onPress={() => {
@@ -287,7 +277,7 @@ export default function AddressBottomModal({
                 );
                 setShowInfoModal(false), handleClose();
               }}
-              style={[styles.actionButton, { borderColor: "#6B7280" }]}
+              style={[styles.actionButton, {borderWidth: 1, borderColor: "#6B7280" }]}
             >
               <ThemedText>Edit</ThemedText>
             </TouchableOpacity>
@@ -298,9 +288,8 @@ export default function AddressBottomModal({
               <ThemedText style={{ color: "#fff" }}>Delete</ThemedText>
             </TouchableOpacity>
           </View>
-        </ThemedView>
       </CenterModal>
-    </>
+    </ThemedView>
   );
 }
 
@@ -323,54 +312,23 @@ const styles = StyleSheet.create({
     padding: 16,
     overflow: "hidden",
   },
-  currentLocation: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  locationThemedText: {
+  addressText: {
     marginLeft: 12,
+    width:"72%"
   },
   text: {
     fontSize: 12,
     color: "#6B7280",
   },
-  addressList: {},
   addressItem: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
   },
-  addressIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#E5E7EB",
-  },
-  addressThemedText: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: "#e9e7eb",
-    borderRadius: 8,
-  },
-  addButtonThemedText: {
-    marginLeft: 8,
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#",
-  },
   actionButton: {
     padding: 12,
     borderRadius: 8,
-    borderWidth: 1,
-    flex: 1,
+    flex:1,
     alignItems: "center",
   },
 });

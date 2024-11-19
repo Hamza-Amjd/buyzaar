@@ -15,6 +15,7 @@ type customButtonProps = {
   isLoading?: boolean;
   title: string;
   icon?:any;
+  height?: number;
 };
 
 const CustomButton = ({
@@ -23,6 +24,7 @@ const CustomButton = ({
   isLoading,
   title,
   icon,
+  height
 }: customButtonProps) => {
   return (
     <TouchableOpacity
@@ -31,9 +33,10 @@ const CustomButton = ({
       style={[
         styles.registerBtn,
         isValid && { backgroundColor: Colors["light"].primary },
+        { height: height?height:45 },
       ]}
     >
-      {icon?<Ionicons name={icon }/>:null}
+      {icon?<Ionicons name={icon } size={20} color={'#fff'}/>:null}
       <Text
         style={{
           fontWeight: "bold",
@@ -51,12 +54,12 @@ export default CustomButton;
 
 const styles = StyleSheet.create({
   registerBtn: {
-    height: 50,
     borderRadius: 16,
     backgroundColor: Colors["dark"].gray,
     justifyContent: "center",
     alignItems: "center",
     flexDirection:'row',
+    gap:5,
     elevation:5
   },
 });

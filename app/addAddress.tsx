@@ -2,77 +2,91 @@ import CustomButton from "@/components/CustomButton";
 import CustomTextInput from "@/components/CustomTextInput";
 import { ThemedView } from "@/components/ThemedView";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, StyleSheet, TouchableOpacity, Animated } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import axios from "axios";
 import { useUser } from "@clerk/clerk-expo";
-import { StatusBar } from "react-native";
+import Header from "@/components/Header";
 
-const AddAddressScreen = () => {
-  const {user} = useUser();
-  const { address, edit } = useLocalSearchParams<{ address: string ,edit:string }>();
-  const addres=JSON.parse(address)
-  const [title, setTitle] = useState(addres.title || "");
-  const [phoneNumber, setPhoneNumber] = useState(addres.phoneNumber || "");
-  const [selectedLocation, setSelectedLocation] = useState({
-    ...addres.coordinates,
+const addAddress = () => {
+  const { user } = useUser();
+  const mapRef = useRef<MapView>(null);
+  const { address, edit } = useLocalSearchParams<{
+    address: string;
+    edit: string;
+  }>();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const parsedAddress = React.useMemo(() => {
+    try {
+      return address ? JSON.parse(address) : {};
+    } catch (e) {
+      console.error("Failed to parse address:", e);
+      return {};
+    }
+  }, [address]);
+
+  const [title, setTitle] = useState(parsedAddress.title || "");
+  const [phoneNumber, setPhoneNumber] = useState(
+    parsedAddress.phoneNumber || ""
+  );
+  const [coordinates, setCoordinates] = useState({
+    ...parsedAddress.coordinates,
     latitudeDelta: 0.005,
     longitudeDelta: 0.005,
   });
-  const [selectedLocationName, setSelectedLocationName] = useState<any>([]);
+  const [selectedLocationName, setSelectedLocationName] = useState<any>({});
+  const markerAnimation = useRef(new Animated.Value(0)).current;
 
-  const handleMapPress = async (event: any) => {
-    setSelectedLocation(event.nativeEvent.coordinate);
-    console.log(event.nativeEvent.coordinate);
-    let regionName = await Location.reverseGeocodeAsync(
-      event.nativeEvent.coordinate
-    );
+  const isValidPhoneNumber = (number: string) => {
+    return /^\+?[\d\s-]{10,}$/.test(number);
+  };
+
+  const handleRegionChange = async (region: any) => {
+    // Start animation
+    Animated.sequence([
+      Animated.timing(markerAnimation, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(markerAnimation, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    setCoordinates(region);
+    let regionName = await Location.reverseGeocodeAsync({
+      latitude: region.latitude,
+      longitude: region.longitude,
+    });
     setSelectedLocationName(regionName[0]);
-    console.log(regionName);
   };
 
   useEffect(() => {
     (async () => {
-      let regionName = await Location.reverseGeocodeAsync(selectedLocation);
+      let regionName = await Location.reverseGeocodeAsync(coordinates);
+      console.log(regionName);
       setSelectedLocationName(regionName[0]);
     })();
+    mapRef.current?.animateToRegion(coordinates);
   }, []);
 
-  const handleAddAddress = async () => {
-    await axios
-      .post(`https://buyzaar.vercel.app/api/users/address`, {
-        userId: user?.id,
-        address: {
-          title,
-          address: selectedLocationName.formattedAddress,
-          city: selectedLocationName.city,
-          country: selectedLocationName.country,
-          countrycode: selectedLocationName.isoCountryCode,
-          phoneNumber,
-          coordinates: {
-            longitude: selectedLocation.longitude,
-            latitude: selectedLocation.latitude,
-          },
-        },
-      })
-      .then((response) => console.log(response.data))
-      .then((res) => router.back())
-      .catch((error) => console.log(error));
-  };
+  const handleAddressSubmit = async () => {
+    try {
+      setIsLoading(true);
 
-  const handleUpdateAddress = async () => {
-    let values={
-      userId: user?.id,
-      addressId:addres._id,
-      updatedAddress: {
+      if (!isValidPhoneNumber(phoneNumber)) {
+        throw new Error("Please enter a valid phone number");
+      }
+
+      const addressData = {
         title,
         address: selectedLocationName.formattedAddress,
         city: selectedLocationName.city,
@@ -80,63 +94,103 @@ const AddAddressScreen = () => {
         countrycode: selectedLocationName.isoCountryCode,
         phoneNumber,
         coordinates: {
-          longitude: selectedLocation.longitude,
-          latitude: selectedLocation.latitude,
+          longitude: coordinates.longitude,
+          latitude: coordinates.latitude,
         },
-      },
+      };
+
+      const endpoint = "https://buyzaar.vercel.app/api/users/address";
+      if (edit) {
+        await axios.put(endpoint, {
+          userId: user?.id,
+          addressId: parsedAddress._id,
+          updatedAddress: addressData,
+        });
+      } else {
+        await axios.post(endpoint, {
+          userId: user?.id,
+          address: addressData,
+        });
+      }
+
+      router.back();
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-    await axios
-      .put(`https://buyzaar.vercel.app/api/users/address`, values, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      .then((res) => router.back())
-      .catch((error) => console.log(error));
   };
+
   return (
     <ThemedView style={styles.container}>
-      <TouchableOpacity
-        style={{ position: "absolute", top: 10, left: 20, zIndex: 100 }}
-        onPress={() => router.back()}
-      >
-        <Ionicons name="arrow-back" size={30} color={Colors.light.primary} />
+      <TouchableOpacity style={styles.backButton} onPress={()=>router.back()}>
+        <Ionicons name="arrow-back" size={35} color={"grey"}/>
       </TouchableOpacity>
-      <MapView
-        style={styles.map}
-        initialRegion={selectedLocation}
-        onPress={handleMapPress}
-        showsUserLocation
-        showsMyLocationButton
-      >
-        <Marker coordinate={selectedLocation} />
-      </MapView>
+      <View style={styles.mapContainer}>
+        <MapView
+          style={styles.map}
+          initialRegion={coordinates}
+          onRegionChangeComplete={handleRegionChange}
+          region={coordinates}
+          showsMyLocationButton
+          showsUserLocation
+          ref={mapRef}
+        />
+        <Animated.View
+          style={[
+            styles.markerFixed,
+            {
+              transform: [
+                {
+                  translateY: markerAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -20],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <FontAwesome5 name="map-marker-alt" size={40} color={"red"} />
+        </Animated.View>
+      </View>
+
       <View style={styles.form}>
-        <CustomTextInput title="Title" value={title} handleChange={setTitle} />
+        <CustomTextInput
+          title="Title"
+          value={title}
+          handleChange={setTitle}
+          placeholder="Enter address title (e.g., Home, Office)"
+        />
         <CustomTextInput
           title="Mobile number"
           value={phoneNumber}
           handleChange={setPhoneNumber}
-          keyboardType={"number-pad"}
+          keyboardType="phone-pad"
+          placeholder="Enter your phone number"
+          error={phoneNumber.length > 0 && !isValidPhoneNumber(phoneNumber)}
+          errorText="Please enter a valid phone number"
         />
         <CustomTextInput
           title="Address"
           value={selectedLocationName?.formattedAddress}
-          handleChange={(value:string)=>setSelectedLocationName((prev:any)=>{return {...prev,formattedAddress:value}})}
+          handleChange={(value: string) =>
+            setSelectedLocationName((prev: any) => {
+              return { ...prev, formattedAddress: value };
+            })
+          }
           numberOfLines={2}
+          placeholder="Select location on map"
         />
-        <View style={{marginTop:10}}>
-        {edit?
-        <CustomButton
-        title="Update Address"
-        onPress={handleUpdateAddress}
-        isValid={title.length>0 && phoneNumber.length>0}
-      />
-        :<CustomButton
-          title="Add Address"
-          onPress={handleAddAddress}
-          isValid={title.length>0 && phoneNumber.length>0}
-        />}</View>
+
+        <View style={styles.buttonContainer}>
+          <CustomButton
+            title={edit ? "Update Address" : "Add Address"}
+            onPress={handleAddressSubmit}
+            isValid={title.length > 0 && isValidPhoneNumber(phoneNumber)}
+            isLoading={isLoading}
+          />
+        </View>
       </View>
     </ThemedView>
   );
@@ -151,8 +205,6 @@ const styles = StyleSheet.create({
   },
   form: {
     padding: 20,
-    borderTopLeftRadius:15,
-    borderTopRightRadius:15,
   },
   input: {
     borderColor: "#ccc",
@@ -161,6 +213,34 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
   },
+  backButton: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    zIndex: 100,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+  },
+  buttonContainer: {
+    marginTop: 20,
+  },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  mapContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  markerFixed: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: -20,
+    marginTop: -40,
+  },
 });
 
-export default AddAddressScreen;
+export default addAddress;

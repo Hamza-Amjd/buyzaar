@@ -22,6 +22,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FF8E31"
       },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AlzaSyIUN69PX-YVxqtU4Oeq0XjZtW-h0cUZ3de"
+        }
+      },
       "googleServicesFile": "./google-services.json",
       "package": "com.hamzaamjd.buyzaar"
     },

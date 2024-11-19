@@ -34,6 +34,7 @@ const OrdersScreen = () => {
     }
     await getOrders(user.id)
       .then((res) => setOrders(res))
+      .catch((err) => console.log(err))
       .finally(() => setloading(false));
   };
 

@@ -162,6 +162,7 @@ export default function Login() {
               isValid={isValid}
               onPress={handleSubmit}
               title="S I G N   I N"
+              height={50}
             />
             <TouchableOpacity
               onPress={handleGoogleSignIn}

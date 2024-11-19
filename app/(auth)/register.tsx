@@ -111,7 +111,7 @@ export default function RegisterationScreen() {
       {pendingVerification ? (
         <View style={{ paddingHorizontal: 20 ,gap:40}}>
           <ConfirmationCodeInput code={code} setCode={setCode}/>
-          <CustomButton onPress={onPressVerify} title="Verify Email"/>
+          <CustomButton onPress={onPressVerify} title="Verify Email" height={50}/>
         </View>
       ):<Formik
         initialValues={{
