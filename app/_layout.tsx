@@ -4,7 +4,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
-import { Slot, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StripeProvider } from "@stripe/stripe-react-native";
@@ -18,6 +18,8 @@ import {
 } from "react-native-reanimated";
 import { useEffect } from "react";
 import { Colors } from "@/constants/Colors";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { usePushNotifications } from '@/hooks/usePushNotification';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,11 +40,18 @@ export default function RootLayout() {
     poppins_medium: require("@/assets/fonts/Poppins-Medium.ttf"),
     poppins_bold: require("@/assets/fonts/Poppins-Bold.ttf"),
   });
+  const { expoPushToken, fcmToken } = usePushNotifications();
   useEffect(() => {
     if (!loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+  useEffect(() => {
+    if (fcmToken) {
+      // Send FCM token to your backend
+      console.log('FCM Token available:', fcmToken);
+    }
+  }, [fcmToken]);
   if (!loaded) {
     return null;
   }
@@ -60,6 +69,7 @@ export default function RootLayout() {
           }
         >
           <ClerkLoaded>
+          <BottomSheetModalProvider>
             <ThemeProvider
               value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
             >
@@ -76,6 +86,7 @@ export default function RootLayout() {
                 <Stack.Screen name="(auth)" />
               </Stack>
             </ThemeProvider>
+            </BottomSheetModalProvider>
           </ClerkLoaded>
         </StripeProvider>
       </ClerkProvider>

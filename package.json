@@ -20,6 +20,8 @@
     "@expo/vector-icons": "^14.0.2",
     "@gorhom/bottom-sheet": "^5.0.6",
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-firebase/app": "^19.0.0",
+    "@react-native-firebase/messaging": "^19.0.0",
     "@react-navigation/bottom-tabs": "^7.0.0",
     "@react-navigation/native": "^7.0.0",
     "@stripe/stripe-react-native": "0.38.6",
@@ -56,7 +58,8 @@
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.2",
     "yup": "^1.4.0",
-    "zustand": "^4.5.5"
+    "zustand": "^4.5.5",
+    "expo-dev-client": "~5.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

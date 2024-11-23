@@ -62,18 +62,18 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     lineHeight: 32,
-    // fontFamily:"poppins_bold"
+    fontFamily:"poppins_bold"
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
     lineHeight: 32,
-    // fontFamily:"poppins_bold"
+    fontFamily:"poppins_bold"
   },
   subtitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    // fontFamily:"poppins_bold"
+    fontFamily:"poppins_bold"
   },
   link: {
     lineHeight: 30,

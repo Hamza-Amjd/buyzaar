@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   },
   bar: {
     position: "absolute",
-    top: 30,
+    top: 10,
   },
   flex: {
     flexDirection: "row",

@@ -25,6 +25,7 @@ import {
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetView,
+  useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
@@ -46,9 +47,7 @@ export default function AddressBottomModal({
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleDismissModal = React.useCallback(() => {
-    bottomSheetModalRef.current?.dismiss();
-  }, []);
+  const {dismiss}= useBottomSheetModal();
   
   const fetchaddresses = async () => {
     setIsLoading(true);
@@ -80,7 +79,7 @@ export default function AddressBottomModal({
         coordinates: locationCords,
       })}`
     );
-    handleDismissModal();
+    dismiss();
   };
 
   const handleDelete = async () => {
@@ -105,7 +104,6 @@ export default function AddressBottomModal({
 
   return (
     <>
-      <BottomSheetModalProvider>
         <BottomSheetModal
           ref={bottomSheetModalRef} 
           containerStyle={{backgroundColor: "rgba(0,0,0,0.6)",}}
@@ -123,7 +121,7 @@ export default function AddressBottomModal({
                   onPress={() => {
                     setSelectedAddress(null);
                     setAddress(location);
-                    handleDismissModal();
+                    dismiss();
                   }}
                   style={styles.addressItem}
                 >
@@ -166,7 +164,7 @@ export default function AddressBottomModal({
                       onPress={() => {
                         setSelectedAddress(address);
                         setAddress(address);
-                        handleDismissModal();
+                        dismiss();
                       }}
                       onLongPress={() => {
                         setSelectedAddress(address);
@@ -222,7 +220,7 @@ export default function AddressBottomModal({
                               address
                             )}&edit=true`
                           );
-                          handleDismissModal();
+                          dismiss();
                         }}
                       >
                         <MaterialIcons name="edit" color="#6B7280" size={23} />
@@ -239,7 +237,6 @@ export default function AddressBottomModal({
             </ThemedView>
           </BottomSheetView>
         </BottomSheetModal>
-      </BottomSheetModalProvider>
       <ThemedView style={{flex:1,position:'absolute'}}>
       <CenterModal
         isVisible={showInfoModal}
@@ -275,7 +272,7 @@ export default function AddressBottomModal({
                   selectedAddress
                 )}&edit=true`
               );
-              setShowInfoModal(false), handleDismissModal();
+              setShowInfoModal(false), dismiss();
             }}
             style={[
               styles.actionButton,

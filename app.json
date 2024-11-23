@@ -17,6 +17,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FF8E31"
       },
+      "googleServicesFile": "./google-services.json",
       "package": "com.hamzaamjd.buyzaar"
     },
     "web": {
