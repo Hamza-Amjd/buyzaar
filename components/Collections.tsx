@@ -37,7 +37,7 @@ const Collections = () => {
           activeIndex.value = index;
         }}
         renderItem={({ item }: { item: any }) => (
-          <Link href={`/collections/${item._id}`} asChild>
+          <Link href={`/collections/${item._id}?image=${item.image}`} asChild>
             <TouchableOpacity style={{width:width-20,height:width / 1.8,alignSelf:'center',borderRadius:10 }}>
               <Image style={{ flex: 1,borderRadius:10 }} source={{ uri: item.image }} />
             </TouchableOpacity>

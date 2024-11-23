@@ -4,13 +4,11 @@ import { ThemedView } from "@/components/ThemedView";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Animated } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView from "react-native-maps";
 import * as Location from "expo-location";
-import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { Colors } from "@/constants/Colors";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { useUser } from "@clerk/clerk-expo";
-import Header from "@/components/Header";
 
 const addAddress = () => {
   const { user } = useUser();
@@ -72,7 +70,6 @@ const addAddress = () => {
   useEffect(() => {
     (async () => {
       let regionName = await Location.reverseGeocodeAsync(coordinates);
-      console.log(regionName);
       setSelectedLocationName(regionName[0]);
     })();
     mapRef.current?.animateToRegion(coordinates);

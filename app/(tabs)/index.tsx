@@ -19,6 +19,7 @@ import useCart from "@/hooks/useCart";
 import AddressBottomModal from "@/components/AddressBottomModal";
 import { getCollectionDetails, getProducts } from "@/utils/actions";
 import CategoryList from "@/components/CategoryList";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -51,14 +52,17 @@ export default function Home() {
   const renderItem = ({ item }: { item: ProductType }) => {
     return <ProductCard item={item} />;
   };
+  const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
 
+  const handlePresentModalPress = React.useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  
   return (
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => {
-            setModalVisible(!modalVisible);
-          }}
+          onPress={handlePresentModalPress}
         >
           <Ionicons
             name={"location-sharp"}
@@ -150,8 +154,7 @@ export default function Home() {
         columnWrapperStyle={{ marginHorizontal: 10 }}
       />
       <AddressBottomModal
-        isVisible={modalVisible}
-        handleClose={() => setModalVisible(false)}
+        bottomSheetModalRef={bottomSheetModalRef}
         setAddress={setAddress}
       />
     </ThemedView>

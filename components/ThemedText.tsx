@@ -45,35 +45,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 16,
     fontWeight: '600',
-    fontFamily:"poppins_medium"
+    // fontFamily:"poppins_medium"
   },
   mediumSemiBold: {
     fontSize: 18,
     lineHeight: 24,
     fontWeight: '600',
-    fontFamily:"poppins_medium"
+    // fontFamily:"poppins_medium"
   },
   medium: {
     fontSize: 16,
     lineHeight: 24,
-    fontFamily:"poppins_medium"
+    // fontFamily:"poppins_medium"
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     lineHeight: 32,
-    fontFamily:"poppins_bold"
+    // fontFamily:"poppins_bold"
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
     lineHeight: 32,
-    fontFamily:"poppins_bold"
+    // fontFamily:"poppins_bold"
   },
   subtitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    fontFamily:"poppins_bold"
+    // fontFamily:"poppins_bold"
   },
   link: {
     lineHeight: 30,

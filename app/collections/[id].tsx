@@ -13,44 +13,54 @@ import { useLocalSearchParams } from "expo-router";
 import { ScrollView } from "react-native-gesture-handler";
 import ProductCard from "@/components/ProductCard";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
+import Header from "@/components/Header";
 
 const page = () => {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id,image } = useLocalSearchParams<{ id: string,image:string
+   }>();
   const [collectionDetails, setCollectionDetails] = useState<any>({});
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    getCollectionDetails(id)
-      .then((res) => setCollectionDetails(res))
-      .finally(() => setLoading(false));
+    (async () => {
+      getCollectionDetails(id)
+        .then((res) => setCollectionDetails(res))
+        .finally(() => setLoading(false));
+    })();
   }, []);
   return (
     <>
-      {loading ? (
-        <View style={styles.container}>
-          <ActivityIndicator size={"large"} />
-        </View>
-      ) : (
+      <View style={styles.header}><Header/></View>
+      
         <ParallaxScrollView
           headerImage={
             <Image
-              source={{ uri: collectionDetails.image }}
+              source={{ uri: image }}
               style={styles.image}
             />
           }
         >
+          {loading ? (
+        <View style={styles.container}>
+          <ActivityIndicator size={"large"} />
+        </View>
+      ) : (<>
           <ThemedText style={styles.description}>
             {collectionDetails.description}
           </ThemedText>
+          
           <FlatList
             data={collectionDetails.products}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => <ProductCard item={item} />}
             numColumns={2}
-            contentContainerStyle={{ marginHorizontal:'auto',justifyContent:'space-evenly'}}
+            contentContainerStyle={{
+              marginHorizontal: "auto",
+              justifyContent: "space-evenly",
+            }}
             scrollEnabled={false}
           />
+          </>)}
         </ParallaxScrollView>
-      )}
     </>
   );
 };
@@ -58,7 +68,16 @@ const page = () => {
 export default page;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", justifyContent: "center" },
+  container: {
+    height: 500,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  header:{
+    position: "absolute",
+    top:10,
+    zIndex:10
+  },
   image: {
     width: "100%",
     height: 300,

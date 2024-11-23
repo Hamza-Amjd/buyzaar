@@ -111,7 +111,7 @@ export default function RegisterationScreen() {
       {pendingVerification ? (
         <View style={{ paddingHorizontal: 20 ,gap:40}}>
           <ConfirmationCodeInput code={code} setCode={setCode}/>
-          <CustomButton onPress={onPressVerify} title="Verify Email" height={50}/>
+          <CustomButton onPress={onPressVerify} title="Verify Email"/>
         </View>
       ):<Formik
         initialValues={{
@@ -143,7 +143,7 @@ export default function RegisterationScreen() {
             <AuthTextInput handleChange={handleChange} iconName={'email'} setFieldTouched={setFieldTouched} title="email" touched={touched.email} value={values.email} isPassword={false} error={errors.email}/>
             <AuthTextInput handleChange={handleChange} iconName={'form-textbox-password'} setFieldTouched={setFieldTouched} title="password" touched={touched.password} value={values.password} isPassword={true} obsecurePass={obsecurePass} setobsecurePass={setobsecurePass} error={errors.password}/>
             <AuthTextInput handleChange={handleChange} iconName={'form-textbox-password'} setFieldTouched={setFieldTouched} title="confirmPassword" touched={touched.confirmPassword} value={values.confirmPassword} isPassword={true} obsecurePass={obsecureCpass} setobsecurePass={setobsecureCpass} error={errors.confirmPassword} placeholder="Confirm password"/>
-            <CustomButton isValid={isValid} isLoading={loading} onPress={handleSubmit} title={"S I G N   U P"} />
+            <CustomButton isValid={isValid} isLoading={loading} onPress={handleSubmit} title={"S I G N   U P"} height={50}/>
             <TouchableOpacity onPress={() => router.back()}>
               <ThemedText
                 type="defaultSemiBold"

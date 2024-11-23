@@ -8,11 +8,6 @@
     "scheme": "buyzaar",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FF8E31"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hamzaamjd.buyzaar"
@@ -22,12 +17,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FF8E31"
       },
-      "config": {
-        "googleMaps": {
-          "apiKey": "AlzaSyIUN69PX-YVxqtU4Oeq0XjZtW-h0cUZ3de"
-        }
-      },
-      "googleServicesFile": "./google-services.json",
       "package": "com.hamzaamjd.buyzaar"
     },
     "web": {
@@ -37,11 +26,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
       [
-        "expo-location",
+        "expo-splash-screen",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "image": "./assets/images/adaptive-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FF8E31"
         }
       ],
       "expo-secure-store"

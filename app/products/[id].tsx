@@ -29,7 +29,6 @@ import { getProductDetails, getRelatedProducts } from "@/utils/actions";
 import Header from "@/components/Header";
 import WishlistButton from "@/components/WishlistButton";
 import useCart, { CartItem } from "@/hooks/useCart";
-import ImageView from "react-native-image-viewing";
 import Animated from "react-native-reanimated";
 
 const productDetails = () => {
@@ -414,7 +413,7 @@ const productDetails = () => {
           </TouchableOpacity>
         )}
       </ThemedView>
-      <ImageView
+      {/* <ImageView
         animationType="slide"
         presentationStyle="fullScreen"
         swipeToCloseEnabled
@@ -427,7 +426,7 @@ const productDetails = () => {
             return { uri: img };
           }),
         ]}
-      />
+      /> */}
     </>
   );
 };

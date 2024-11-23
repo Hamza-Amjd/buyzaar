@@ -9,10 +9,9 @@ import {
 import { Colors } from "@/constants/Colors";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useRouter } from "expo-router";
+import { router, useRouter } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import * as webBrowser from "expo-web-browser";
 import Header from "@/components/Header";
 import AuthTextInput from "@/components/AuthTextInput";
 import CustomButton from "@/components/CustomButton";
@@ -21,7 +20,7 @@ import * as WebBrowser from 'expo-web-browser'
 import * as Linking from 'expo-linking'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-webBrowser.maybeCompleteAuthSession();
+WebBrowser.maybeCompleteAuthSession();
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email address").required("Required"),
@@ -48,7 +47,23 @@ export default function Login() {
   
   const { signIn, setActive, isLoaded } = useSignIn();
   const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' })
-  useWarmUpBrowser()
+  useWarmUpBrowser();
+
+  useEffect(() => {
+    const checkFirstStart = async () => {
+    try {
+      const isFirstStart = await AsyncStorage.getItem('isFirstStart');
+      if (isFirstStart === null) {
+        // First time opening app
+        await AsyncStorage.setItem('isFirstStart', 'false');
+        router.replace('/onboarding');
+      }
+    } catch (error) {
+      console.error('Error checking first start:', error);
+    }
+  };
+  checkFirstStart();
+  }, []);
 
   const handleLogin =async (values: any) => {
     if (!isLoaded) {
@@ -70,19 +85,6 @@ export default function Login() {
     }
   };
 
-  useEffect(() => {
-    const checkFirstOpen = async () => {
-      try {
-        const firstOpen = await AsyncStorage.getItem("@firstopen");
-        if (!firstOpen) {
-          router.replace("/onboarding");
-        }
-      } catch (error) {
-        console.error("Error checking first open status:", error);
-      }
-    };
-    checkFirstOpen();
-  }, [router]);
 
   const handleGoogleSignIn = React.useCallback(async () => {
     try {

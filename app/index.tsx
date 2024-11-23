@@ -8,8 +8,6 @@ import { Redirect, router } from "expo-router";
 
 const Main = () => {
   const { isLoaded, isSignedIn } = useAuth();
-
-
     if (!isLoaded) {
     return (
       <ThemedView style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>

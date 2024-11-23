@@ -7,8 +7,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export interface CartItem {
   item: ProductType;
   quantity: number;
-  color?: string; // ? means optional
-  size?: string; // ? means optional
+  color?: string; 
+  size?: string; 
 }
 
 interface CartStore {

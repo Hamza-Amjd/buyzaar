@@ -8,6 +8,7 @@ import { Colors } from "@/constants/Colors";
 import { ThemedText } from "@/components/ThemedText";
 import ConfirmationCodeInput from "@/components/ConfirmationCodeInput";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { ThemedView } from "@/components/ThemedView";
 
 const PwReset = () => {
   const [emailAddress, setEmailAddress] = useState("");
@@ -62,7 +63,7 @@ const PwReset = () => {
     }
   };
   return (
-    <View style={{ flex: 1, paddingTop: 40 }}>
+    <ThemedView style={{ flex: 1 }}>
       <Header onBackPress={onBackPress} />
 
       <View style={styles.container}>
@@ -115,7 +116,7 @@ const PwReset = () => {
           </>
         )}
       </View>
-    </View>
+    </ThemedView>
   );
 };
 
@@ -127,7 +128,7 @@ const styles = StyleSheet.create({
   },
   inputField: {
     height: 50,
-    padding: 10,
+    paddingHorizontal: 10,
     borderColor: Colors["light"].white,
     borderRadius: 10,
     backgroundColor: Colors["light"].gray2,

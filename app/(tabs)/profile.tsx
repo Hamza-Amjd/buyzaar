@@ -22,7 +22,7 @@ const profile = () => {
   const { user } = useUser();
   const { signOut } = useAuth();
 
-  const logout = () => {
+  const logout = async() => {
     Alert.alert("Logout", "Are you sure you want to logout", [
       { text: "Cancel" },
       {

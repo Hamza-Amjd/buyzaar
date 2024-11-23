@@ -29,7 +29,7 @@ const ProductCard: React.FC<productProps> = ({ item }) => {
   const colorScheme = useColorScheme();
   return (
     <Link
-      href={`/products/${item._id}`}
+      href={`/products/${item._id}?image=${item.media[0]}`}
       asChild
       style={[
         styles.productContainer,

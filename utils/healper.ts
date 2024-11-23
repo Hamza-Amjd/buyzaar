@@ -22,5 +22,5 @@ export function numberWithCommas(x:any) {
       } catch (err) {
         return;
       }
-    },
+    }
   };

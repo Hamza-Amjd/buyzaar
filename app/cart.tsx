@@ -21,15 +21,16 @@ import Header from "@/components/Header";
 import useCart, { CartItem } from "@/hooks/useCart";
 import axios from "axios";
 import { useUser } from "@clerk/clerk-expo";
-import { AddressSheet, useStripe, } from "@stripe/stripe-react-native";
+import { AddressSheet, useStripe } from "@stripe/stripe-react-native";
 import useLocation from "@/hooks/useLocation";
+import AddressBottomModal from "@/components/AddressBottomModal";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 export default function cart() {
   const colorScheme = useColorScheme();
   const { location } = useLocation();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
-  const [showAddressSheet, setShowAddressSheet] = useState(false);
   const [address, setAddress] = useState<any>();
 
   const { user } = useUser();
@@ -63,7 +64,6 @@ export default function cart() {
       }
     );
     const { paymentIntent} = await response.json();
-
     return {
       paymentIntent
     };
@@ -90,13 +90,22 @@ export default function cart() {
     if (error) {
       Alert.alert(`Error code: ${error.code}`, error.message);
     } else {
-      console.log(address)
+      
       await axios
         .post(`https://buyzaar-admin.vercel.app/api/mobile/createorder`, {
           cartItems: cartHook.cartItems,
           customerInfo,
           total,
-          address,
+          address:{
+            name: customerInfo.name,
+            address:{line1: address.address,
+            line2: "",
+            city: address.city,
+            state:"",
+            postalCode: "",
+            country: address.country},
+            phone:address.phoneNumber
+          },
         })
         .then(() => cartHook.clearCart())
         .catch((error) =>{
@@ -118,6 +127,12 @@ export default function cart() {
       );} },
     ]);
   };
+  const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
+
+  const handlePresentModalPress = React.useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  
   const renderItem = ({ item }: { item: CartItem }) => {
     return (
       <Link
@@ -298,10 +313,10 @@ export default function cart() {
               router.replace("/(auth)")
             }
             if(!address){
-            setShowAddressSheet(true);
-            await initializePaymentSheet();
+            handlePresentModalPress();
+            await initializePaymentSheet()
           }else{
-            await initializePaymentSheet().then(async()=>await openPaymentSheet())
+            await initializePaymentSheet().then(async()=>await openPaymentSheet());
           }
           }}
           disabled={subtotal == 0}
@@ -319,34 +334,7 @@ export default function cart() {
           </Text>
         </TouchableOpacity>
       </ThemedView>
-      <AddressSheet
-        visible={showAddressSheet}
-        presentationStyle="pageSheet"
-        appearance={{colors:{primary:Colors.light.primary}}}
-        onSubmit={(e) => {
-          setAddress(e);
-          setShowAddressSheet(false);
-        }}
-        onError={(err) => {
-          console.log(err);
-          setShowAddressSheet(false);
-        }}
-        additionalFields={{
-          phoneNumber: 'required',
-        }}
-        allowedCountries={["PK"]}
-        defaultValues={
-          address
-            ? address
-            : {
-                address: {
-                  line1: location?.district ?? "",
-                  city: location?.city ?? "",
-                },
-                name: user?.fullName ?? "",
-              }
-        }
-      />
+      <AddressBottomModal bottomSheetModalRef={bottomSheetModalRef} setAddress={setAddress}/>
     </>
   );
 }
