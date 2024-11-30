@@ -4,7 +4,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Animated } from "react-native";
-import MapView from "react-native-maps";
+import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
@@ -126,6 +126,7 @@ const addAddress = () => {
       <View style={styles.mapContainer}>
         <MapView
           style={styles.map}
+          provider={PROVIDER_GOOGLE}
           initialRegion={coordinates}
           onRegionChangeComplete={handleRegionChange}
           region={coordinates}

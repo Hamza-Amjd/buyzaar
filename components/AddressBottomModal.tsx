@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -8,9 +8,7 @@ import {
   BackHandler,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-// import { BottomModal, ModalContent } from "react-native-modals";
 import { ThemedView } from "./ThemedView";
 import { ThemedText } from "./ThemedText";
 import { Colors } from "@/constants/Colors";
@@ -23,27 +21,26 @@ import * as Haptics from "expo-haptics";
 import CustomButton from "./CustomButton";
 import {
   BottomSheetModal,
-  BottomSheetModalProvider,
   BottomSheetView,
   useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { useDefaultAddress } from "@/hooks/useDefaultAddress";
 
 type addressModalProps = {
-  setAddress: (address: any) => void;
   bottomSheetModalRef:any;
 };
 
 export default function AddressBottomModal({
-  setAddress,
   bottomSheetModalRef
 }: addressModalProps) {
   const { user } = useUser();
   const colorScheme = useColorScheme();
+  const defaultAddress=useDefaultAddress();
   const mapRef = useRef<MapView | null>(null);
+
   const { location, locationCords } = useLocation();
   const [addresses, setAddresses] = useState<any[]>();
-  const [selectedAddress, setSelectedAddress] = useState<any>();
+  const [selectedAddress, setSelectedAddress] = useState<any>(defaultAddress.defaultAddress);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -65,6 +62,16 @@ export default function AddressBottomModal({
   useFocusEffect(
     useCallback(() => {
       fetchaddresses();
+      const backAction = () => {
+        dismiss(); // Close the bottom sheet
+        return true; // Prevent default back action
+      };
+
+      BackHandler.addEventListener("hardwareBackPress", backAction);
+
+      return () => {
+        BackHandler.removeEventListener("hardwareBackPress", backAction);
+      };
     }, [])
   );
   const handleAddAddress = () => {
@@ -109,6 +116,7 @@ export default function AddressBottomModal({
           containerStyle={{backgroundColor: "rgba(0,0,0,0.6)",}}
           backgroundStyle={{backgroundColor: Colors[colorScheme ?? "light"].background}}
           handleIndicatorStyle={{backgroundColor: Colors[colorScheme ?? "light"].text}}  
+          
         >
           <BottomSheetView
             style={{
@@ -120,7 +128,6 @@ export default function AddressBottomModal({
                 <TouchableOpacity
                   onPress={() => {
                     setSelectedAddress(null);
-                    setAddress(location);
                     dismiss();
                   }}
                   style={styles.addressItem}
@@ -163,13 +170,13 @@ export default function AddressBottomModal({
                       key={address._id}
                       onPress={() => {
                         setSelectedAddress(address);
-                        setAddress(address);
+                        defaultAddress.setDefaultAddress(address);
                         dismiss();
                       }}
                       onLongPress={() => {
                         setSelectedAddress(address);
                         setShowInfoModal(true);
-                        setAddress(address);
+                        defaultAddress.setDefaultAddress(address);
                         Haptics.impactAsync();
                       }}
                       style={styles.addressItem}
@@ -248,6 +255,7 @@ export default function AddressBottomModal({
             <MapView
               style={styles.map}
               ref={mapRef}
+              provider={PROVIDER_GOOGLE}
               initialCamera={{
                 center: selectedAddress.coordinates,
                 altitude: 1000,

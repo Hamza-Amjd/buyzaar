@@ -25,13 +25,14 @@ import { AddressSheet, useStripe } from "@stripe/stripe-react-native";
 import useLocation from "@/hooks/useLocation";
 import AddressBottomModal from "@/components/AddressBottomModal";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useDefaultAddress } from "@/hooks/useDefaultAddress";
 
 export default function cart() {
   const colorScheme = useColorScheme();
-  const { location } = useLocation();
+  const { defaultAddress } = useDefaultAddress();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
-  const [address, setAddress] = useState<any>();
+  const [address, setAddress] = useState<any>(defaultAddress);
 
   const { user } = useUser();
   const cartHook = useCart();
@@ -129,7 +130,7 @@ export default function cart() {
   };
   const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
 
-  const handlePresentModalPress = React.useCallback(() => {
+  const handlePresentAddressModalPress = React.useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
   
@@ -312,8 +313,8 @@ export default function cart() {
             if(!user){
               router.replace("/(auth)")
             }
-            if(!address){
-            handlePresentModalPress();
+            if(!defaultAddress){
+            handlePresentAddressModalPress();
             await initializePaymentSheet()
           }else{
             await initializePaymentSheet().then(async()=>await openPaymentSheet());
@@ -334,7 +335,7 @@ export default function cart() {
           </Text>
         </TouchableOpacity>
       </ThemedView>
-      <AddressBottomModal bottomSheetModalRef={bottomSheetModalRef} setAddress={setAddress}/>
+      <AddressBottomModal bottomSheetModalRef={bottomSheetModalRef}/>
     </>
   );
 }

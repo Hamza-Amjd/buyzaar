@@ -1,17 +1,15 @@
 import { ActivityIndicator } from "react-native";
-import React, { useEffect } from "react";
-
-import { Colors } from "@/constants/Colors";
+import React from "react";
 import { ThemedView } from "@/components/ThemedView";
 import { useAuth } from "@clerk/clerk-expo";
-import { Redirect, router } from "expo-router";
+import { Redirect } from "expo-router";
 
 const Main = () => {
   const { isLoaded, isSignedIn } = useAuth();
     if (!isLoaded) {
     return (
       <ThemedView style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size="large" color={Colors.light.primary} />
+        <ActivityIndicator size="large"/>
       </ThemedView>
     );
   }

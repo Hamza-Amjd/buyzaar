@@ -20,13 +20,13 @@ import AddressBottomModal from "@/components/AddressBottomModal";
 import { getCollectionDetails, getProducts } from "@/utils/actions";
 import CategoryList from "@/components/CategoryList";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useDefaultAddress } from "@/hooks/useDefaultAddress";
 
 export default function Home() {
   const colorScheme = useColorScheme();
   const cart = useCart();
-
+  const {defaultAddress} = useDefaultAddress();
   const [products, setProducts] = useState<any>();
-  const [address, setAddress] = useState<any>();
   const [discountItems, setDiscountItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [footerLoading, setFooterLoading] = useState(false);
@@ -77,7 +77,7 @@ export default function Home() {
             setModalVisible(!modalVisible);
           }}
         >
-          {address && address.city + ", " + address.country}
+          {defaultAddress && defaultAddress.city + ", " + defaultAddress.country}
         </ThemedText>
         <TouchableOpacity
           onPress={() => {
@@ -155,7 +155,6 @@ export default function Home() {
       />
       <AddressBottomModal
         bottomSheetModalRef={bottomSheetModalRef}
-        setAddress={setAddress}
       />
     </ThemedView>
   );

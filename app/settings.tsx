@@ -1,4 +1,5 @@
 import {
+  Alert,
   Appearance,
   ColorSchemeName,
   Image,
@@ -10,7 +11,7 @@ import {
 import React, { useState } from "react";
 import { ThemedView } from "@/components/ThemedView";
 import Header from "@/components/Header";
-import { useUser } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import { ThemedText } from "@/components/ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
@@ -19,11 +20,69 @@ import CenterModal from "@/components/CenterModal";
 const settings = () => {
   const colorScheme = useColorScheme();
   const { user } = useUser();
+  const {signOut} = useAuth();
   const [themeModal, setThemeModal] = useState(false)
+  const [notificationEnabled, setNotificationEnabled] = useState(true);
+  const [privacySetting, setPrivacySetting] = useState("public");
+  const [language, setLanguage] = useState("English");
+  const [dataUsage, setDataUsage] = useState(false);
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout", [
+      { text: "Cancel" },
+      {
+        text: "Confirm",
+        onPress: async () => await signOut(),
+      },
+    ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert("Delete Account?", "Deleted accounts cannot be recovered.", [
+      { text: "Cancel" },
+      {
+        text: "Confirm",
+        onPress: async () => await signOut(),
+      },
+    ]);
+  };
+
+  const handleChangeLanguage = (lang: string) => {
+    setLanguage(lang);
+  };
+
   const SETTING = [
     {
       header: "Display",
       items: [{ name: "Theme", iconName: "sunny", function: ()=>setThemeModal(true) }],
+    },
+    
+    {
+      header: "Notifications",
+      items: [
+        {
+          name: notificationEnabled ? "Disable Notifications" : "Enable Notifications",
+          iconName: "notifications",
+          function: () => setNotificationEnabled(!notificationEnabled),
+        },
+      ],
+    },
+    {
+      header: "Privacy",
+      items: [
+        {
+          name: privacySetting === "public" ? "Set to Private" : "Set to Public",
+          iconName: "lock-closed",
+          function: () => setPrivacySetting(privacySetting === "public" ? "private" : "public"),
+        },
+      ],
+    },
+    {
+      header: "Account",
+      items: [
+        { name: "Delete Account", iconName: "trash", function: handleDeleteAccount },
+        { name: "Logout", iconName: "log-out", function: handleLogout },
+      ],
     },
   ];
   function handleColorScheme(theme:ColorSchemeName) {
@@ -81,12 +140,12 @@ const settings = () => {
                   />
                   <ThemedText type="subtitle">{subitem.name}</ThemedText>
                 </View>
-                <Ionicons
+                {subitem.name=="Theme"&&<Ionicons
                   name="chevron-forward"
                   size={25}
                   color={Colors[colorScheme ?? "light"].text}
                   style={{}}
-                />
+                />}
               </TouchableOpacity>
             ))}
           </View>
@@ -94,11 +153,11 @@ const settings = () => {
       })}
       <CenterModal isVisible={themeModal} onClose={()=>setThemeModal(false)} width={'50%'}>
         <View style={{justifyContent:'flex-start',width:'100%',gap:10}}>
-          <TouchableOpacity style={styles.themeButton} onPress={()=>handleColorScheme('light')}>
+          <TouchableOpacity style={[styles.themeButton,colorScheme=="light"&&{backgroundColor:"rgba(0,0,0,0.2)"}]} onPress={()=>handleColorScheme('light')}>
             <Ionicons name="sunny-outline" size={24} color={Colors[colorScheme ?? "light"].text} />
             <ThemedText type="default">Light</ThemedText>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.themeButton} onPress={()=>handleColorScheme('dark')}>
+          <TouchableOpacity style={[styles.themeButton,colorScheme=="dark"&&{backgroundColor:"rgba(0,0,0,0.2)"}]} onPress={()=>handleColorScheme('dark')}>
             <Ionicons name="moon-outline" size={24} color={Colors[colorScheme ?? "light"].text} />
             <ThemedText type="default">Dark</ThemedText>
           </TouchableOpacity> 
@@ -128,7 +187,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    padding: 10,
+    padding: 15,
     borderRadius:10,
   }
 });

@@ -17,6 +17,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FF8E31"
       },
+      "config":{
+        "googleMaps": {
+          "apiKey": "AIzaSyCbg7VNLplzSfPofpsJBG40Ip81VIEengA"
+        }
+      },
       "googleServicesFile": "./google-services.json",
       "package": "com.hamzaamjd.buyzaar"
     },
@@ -44,7 +49,7 @@
     "extra": {
       "eas": {
         "projectId": "0e8e42fe-dc7d-4ce5-8315-d9440e3561fb"
-      }
+      } 
     }
   }
 }

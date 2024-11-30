@@ -6,8 +6,9 @@ interface Address {
   _id: string;
   title:string;
   address: string;
-  "coordinates": {"latitude": number, "longitude": number}
+  coordinates: {latitude: number, longitude: number}
   city: string;
+  country: string;
   phoneNumber: string;
 }
 

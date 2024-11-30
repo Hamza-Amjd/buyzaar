@@ -48,7 +48,7 @@ export const usePushNotifications = (): PushNotificationState => {
       // Get FCM token
       const token = await messaging().getToken();
       setFcmToken(token);
-      console.log('FCM Token:', token);
+      // console.log('FCM Token:', token);
 
       // Handle FCM token refresh
       messaging().onTokenRefresh((token: string) => {

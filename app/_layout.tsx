@@ -46,12 +46,6 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
-  useEffect(() => {
-    if (fcmToken) {
-      // Send FCM token to your backend
-      console.log('FCM Token available:', fcmToken);
-    }
-  }, [fcmToken]);
   if (!loaded) {
     return null;
   }
