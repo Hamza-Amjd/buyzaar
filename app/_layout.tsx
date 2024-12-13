@@ -19,8 +19,9 @@ import {
 import { useEffect } from "react";
 import { Colors } from "@/constants/Colors";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { usePushNotifications } from '@/hooks/usePushNotification';
-
+import { usePushNotifications } from "@/hooks/usePushNotification";
+const ClerkPublishableKey = process.env.EXPO_PUCLIC_CLERK_PUBLISHABLE_KEY as string;
+const StripePublishableKey = process.env.EXPO_PUCLIC_STRIPE_PUBLISHABLE_KEY as string;
 SplashScreen.preventAutoHideAsync();
 
 // Set the animation options. This is optional.
@@ -53,36 +54,30 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ClerkProvider
         tokenCache={tokenCache}
-        publishableKey={
-          "pk_test_aW1tb3J0YWwtdHJvbGwtMzkuY2xlcmsuYWNjb3VudHMuZGV2JA"
-        }
+        publishableKey={ClerkPublishableKey}
       >
-        <StripeProvider
-          publishableKey={
-            "pk_test_51PJNNlGfVO2eEzjSWFlEPrAO7Fjsw918Iq16sjQjWzGRnCf9J1q314U0fXsYfXD3amw4Pund0xiqFV3SnhVUifkk00x2n6qBZx"
-          }
-        >
-          <ClerkLoaded>
-          <BottomSheetModalProvider>
-            <ThemeProvider
-              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
-              <Stack
-                initialRouteName={"(tabs)"}
-                screenOptions={{
-                  headerShown: false,
-                  statusBarBackgroundColor:
-                    Colors[colorScheme ?? "light"].background,
-                  statusBarStyle: colorScheme === "dark" ? "light" : "dark",
-                }}
+        <ClerkLoaded>
+          <StripeProvider publishableKey={StripePublishableKey}>
+            <BottomSheetModalProvider>
+              <ThemeProvider
+                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
               >
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="(auth)" />
-              </Stack>
-            </ThemeProvider>
+                <Stack
+                  initialRouteName={"(tabs)"}
+                  screenOptions={{
+                    headerShown: false,
+                    statusBarBackgroundColor:
+                      Colors[colorScheme ?? "light"].background,
+                    statusBarStyle: colorScheme === "dark" ? "light" : "dark",
+                  }}
+                >
+                  <Stack.Screen name="(tabs)" />
+                  <Stack.Screen name="(auth)" />
+                </Stack>
+              </ThemeProvider>
             </BottomSheetModalProvider>
-          </ClerkLoaded>
-        </StripeProvider>
+          </StripeProvider>
+        </ClerkLoaded>
       </ClerkProvider>
     </GestureHandlerRootView>
   );

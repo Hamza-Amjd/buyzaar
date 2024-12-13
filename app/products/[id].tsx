@@ -30,6 +30,7 @@ import Header from "@/components/Header";
 import WishlistButton from "@/components/WishlistButton";
 import useCart, { CartItem } from "@/hooks/useCart";
 import Animated from "react-native-reanimated";
+import EnhancedImageViewing from "react-native-image-viewing/dist/ImageViewing";
 
 const productDetails = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -413,7 +414,7 @@ const productDetails = () => {
           </TouchableOpacity>
         )}
       </ThemedView>
-      {/* <ImageView
+      <EnhancedImageViewing
         animationType="slide"
         presentationStyle="fullScreen"
         swipeToCloseEnabled
@@ -426,7 +427,7 @@ const productDetails = () => {
             return { uri: img };
           }),
         ]}
-      /> */}
+      />
     </>
   );
 };

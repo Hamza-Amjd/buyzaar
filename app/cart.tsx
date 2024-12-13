@@ -21,8 +21,7 @@ import Header from "@/components/Header";
 import useCart, { CartItem } from "@/hooks/useCart";
 import axios from "axios";
 import { useUser } from "@clerk/clerk-expo";
-import { AddressSheet, useStripe } from "@stripe/stripe-react-native";
-import useLocation from "@/hooks/useLocation";
+import { useStripe } from "@stripe/stripe-react-native";
 import AddressBottomModal from "@/components/AddressBottomModal";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useDefaultAddress } from "@/hooks/useDefaultAddress";
@@ -89,7 +88,11 @@ export default function cart() {
     const { error } = await presentPaymentSheet();
 
     if (error) {
-      Alert.alert(`Error code: ${error.code}`, error.message);
+      ToastAndroid.showWithGravity(
+        error.message,
+        ToastAndroid.LONG,
+        ToastAndroid.CENTER,
+      );
     } else {
       
       await axios

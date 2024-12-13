@@ -27,25 +27,27 @@ import {
 import { useDefaultAddress } from "@/hooks/useDefaultAddress";
 
 type addressModalProps = {
-  bottomSheetModalRef:any;
+  bottomSheetModalRef: any;
 };
 
 export default function AddressBottomModal({
-  bottomSheetModalRef
+  bottomSheetModalRef,
 }: addressModalProps) {
   const { user } = useUser();
   const colorScheme = useColorScheme();
-  const defaultAddress=useDefaultAddress();
+  const defaultAddress = useDefaultAddress();
   const mapRef = useRef<MapView | null>(null);
 
   const { location, locationCords } = useLocation();
   const [addresses, setAddresses] = useState<any[]>();
-  const [selectedAddress, setSelectedAddress] = useState<any>(defaultAddress.defaultAddress);
+  const [selectedAddress, setSelectedAddress] = useState<any>(
+    defaultAddress.defaultAddress
+  );
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const {dismiss}= useBottomSheetModal();
-  
+  const { dismiss } = useBottomSheetModal();
+
   const fetchaddresses = async () => {
     setIsLoading(true);
     await axios
@@ -62,16 +64,6 @@ export default function AddressBottomModal({
   useFocusEffect(
     useCallback(() => {
       fetchaddresses();
-      const backAction = () => {
-        dismiss(); // Close the bottom sheet
-        return true; // Prevent default back action
-      };
-
-      BackHandler.addEventListener("hardwareBackPress", backAction);
-
-      return () => {
-        BackHandler.removeEventListener("hardwareBackPress", backAction);
-      };
     }, [])
   );
   const handleAddAddress = () => {
@@ -111,197 +103,203 @@ export default function AddressBottomModal({
 
   return (
     <>
-        <BottomSheetModal
-          ref={bottomSheetModalRef} 
-          containerStyle={{backgroundColor: "rgba(0,0,0,0.6)",}}
-          backgroundStyle={{backgroundColor: Colors[colorScheme ?? "light"].background}}
-          handleIndicatorStyle={{backgroundColor: Colors[colorScheme ?? "light"].text}}  
-          
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        containerStyle={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+        backgroundStyle={{
+          backgroundColor: Colors[colorScheme ?? "light"].background,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: Colors[colorScheme ?? "light"].text,
+        }}
+      >
+        <BottomSheetView
+          style={{
+            backgroundColor: Colors[colorScheme ?? "light"].background,
+          }}
         >
-          <BottomSheetView
-            style={{
-              backgroundColor: Colors[colorScheme ?? "light"].background,
-            }}
-          >
-            <ThemedView style={styles.content}>
-              <View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setSelectedAddress(null);
-                    dismiss();
-                  }}
-                  style={styles.addressItem}
-                >
-                  {!selectedAddress ? (
-                    <MaterialIcons
-                      name="my-location"
-                      color={Colors[colorScheme ?? "light"].primary}
-                      size={24}
-                    />
-                  ) : (
-                    <MaterialIcons
-                      name="location-searching"
-                      color={
-                        selectedAddress
-                          ? Colors[colorScheme ?? "light"].text
-                          : Colors[colorScheme ?? "light"].primary
-                      }
-                      size={24}
-                    />
-                  )}
-                  <View style={{ marginLeft: 12 }}>
-                    <ThemedText type="defaultSemiBold">
-                      Current Location
-                    </ThemedText>
-                    <ThemedText style={styles.text}>
-                      {location?.formattedAddress}
-                    </ThemedText>
-                  </View>
-                </TouchableOpacity>
-                {isLoading ? (
-                  <ActivityIndicator
-                    size="large"
+          <ThemedView style={styles.content}>
+            <View>
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedAddress(null);
+                  dismiss();
+                }}
+                style={styles.addressItem}
+              >
+                {!selectedAddress ? (
+                  <MaterialIcons
+                    name="my-location"
                     color={Colors[colorScheme ?? "light"].primary}
-                    style={{ marginVertical: 20 }}
+                    size={24}
                   />
                 ) : (
-                  addresses?.map((address) => (
+                  <MaterialIcons
+                    name="location-searching"
+                    color={
+                      selectedAddress
+                        ? Colors[colorScheme ?? "light"].text
+                        : Colors[colorScheme ?? "light"].primary
+                    }
+                    size={24}
+                  />
+                )}
+                <View style={{ marginLeft: 12 }}>
+                  <ThemedText type="defaultSemiBold">
+                    Current Location
+                  </ThemedText>
+                  <ThemedText style={styles.text}>
+                    {location?.formattedAddress}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
+              {isLoading ? (
+                <ActivityIndicator
+                  size="large"
+                  color={Colors[colorScheme ?? "light"].primary}
+                  style={{ marginVertical: 20 }}
+                />
+              ) : (
+                addresses?.map((address) => (
+                  <TouchableOpacity
+                    key={address._id}
+                    onPress={() => {
+                      setSelectedAddress(address);
+                      defaultAddress.setDefaultAddress(address);
+                      dismiss();
+                    }}
+                    onLongPress={() => {
+                      setSelectedAddress(address);
+                      setShowInfoModal(true);
+                      defaultAddress.setDefaultAddress(address);
+                      Haptics.impactAsync();
+                    }}
+                    style={styles.addressItem}
+                  >
+                    {selectedAddress?._id === address._id ? (
+                      <FontAwesome5
+                        name="dot-circle"
+                        color={Colors[colorScheme ?? "light"].primary}
+                        size={20}
+                        style={{ marginRight: 10 }}
+                      />
+                    ) : (
+                      <FontAwesome5
+                        name="circle"
+                        color={Colors[colorScheme ?? "light"].text}
+                        size={20}
+                        style={{ marginRight: 10 }}
+                      />
+                    )}
+                    {address.title === "Home" ? (
+                      <FontAwesome5 name="home" color="#6B7280" size={24} />
+                    ) : address.title === "Work" ? (
+                      <FontAwesome5
+                        name="briefcase"
+                        color="#6B7280"
+                        size={24}
+                      />
+                    ) : (
+                      <FontAwesome5
+                        name="map-marker-alt"
+                        color="#6B7280"
+                        size={24}
+                      />
+                    )}
+                    <View style={styles.addressText}>
+                      <ThemedText type="defaultSemiBold">
+                        {address.title}
+                      </ThemedText>
+                      <ThemedText style={styles.text}>
+                        {address.address}
+                      </ThemedText>
+                    </View>
+
                     <TouchableOpacity
-                      key={address._id}
                       onPress={() => {
-                        setSelectedAddress(address);
-                        defaultAddress.setDefaultAddress(address);
+                        router.push(
+                          `/addAddress?address=${JSON.stringify(
+                            address
+                          )}&edit=true`
+                        );
                         dismiss();
                       }}
-                      onLongPress={() => {
-                        setSelectedAddress(address);
-                        setShowInfoModal(true);
-                        defaultAddress.setDefaultAddress(address);
-                        Haptics.impactAsync();
-                      }}
-                      style={styles.addressItem}
                     >
-                      {selectedAddress?._id === address._id ? (
-                        <FontAwesome5
-                          name="dot-circle"
-                          color={Colors[colorScheme ?? "light"].primary}
-                          size={20}
-                          style={{ marginRight: 10 }}
-                        />
-                      ) : (
-                        <FontAwesome5
-                          name="circle"
-                          color={Colors[colorScheme ?? "light"].text}
-                          size={20}
-                          style={{ marginRight: 10 }}
-                        />
-                      )}
-                      {address.title === "Home" ? (
-                        <FontAwesome5 name="home" color="#6B7280" size={24} />
-                      ) : address.title === "Work" ? (
-                        <FontAwesome5
-                          name="briefcase"
-                          color="#6B7280"
-                          size={24}
-                        />
-                      ) : (
-                        <FontAwesome5
-                          name="map-marker-alt"
-                          color="#6B7280"
-                          size={24}
-                        />
-                      )}
-                      <View style={styles.addressText}>
-                        <ThemedText type="defaultSemiBold">
-                          {address.title}
-                        </ThemedText>
-                        <ThemedText style={styles.text}>
-                          {address.address}
-                        </ThemedText>
-                      </View>
-
-                      <TouchableOpacity
-                        onPress={() => {
-                          router.push(
-                            `/addAddress?address=${JSON.stringify(
-                              address
-                            )}&edit=true`
-                          );
-                          dismiss();
-                        }}
-                      >
-                        <MaterialIcons name="edit" color="#6B7280" size={23} />
-                      </TouchableOpacity>
+                      <MaterialIcons name="edit" color="#6B7280" size={23} />
                     </TouchableOpacity>
-                  ))
-                )}
-              </View>
-              <CustomButton
-                title="Add New Address"
-                onPress={handleAddAddress}
-                icon={"add"}
-              />
-            </ThemedView>
-          </BottomSheetView>
-        </BottomSheetModal>
-      <ThemedView style={{flex:1,position:'absolute'}}>
-      <CenterModal
-        isVisible={showInfoModal}
-        onClose={() => setShowInfoModal(false)}
-        width={"90%"}
-      >
-        {selectedAddress?.title && (
-          <>
-            <MapView
-              style={styles.map}
-              ref={mapRef}
-              provider={PROVIDER_GOOGLE}
-              initialCamera={{
-                center: selectedAddress.coordinates,
-                altitude: 1000,
-                heading: 0,
-                pitch: 0,
-                zoom: 16,
-              }}
-            >
-              <Marker coordinate={selectedAddress.coordinates} />
-            </MapView>
-            <View style={{ marginVertical: 10 }}>
-              <ThemedText type="subtitle">{selectedAddress.title}</ThemedText>
-              <ThemedText type="default">{selectedAddress.address}</ThemedText>
+                  </TouchableOpacity>
+                ))
+              )}
             </View>
-          </>
-        )}
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          <TouchableOpacity
-            onPress={() => {
-              router.push(
-                `/addAddress?address=${JSON.stringify(
-                  selectedAddress
-                )}&edit=true`
-              );
-              setShowInfoModal(false), dismiss();
-            }}
-            style={[
-              styles.actionButton,
-              { borderWidth: 1, borderColor: "#6B7280" },
-            ]}
-          >
-            <ThemedText>Edit</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleDelete}
-            style={[styles.actionButton, { backgroundColor: "#ff0055" }]}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator />
-            ) : (
-              <ThemedText style={{ color: "#fff" }}>Delete</ThemedText>
-            )}
-          </TouchableOpacity>
-        </View>
-      </CenterModal></ThemedView>
+            <CustomButton
+              title="Add New Address"
+              onPress={handleAddAddress}
+              icon={"add"}
+            />
+          </ThemedView>
+        </BottomSheetView>
+      </BottomSheetModal>
+      <ThemedView style={{ flex: 1, position: "absolute" }}>
+        <CenterModal
+          isVisible={showInfoModal}
+          onClose={() => setShowInfoModal(false)}
+          width={"90%"}
+        >
+          {selectedAddress?.title && (
+            <>
+              <MapView
+                style={styles.map}
+                ref={mapRef}
+                provider={PROVIDER_GOOGLE}
+                initialCamera={{
+                  center: selectedAddress.coordinates,
+                  altitude: 1000,
+                  heading: 0,
+                  pitch: 0,
+                  zoom: 16,
+                }}
+              >
+                <Marker coordinate={selectedAddress.coordinates} />
+              </MapView>
+              <View style={{ marginVertical: 10 }}>
+                <ThemedText type="subtitle">{selectedAddress.title}</ThemedText>
+                <ThemedText type="default">
+                  {selectedAddress.address}
+                </ThemedText>
+              </View>
+            </>
+          )}
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <TouchableOpacity
+              onPress={() => {
+                router.push(
+                  `/addAddress?address=${JSON.stringify(
+                    selectedAddress
+                  )}&edit=true`
+                );
+                setShowInfoModal(false), dismiss();
+              }}
+              style={[
+                styles.actionButton,
+                { borderWidth: 1, borderColor: "#6B7280" },
+              ]}
+            >
+              <ThemedText>Edit</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleDelete}
+              style={[styles.actionButton, { backgroundColor: "#ff0055" }]}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator />
+              ) : (
+                <ThemedText style={{ color: "#fff" }}>Delete</ThemedText>
+              )}
+            </TouchableOpacity>
+          </View>
+        </CenterModal>
+      </ThemedView>
     </>
   );
 }
