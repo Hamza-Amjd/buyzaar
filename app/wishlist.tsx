@@ -28,7 +28,7 @@ const wishlist = () => {
         renderItem={({ item }) => <Product item={item} />}
         numColumns={2}
         contentContainerStyle={{
-           marginHorizontal:'auto',justifyContent:'space-evenly'
+          justifyContent:'space-evenly'
         }}
         columnWrapperStyle={{ marginHorizontal: 10 }}
       />

@@ -20,8 +20,8 @@ import { useEffect } from "react";
 import { Colors } from "@/constants/Colors";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { usePushNotifications } from "@/hooks/usePushNotification";
-const ClerkPublishableKey = process.env.EXPO_PUCLIC_CLERK_PUBLISHABLE_KEY as string;
-const StripePublishableKey = process.env.EXPO_PUCLIC_STRIPE_PUBLISHABLE_KEY as string;
+const ClerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string;
+const StripePublishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string;
 SplashScreen.preventAutoHideAsync();
 
 // Set the animation options. This is optional.

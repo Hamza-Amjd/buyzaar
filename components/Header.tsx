@@ -10,22 +10,26 @@ const Header = ({
   title,
   color,
   headerRight,
-  onBackPress=()=>router.back()
+  onBackPress=()=>router.back(),
+  showBackButton=true,
+  style
 }: {
   title?: string;
   color?: string;
   headerRight?: React.ReactNode;
+  showBackButton?: boolean;
   onBackPress?: ()=>void;
+  style?:any;
 }) => {
   const colorScheme = useColorScheme();
   return (
-    <View style={styles.bar}>
+    <View style={[styles.bar,style]}>
       <View style={{ flexDirection: "row", gap: 15 ,alignItems:'center'}}>
-        <TouchableOpacity
+        {showBackButton && <TouchableOpacity
           onPress={onBackPress}
         >
           <Ionicons name="arrow-back" size={30} color={color?color:Colors[colorScheme??'light'].text}/>
-        </TouchableOpacity>
+        </TouchableOpacity>}
         {title && <ThemedText style={[styles.title,{color:color?color:Colors[colorScheme??'light'].text}]}>{title}</ThemedText>}
       </View>
       {headerRight && headerRight}

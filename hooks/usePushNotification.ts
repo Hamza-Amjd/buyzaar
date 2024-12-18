@@ -3,8 +3,9 @@ import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
-import messaging from '@react-native-firebase/messaging';
-import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
+import messaging from "@react-native-firebase/messaging";
+import { FirebaseMessagingTypes } from "@react-native-firebase/messaging";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
@@ -13,9 +14,11 @@ export interface PushNotificationState {
 }
 
 export const usePushNotifications = (): PushNotificationState => {
-  const [expoPushToken, setExpoPushToken] = useState<Notifications.ExpoPushToken>();
+  const [expoPushToken, setExpoPushToken] =
+    useState<Notifications.ExpoPushToken>();
   const [fcmToken, setFcmToken] = useState<string>();
-  const [notification, setNotification] = useState<Notifications.Notification>();
+  const [notification, setNotification] =
+    useState<Notifications.Notification>();
 
   const notificationListener = useRef<Notifications.EventSubscription>();
   const responseListener = useRef<Notifications.EventSubscription>();
@@ -36,7 +39,7 @@ export const usePushNotifications = (): PushNotificationState => {
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
       if (enabled) {
-        console.log('Authorization status:', authStatus);
+        console.log("Authorization status:", authStatus);
       }
     }
   }
@@ -44,7 +47,7 @@ export const usePushNotifications = (): PushNotificationState => {
   async function setupFCM() {
     try {
       await requestUserPermission();
-      
+
       // Get FCM token
       const token = await messaging().getToken();
       setFcmToken(token);
@@ -53,45 +56,50 @@ export const usePushNotifications = (): PushNotificationState => {
       // Handle FCM token refresh
       messaging().onTokenRefresh((token: string) => {
         setFcmToken(token);
-        console.log('New FCM token:', token);
+        console.log("New FCM token:", token);
       });
 
       // Handle background messages
-      messaging().setBackgroundMessageHandler(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-        console.log('Background message:', remoteMessage);
-      });
+      messaging().setBackgroundMessageHandler(
+        async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+          console.log("Background message:", remoteMessage);
+        }
+      );
 
       // Handle foreground messages
-      const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-        console.log('Foreground message:', remoteMessage);
-        // Convert FCM message to local notification
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: remoteMessage.notification?.title || '',
-            body: remoteMessage.notification?.body || '',
-            data: remoteMessage.data,
-          },
-          trigger: null,
-        });
-      });
+      const unsubscribe = messaging().onMessage(
+        async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+          console.log("Foreground message:", remoteMessage);
+          // Convert FCM message to local notification
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: remoteMessage.notification?.title || "",
+              body: remoteMessage.notification?.body || "",
+              data: remoteMessage.data,
+            },
+            trigger: null,
+          });
+        }
+      );
 
       return unsubscribe;
     } catch (error) {
-      console.error('FCM setup error:', error);
+      console.error("FCM setup error:", error);
     }
   }
 
   async function registerForPushNotificationsAsync() {
     let token;
     if (Device.isDevice) {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
 
       if (existingStatus !== "granted") {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
       }
-      
+
       if (finalStatus !== "granted") {
         alert("Failed to get push token for push notification");
         return;
@@ -114,6 +122,22 @@ export const usePushNotifications = (): PushNotificationState => {
     return token;
   }
 
+  async function saveNotification(notification: Notifications.Notification) {
+    try {
+      const existingNotifications = await AsyncStorage.getItem("notifications");
+      const notificationsList = existingNotifications? JSON.parse(existingNotifications): [];
+      notificationsList.push({
+        id: notification.request.identifier,
+        date: notification.date,
+        title: notification.request.content.title,
+        body: notification.request.content.body,
+      });
+      await AsyncStorage.setItem("notifications",JSON.stringify(notificationsList));
+    } catch (error) {
+      console.error("Error saving notification:", error);
+    }
+  }
+
   useEffect(() => {
     let fcmUnsubscribe: (() => void) | undefined;
 
@@ -126,24 +150,25 @@ export const usePushNotifications = (): PushNotificationState => {
       fcmUnsubscribe = await setupFCM();
 
       // Setup notification listeners
-      notificationListener.current = Notifications.addNotificationReceivedListener(
-        notification => {
+      notificationListener.current =
+        Notifications.addNotificationReceivedListener((notification) => {
           setNotification(notification);
-        }
-      );
+          saveNotification(notification);
+        });
 
-      responseListener.current = Notifications.addNotificationResponseReceivedListener(
-        response => {
-          console.log('Notification response:', response);
-        }
-      );
+      responseListener.current =
+        Notifications.addNotificationResponseReceivedListener((response) => {
+          console.log("Notification response:", response);
+        });
     };
 
     setup();
 
     return () => {
       if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current);
+        Notifications.removeNotificationSubscription(
+          notificationListener.current
+        );
       }
       if (responseListener.current) {
         Notifications.removeNotificationSubscription(responseListener.current);

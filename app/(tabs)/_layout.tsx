@@ -29,16 +29,22 @@ export default function TabLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: 'Explore',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'search' : 'search-outline'} color={Colors[colorScheme ?? 'light'].primary} />
           ),
         }}
       />
       <Tabs.Screen
+        name="messages"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'chatbubble' : 'chatbubble-outline'} color={Colors[colorScheme ?? 'light'].primary} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
-          title: 'Explore',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'person' : 'person-outline'} color={Colors[colorScheme ?? 'light'].primary} />
           ),

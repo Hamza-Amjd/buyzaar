@@ -6,7 +6,6 @@ import {
   Alert,
   ActivityIndicator,
   useColorScheme,
-  Linking,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Colors } from "@/constants/Colors";
@@ -15,6 +14,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { router } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { useAuth, useUser } from "@clerk/clerk-expo";
+import * as WebBrowser from "expo-web-browser"
 
 const profile = () => {
   const colorScheme = useColorScheme();
@@ -51,7 +51,7 @@ const profile = () => {
       name: "Privacy policy",
       icon: "shield-checkmark",
       function: () =>
-        Linking.openURL("https://buyzaar.vercel.app/site/privacypolicy"),
+        WebBrowser.openBrowserAsync("https://buyzaar.vercel.app/site/privacypolicy"),
     },
     { name: "Log out", icon: "log-out", function: logout },
   ];
