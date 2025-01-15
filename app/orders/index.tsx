@@ -12,11 +12,11 @@ import { ActivityIndicator } from "react-native";
 import AnimatedLottieView from "lottie-react-native";
 import { Link, router } from "expo-router";
 import { Colors } from "@/constants/Colors";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import ReviewModal from "@/components/ReviewModal";
-import Header from "@/components/Header";
-import { getOrders } from "@/utils/actions";
+import { ThemedView } from "@/components/ui/ThemedView";
+import { ThemedText } from "@/components/ui/ThemedText";
+import ReviewModal from "@/components/modals/ReviewModal";
+import Header from "@/components/ui/Header";
+import { getOrders } from "@/services/api/actions";
 import { numberWithCommas } from "@/utils/healper";
 import { useUser } from "@clerk/clerk-expo";
 

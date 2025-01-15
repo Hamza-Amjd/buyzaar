@@ -11,10 +11,10 @@ import { Colors } from "@/constants/Colors";
 import { useState } from "react";
 import axios from "axios";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import SearchTile from "@/components/SearchTile";
-import { ThemedView } from "@/components/ThemedView";
-import { getSearchedProducts } from "@/utils/actions";
-import { ThemedText } from "@/components/ThemedText";
+import SearchTile from "@/components/ui/SearchTile";
+import { ThemedView } from "@/components/ui/ThemedView";
+import { getSearchedProducts } from "@/services/api/actions";
+import { ThemedText } from "@/components/ui/ThemedText";
 
 const search = () => {
   const [searchKey, setSearchKey] = useState("");

@@ -1,8 +1,8 @@
 // src/TrackOrder.js
 
-import Header from '@/components/Header';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import Header from '@/components/ui/Header';
+import { ThemedText } from '@/components/ui/ThemedText';
+import { ThemedView } from '@/components/ui/ThemedView';
 import { Colors } from '@/constants/Colors';
 import React from 'react';
 import { View, StyleSheet, FlatList, useColorScheme } from 'react-native';

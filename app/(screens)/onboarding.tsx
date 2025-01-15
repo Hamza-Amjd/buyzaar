@@ -28,7 +28,7 @@ import Animated, {
   SlideInRight,
   runOnJS,
 } from "react-native-reanimated";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedView } from "@/components/ui/ThemedView";
 import { Colors } from "@/constants/Colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 //@ts-ignore
@@ -79,6 +79,7 @@ export default function onboarding() {
   };
 
   const endOnboarding = async() => {
+    'worklet';
     await AsyncStorage.setItem("isFirstStart", "false");
     router.replace("/(auth)");
   };

@@ -9,13 +9,13 @@ import {
   View,
 } from "react-native";
 import React, { useState } from "react";
-import { ThemedView } from "@/components/ThemedView";
-import Header from "@/components/Header";
+import { ThemedView } from "@/components/ui/ThemedView";
+import Header from "@/components/ui/Header";
 import { useAuth, useUser } from "@clerk/clerk-expo";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/components/ui/ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import CenterModal from "@/components/CenterModal";
+import CenterModal from "@/components/modals/CenterModal";
 
 const settings = () => {
   const colorScheme = useColorScheme();

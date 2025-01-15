@@ -37,8 +37,7 @@
         {
           "image": "./assets/images/adaptive-icon.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#FF8E31"
+          "resizeMode": "contain"
         }
       ],
       "expo-secure-store"

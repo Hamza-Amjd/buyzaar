@@ -10,24 +10,26 @@ import {
 import React, { useEffect, useState } from "react";
 import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/components/ui/ThemedText";
 import { router } from "expo-router";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedView } from "@/components/ui/ThemedView";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import * as WebBrowser from "expo-web-browser"
+import { useAddressStore } from "@/services/addressStore";
 
 const profile = () => {
   const colorScheme = useColorScheme();
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
   const { signOut } = useAuth();
+  const {removeAddresses}=useAddressStore();
 
   const logout = async() => {
     Alert.alert("Logout", "Are you sure you want to logout", [
       { text: "Cancel" },
       {
         text: "Confirm",
-        onPress: async () => await signOut(),
+        onPress: async () => {await signOut();removeAddresses()},
       },
     ]);
   };

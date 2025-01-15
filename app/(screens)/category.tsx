@@ -6,12 +6,12 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import {  MaterialCommunityIcons } from "@expo/vector-icons";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/components/ui/ThemedText";
 import {  useLocalSearchParams } from "expo-router";
-import Header from "@/components/Header";
-import { getSearchedProducts } from "@/utils/actions";
-import ProductCard from "@/components/ProductCard";
-import { ThemedView } from "@/components/ThemedView";
+import Header from "@/components/ui/Header";
+import { getSearchedProducts } from "@/services/api/actions";
+import ProductCard from "@/components/home/ProductCard";
+import { ThemedView } from "@/components/ui/ThemedView";
 
 export default function category() {
   const { name } = useLocalSearchParams<{ name: string }>();

@@ -22,7 +22,7 @@ interface CartStore {
   toggleWishlist:(item: ProductType) => void;
 }
 
-const useCart = create(
+const useCartStore = create(
   persist<CartStore>(
     (set, get) => ({
       cartItems: [],
@@ -120,4 +120,4 @@ const useCart = create(
   )
 );
 
-export default useCart;
+export default useCartStore;

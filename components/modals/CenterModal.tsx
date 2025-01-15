@@ -6,7 +6,7 @@ import {
   Dimensions,
 } from "react-native";
 import React from "react";
-import { ThemedView } from "./ThemedView";
+import { ThemedView } from "../ui/ThemedView";
 
 type ModalProps = {
   isVisible: boolean;

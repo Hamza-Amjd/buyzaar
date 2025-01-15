@@ -5,6 +5,7 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { HapticTab } from '@/components/navigation/HapticTab';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -15,6 +16,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarShowLabel: false,
+        tabBarButton: HapticTab
       }}>
       <Tabs.Screen
         name="index" 

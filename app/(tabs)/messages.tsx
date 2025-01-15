@@ -8,12 +8,12 @@ import {
   Alert,
 } from "react-native";
 import React, { useCallback, useState } from "react";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ui/ThemedView";
+import { ThemedText } from "@/components/ui/ThemedText";
 import { Colors } from "@/constants/Colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
-import Header from "@/components/Header";
+import Header from "@/components/ui/Header";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 const NotificationItem = ({ item }: any) => {

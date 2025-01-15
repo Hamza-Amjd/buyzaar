@@ -9,13 +9,13 @@ import { Colors } from "@/constants/Colors";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { router } from "expo-router";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import Header from "@/components/Header";
-import AuthTextInput from "@/components/AuthTextInput";
-import CustomButton from "@/components/CustomButton";
+import { ThemedText } from "@/components/ui/ThemedText";
+import { ThemedView } from "@/components/ui/ThemedView";
+import Header from "@/components/ui/Header";
+import AuthTextInput from "@/components/auth/AuthTextInput";
+import CustomButton from "@/components/ui/CustomButton";
 import { useSignUp } from "@clerk/clerk-expo";
-import ConfirmationCodeInput from "@/components/ConfirmationCodeInput";
+import ConfirmationCodeInput from "@/components/auth/ConfirmationCodeInput";
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("Please enter your firstname"),

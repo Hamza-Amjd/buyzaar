@@ -10,11 +10,11 @@ import { Colors } from "@/constants/Colors";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { router, useRouter } from "expo-router";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import Header from "@/components/Header";
-import AuthTextInput from "@/components/AuthTextInput";
-import CustomButton from "@/components/CustomButton";
+import { ThemedView } from "@/components/ui/ThemedView";
+import { ThemedText } from "@/components/ui/ThemedText";
+import Header from "@/components/ui/Header";
+import AuthTextInput from "@/components/auth/AuthTextInput";
+import CustomButton from "@/components/ui/CustomButton";
 import {  useOAuth, useSignIn } from "@clerk/clerk-expo";
 import * as WebBrowser from 'expo-web-browser'
 import * as Linking from 'expo-linking'

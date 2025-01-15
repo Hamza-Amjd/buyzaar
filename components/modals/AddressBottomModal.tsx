@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -9,96 +9,68 @@ import {
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { ThemedView } from "./ThemedView";
-import { ThemedText } from "./ThemedText";
+import { ThemedView } from "../ui/ThemedView";
+import { ThemedText } from "../ui/ThemedText";
 import { Colors } from "@/constants/Colors";
 import useLocation from "@/hooks/useLocation";
 import { router, useFocusEffect } from "expo-router";
-import axios from "axios";
 import { useUser } from "@clerk/clerk-expo";
-import CenterModal from "./CenterModal";
 import * as Haptics from "expo-haptics";
-import CustomButton from "./CustomButton";
+import CustomButton from "../ui/CustomButton";
 import {
   BottomSheetModal,
   BottomSheetView,
   useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
-import { useDefaultAddress } from "@/hooks/useDefaultAddress";
+import {
+  DeleteAddressService,
+  fetchaddresses,
+} from "@/services/api/addressServices";
+import { useAddressStore } from "@/services/addressStore";
+import { setUserService } from "@/services/api/authService";
+import CenterModal from "./CenterModal";
 
 type addressModalProps = {
+  setAddress: (address: any) => void;
   bottomSheetModalRef: any;
 };
 
-export default function AddressBottomModal({
+ const AddressBottomModal=({
+  setAddress,
   bottomSheetModalRef,
-}: addressModalProps) {
+}: addressModalProps) =>{
   const { user } = useUser();
   const colorScheme = useColorScheme();
-  const defaultAddress = useDefaultAddress();
-  const mapRef = useRef<MapView | null>(null);
+  const { addresses,defaultAddress,setDefaultAddress } = useAddressStore();
 
-  const { location, locationCords } = useLocation();
-  const [addresses, setAddresses] = useState<any[]>();
-  const [selectedAddress, setSelectedAddress] = useState<any>(
-    defaultAddress.defaultAddress
-  );
+  const mapRef = useRef<MapView | null>(null);
+  
+  const { location} = useLocation();
+  const [selectedAddress, setSelectedAddress] = useState<any>();
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const { dismiss } = useBottomSheetModal();
 
-  const fetchaddresses = async () => {
-    setIsLoading(true);
-    await axios
-      .post(`https://buyzaar.vercel.app/api/users`, {
-        userId: user?.id,
-      })
-      .catch((err) => console.log(err));
-    await axios
-      .get(`https://buyzaar.vercel.app/api/users/address/${user?.id}`)
-      .then((response) => setAddresses(response.data.addresses))
-      .catch((err) => console.log(err))
-      .finally(() => setIsLoading(false));
-  };
-  useFocusEffect(
-    useCallback(() => {
-      fetchaddresses();
-    }, [])
-  );
+  useEffect(() => {
+    setUserService(user?.id);
+    fetchaddresses(user?.id)
+  }, []);
+
   const handleAddAddress = () => {
     if (!user?.id) {
       router.replace("/(auth)");
       return;
     }
-    router.push(
-      `/addAddress?address=${JSON.stringify({
-        title: null,
-        address: null,
-        coordinates: locationCords,
-      })}`
-    );
+    router.push(`/(screens)/address`);
     dismiss();
   };
 
   const handleDelete = async () => {
     setIsLoading(true);
-    await fetch(`https://buyzaar.vercel.app/api/users/address`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user?.id,
-        addressId: selectedAddress._id,
-      }),
-    })
-      .then(() => {
-        fetchaddresses();
-        setIsLoading(false);
-        setShowInfoModal(false);
-      })
-      .catch((error) => console.log(error));
+    await DeleteAddressService(user?.id, selectedAddress._id);
+    setIsLoading(false);
+    setShowInfoModal(false);
   };
 
   return (
@@ -123,6 +95,7 @@ export default function AddressBottomModal({
               <TouchableOpacity
                 onPress={() => {
                   setSelectedAddress(null);
+                  setAddress(location);
                   dismiss();
                 }}
                 style={styles.addressItem}
@@ -165,13 +138,13 @@ export default function AddressBottomModal({
                     key={address._id}
                     onPress={() => {
                       setSelectedAddress(address);
-                      defaultAddress.setDefaultAddress(address);
+                      setDefaultAddress(address);
                       dismiss();
                     }}
                     onLongPress={() => {
                       setSelectedAddress(address);
                       setShowInfoModal(true);
-                      defaultAddress.setDefaultAddress(address);
+                      setDefaultAddress(address);
                       Haptics.impactAsync();
                     }}
                     style={styles.addressItem}
@@ -216,14 +189,8 @@ export default function AddressBottomModal({
                     </View>
 
                     <TouchableOpacity
-                      onPress={() => {
-                        router.push(
-                          `/addAddress?address=${JSON.stringify(
-                            address
-                          )}&edit=true`
-                        );
-                        dismiss();
-                      }}
+                      //@ts-ignore
+                      onPress={()=>{router.navigate({pathname: "/(screens)/address",params:address});dismiss();}}
                     >
                       <MaterialIcons name="edit" color="#6B7280" size={23} />
                     </TouchableOpacity>
@@ -250,7 +217,6 @@ export default function AddressBottomModal({
               <MapView
                 style={styles.map}
                 ref={mapRef}
-                provider={PROVIDER_GOOGLE}
                 initialCamera={{
                   center: selectedAddress.coordinates,
                   altitude: 1000,
@@ -271,13 +237,9 @@ export default function AddressBottomModal({
           )}
           <View style={{ flexDirection: "row", gap: 10 }}>
             <TouchableOpacity
-              onPress={() => {
-                router.push(
-                  `/addAddress?address=${JSON.stringify(
-                    selectedAddress
-                  )}&edit=true`
-                );
-                setShowInfoModal(false), dismiss();
+              onPress={()=>{
+                router.navigate({pathname: "/(screens)/address",params:selectedAddress});
+                dismiss();
               }}
               style={[
                 styles.actionButton,
@@ -347,3 +309,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+
+export default AddressBottomModal;

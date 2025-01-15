@@ -10,28 +10,29 @@ import {
 import React, { useState, useEffect } from "react";
 import { AntDesign, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ui/ThemedView";
+import { ThemedText } from "@/components/ui/ThemedText";
 import { router } from "expo-router";
-import Collections from "@/components/Collections";
-import ProductCard from "@/components/ProductCard";
-import useCart from "@/hooks/useCart";
-import AddressBottomModal from "@/components/AddressBottomModal";
-import { getCollectionDetails, getProducts } from "@/utils/actions";
-import CategoryList from "@/components/CategoryList";
+import Collections from "@/components/home/Collections";
+import useCart from "@/services/cartStore";
+import AddressBottomModal from "@/components/modals/AddressBottomModal";
+import { getCollectionDetails, getProducts } from "@/services/api/actions";
+import CategoryList from "@/components/home/CategoryList";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useDefaultAddress } from "@/hooks/useDefaultAddress";
+import { useAddressStore } from "@/services/addressStore";
+import useLocation from "@/hooks/useLocation";
+import ProductCard from "@/components/home/ProductCard";
 
 export default function Home() {
   const colorScheme = useColorScheme();
   const cart = useCart();
-  const {defaultAddress} = useDefaultAddress();
   const [products, setProducts] = useState<any>();
   const [discountItems, setDiscountItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [footerLoading, setFooterLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [modalVisible, setModalVisible] = useState(false);
+  const {location} = useLocation(); 
 
   const fetchData = async () => {
     setLoading(true);
@@ -77,7 +78,7 @@ export default function Home() {
             setModalVisible(!modalVisible);
           }}
         >
-          {defaultAddress && defaultAddress.city + ", " + defaultAddress.country}
+          {location?.city && (location?.city+ ", " )}{location?.country &&  location?.country}
         </ThemedText>
         <TouchableOpacity
           onPress={() => {
@@ -154,6 +155,7 @@ export default function Home() {
         columnWrapperStyle={{ marginHorizontal: 10 }}
       />
       <AddressBottomModal
+        setAddress={setCurrentPage}
         bottomSheetModalRef={bottomSheetModalRef}
       />
     </ThemedView>

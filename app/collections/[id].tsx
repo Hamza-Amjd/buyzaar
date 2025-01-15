@@ -7,13 +7,13 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { ThemedText } from "@/components/ThemedText";
-import { getCollectionDetails } from "@/utils/actions";
+import { ThemedText } from "@/components/ui/ThemedText";
+import { getCollectionDetails } from "@/services/api/actions";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView } from "react-native-gesture-handler";
-import ProductCard from "@/components/ProductCard";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import Header from "@/components/Header";
+import ProductCard from "@/components/home/ProductCard";
+import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
+import Header from "@/components/ui/Header";
 
 const page = () => {
   const { id,image } = useLocalSearchParams<{ id: string,image:string

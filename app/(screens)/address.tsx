@@ -1,49 +1,36 @@
-import CustomButton from "@/components/CustomButton";
-import CustomTextInput from "@/components/CustomTextInput";
-import { ThemedView } from "@/components/ThemedView";
-import { router, useLocalSearchParams } from "expo-router";
+import CustomButton from "@/components/ui/CustomButton";
+import { ThemedView } from "@/components/ui/ThemedView";
+import { router} from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Animated } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
-import axios from "axios";
 import { useUser } from "@clerk/clerk-expo";
+import { useRoute } from "@react-navigation/native";
+import { isValidPhoneNumber } from "@/utils/healper";
+import { AddAddressService, UpdateAddressService} from "@/services/api/addressServices";
+import CustomInput from "@/components/ui/CustomInput";
 
-const addAddress = () => {
+const Page = () => {
   const { user } = useUser();
+  const route:any =useRoute();
   const mapRef = useRef<MapView>(null);
-  const { address, edit } = useLocalSearchParams<{
-    address: string;
-    edit: string;
-  }>();
+  const item = route.params;
 
   const [isLoading, setIsLoading] = useState(false);
-
-  const parsedAddress = React.useMemo(() => {
-    try {
-      return address ? JSON.parse(address) : {};
-    } catch (e) {
-      console.error("Failed to parse address:", e);
-      return {};
-    }
-  }, [address]);
-
-  const [title, setTitle] = useState(parsedAddress.title || "");
-  const [phoneNumber, setPhoneNumber] = useState(
-    parsedAddress.phoneNumber || ""
-  );
+  const [title, setTitle] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [coordinates, setCoordinates] = useState({
-    ...parsedAddress.coordinates,
+    latitude: 31.592419806574995,
+    longitude:74.38634617254138,
     latitudeDelta: 0.005,
     longitudeDelta: 0.005,
   });
   const [selectedLocationName, setSelectedLocationName] = useState<any>({});
   const markerAnimation = useRef(new Animated.Value(0)).current;
 
-  const isValidPhoneNumber = (number: string) => {
-    return /^\+?[\d\s-]{10,}$/.test(number);
-  };
+
 
   const handleRegionChange = async (region: any) => {
     // Start animation
@@ -68,60 +55,49 @@ const addAddress = () => {
   };
 
   useEffect(() => {
-    (async () => {
+    const setData=async () => {
+      if (item.title) {
+        setTitle(item?.title);
+        setPhoneNumber(item.phoneNumber);
+        setCoordinates({latitude:item.coordinates.latitude,longitude:coordinates.longitude,longitudeDelta:0.005,latitudeDelta:0.005});
+      }
       let regionName = await Location.reverseGeocodeAsync(coordinates);
       setSelectedLocationName(regionName[0]);
-    })();
-    mapRef.current?.animateToRegion(coordinates);
+      mapRef.current?.animateToRegion(coordinates);
+    }
+    setData();
   }, []);
 
   const handleAddressSubmit = async () => {
-    try {
       setIsLoading(true);
-
       if (!isValidPhoneNumber(phoneNumber)) {
         throw new Error("Please enter a valid phone number");
       }
 
-      const addressData = {
+      const addressData:any = {
         title,
+        phoneNumber,
         address: selectedLocationName.formattedAddress,
         city: selectedLocationName.city,
         country: selectedLocationName.country,
         countrycode: selectedLocationName.isoCountryCode,
-        phoneNumber,
         coordinates: {
           longitude: coordinates.longitude,
           latitude: coordinates.latitude,
         },
       };
-
-      const endpoint = "https://buyzaar.vercel.app/api/users/address";
-      if (edit) {
-        await axios.put(endpoint, {
-          userId: user?.id,
-          addressId: parsedAddress._id,
-          updatedAddress: addressData,
-        });
+      if (item.title) {
+        await UpdateAddressService(user?.id,item._id ,addressData)
       } else {
-        await axios.post(endpoint, {
-          userId: user?.id,
-          address: addressData,
-        });
+        await AddAddressService(user?.id, addressData)
       }
-
       router.back();
-    } catch (err: any) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
     <ThemedView style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={()=>router.back()}>
-        <Ionicons name="arrow-back" size={35} color={"grey"}/>
+        <Ionicons name="arrow-back" size={30} color={"grey"}/>
       </TouchableOpacity>
       <View style={styles.mapContainer}>
         <MapView
@@ -129,9 +105,6 @@ const addAddress = () => {
           provider={PROVIDER_GOOGLE}
           initialRegion={coordinates}
           onRegionChangeComplete={handleRegionChange}
-          region={coordinates}
-          showsMyLocationButton
-          showsUserLocation
           ref={mapRef}
         />
         <Animated.View
@@ -154,25 +127,24 @@ const addAddress = () => {
       </View>
 
       <View style={styles.form}>
-        <CustomTextInput
-          title="Title"
+        <CustomInput
+          label="Title"
           value={title}
-          handleChange={setTitle}
-          placeholder="Enter address title (e.g., Home, Office)"
+          onChangeText={setTitle}
         />
-        <CustomTextInput
-          title="Mobile number"
+        <CustomInput
+          label="Mobile number"
           value={phoneNumber}
-          handleChange={setPhoneNumber}
+          onChangeText={setPhoneNumber}
+          validationMessage="Invalid mobile number"
           keyboardType="phone-pad"
           placeholder="Enter your phone number"
-          error={phoneNumber.length > 0 && !isValidPhoneNumber(phoneNumber)}
-          errorText="Please enter a valid phone number"
+          validationFunction={isValidPhoneNumber}
         />
-        <CustomTextInput
-          title="Address"
+        <CustomInput
+          label="Address"
           value={selectedLocationName?.formattedAddress}
-          handleChange={(value: string) =>
+          onChangeText={(value: string) =>
             setSelectedLocationName((prev: any) => {
               return { ...prev, formattedAddress: value };
             })
@@ -183,7 +155,7 @@ const addAddress = () => {
 
         <View style={styles.buttonContainer}>
           <CustomButton
-            title={edit ? "Update Address" : "Add Address"}
+            title={item.title ? "Update Address" : "Add Address"}
             onPress={handleAddressSubmit}
             isValid={title.length > 0 && isValidPhoneNumber(phoneNumber)}
             isLoading={isLoading}
@@ -241,4 +213,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default addAddress;
+export default Page;

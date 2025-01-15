@@ -1,7 +1,7 @@
 import { StyleSheet, TouchableOpacity} from 'react-native'
 import React from 'react'
 import {  FontAwesome } from '@expo/vector-icons';
-import useCart from '@/hooks/useCart';
+import useCart from '@/services/cartStore';
 
 const WishlistButton = ({product}:{product:any}) => {
   const cart =useCart();

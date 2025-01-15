@@ -24,3 +24,8 @@ export function numberWithCommas(x:any) {
       }
     }
   };
+
+  export const isValidPhoneNumber = (number: string) => {
+    return /^\+?[\d\s-]{10,}$/.test(number);
+  };
+

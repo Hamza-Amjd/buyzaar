@@ -8,7 +8,7 @@ import {
 import React, { useEffect, useState } from "react";
 import Carousel from "react-native-reanimated-carousel";
 import { Link } from "expo-router";
-import { getCollections } from "@/utils/actions";
+import { getCollections } from "@/services/api/actions";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 const Collections = () => {

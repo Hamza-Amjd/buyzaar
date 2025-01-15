@@ -13,29 +13,29 @@ import {
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import AnimatedLottieView from "lottie-react-native";
 import { Colors } from "@/constants/Colors";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ui/ThemedView";
+import { ThemedText } from "@/components/ui/ThemedText";
 import { Link, router } from "expo-router";
-import { numberWithCommas } from "@/utils/healper";
-import Header from "@/components/Header";
-import useCart, { CartItem } from "@/hooks/useCart";
+import {  numberWithCommas } from "@/utils/healper";
+import Header from "@/components/ui/Header";
 import axios from "axios";
 import { useUser } from "@clerk/clerk-expo";
-import { useStripe } from "@stripe/stripe-react-native";
-import AddressBottomModal from "@/components/AddressBottomModal";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useDefaultAddress } from "@/hooks/useDefaultAddress";
+import useCartStore, { CartItem } from "@/services/cartStore";
+import useLocation from "@/hooks/useLocation";
+import { AddressSheet, useStripe } from "@stripe/stripe-react-native";
 
-export default function cart() {
+export default function Page() {
   const colorScheme = useColorScheme();
-  const { defaultAddress } = useDefaultAddress();
+  const {location} = useLocation();
+
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const [loading, setLoading] = useState(false);
-  const [address, setAddress] = useState<any>(defaultAddress);
+
+  const [address, setAddress] = useState<any>();
+  const [showAddressSheet, setShowAddressSheet] = useState(false);
 
   const { user } = useUser();
-  const cartHook = useCart();
-  const subtotal = cartHook.cartItems.reduce(
+  const cart = useCartStore();
+  const subtotal = cart.cartItems.reduce(
     (acc, cartItem) => acc + cartItem.item.price * cartItem.quantity,
     0
   );
@@ -81,7 +81,6 @@ export default function cart() {
       
     });
     if (!error) {
-      setLoading(true);
     }
   };
   const openPaymentSheet = async () => {
@@ -97,12 +96,13 @@ export default function cart() {
       
       await axios
         .post(`https://buyzaar-admin.vercel.app/api/mobile/createorder`, {
-          cartItems: cartHook.cartItems,
+          cartItems: cart.cartItems,
           customerInfo,
           total,
           address:{
             name: customerInfo.name,
-            address:{line1: address.address,
+            address:{
+              line1: address.address,
             line2: "",
             city: address.city,
             state:"",
@@ -111,7 +111,7 @@ export default function cart() {
             phone:address.phoneNumber
           },
         })
-        .then(() => cartHook.clearCart())
+        .then(() => cart.clearCart())
         .catch((error) =>{
           Alert.alert(
             `Error code: ${error.code}`,
@@ -121,22 +121,25 @@ export default function cart() {
       Alert.alert("Success", "Your order is confirmed!");
     }
   };
+  const handleCheckout=async() => {
+    if(!address){
+      setShowAddressSheet(true);
+      // await initializePaymentSheet().then(async()=> await openPaymentSheet())
+    }else{
+      console.log("asds")  
+    }
+  }
   const handleClearCart = () => {
-    Alert.alert("Clear Cart", "Are you sure you want to clear the cart?", [
-      { text: "Cancel", onPress: () => {} },
-      { text: "Confirm", onPress: () => {cartHook.clearCart();ToastAndroid.showWithGravity(
-        "Cart cleared successfully",
-        ToastAndroid.SHORT,
-        ToastAndroid.CENTER,
-      );} },
-    ]);
-  };
-  const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
+      Alert.alert("Clear Cart", "Are you sure you want to clear the cart?", [
+        { text: "Cancel", onPress: () => {} },
+        { text: "Confirm", onPress: () => {cart.clearCart();ToastAndroid.showWithGravity(
+          "Cart cleared successfully",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER,
+        );} },
+      ]);
+    };
 
-  const handlePresentAddressModalPress = React.useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-  
   const renderItem = ({ item }: { item: CartItem }) => {
     return (
       <Link
@@ -182,7 +185,7 @@ export default function cart() {
             <View style={styles.quantityRow}>
               {item.quantity !== 1 ? (
                 <TouchableOpacity
-                  onPress={() => cartHook.decreaseQuantity(item.item._id)}
+                  onPress={() => cart.decreaseQuantity(item.item._id)}
                 >
                   <Feather
                     name="minus"
@@ -197,7 +200,7 @@ export default function cart() {
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
-                  onPress={() => cartHook.removeItem(item.item._id)}
+                  onPress={() => cart.removeItem(item.item._id)}
                 >
                   <MaterialCommunityIcons
                     name="delete"
@@ -226,7 +229,7 @@ export default function cart() {
                 {item.quantity}
               </ThemedText>
               <TouchableOpacity
-                onPress={() => cartHook.increaseQuantity(item.item._id)}
+                onPress={() => cart.increaseQuantity(item.item._id)}
               >
                 <Feather
                   name="plus"
@@ -246,7 +249,7 @@ export default function cart() {
     );
   };
   return (
-    <>
+    <ThemedView style={styles.container}>
       <ThemedView style={styles.container}>
         <Header
           title="Cart"
@@ -261,7 +264,7 @@ export default function cart() {
           }
         />
         <View style={{ flex: 1 }}>
-          {cartHook.cartItems.length == 0 ? (
+          {cart.cartItems.length == 0 ? (
             <View
               style={{
                 flex: 1,
@@ -274,12 +277,12 @@ export default function cart() {
                 loop
                 speed={0.3}
                 style={{ height: 150, width: 150 }}
-                source={require("../assets/images/emptyCart.json")}
+                source={require("@/assets/images/emptyCart.json")}
               />
             </View>
           ) : (
             <FlatList
-              data={cartHook.cartItems}
+              data={cart.cartItems}
               showsVerticalScrollIndicator={false}
               keyExtractor={(item) => item.item._id}
               renderItem={renderItem}
@@ -312,17 +315,7 @@ export default function cart() {
         </View>
 
         <TouchableOpacity
-          onPress={async () => {
-            if(!user){
-              router.replace("/(auth)")
-            }
-            if(!defaultAddress){
-            handlePresentAddressModalPress();
-            await initializePaymentSheet()
-          }else{
-            await initializePaymentSheet().then(async()=>await openPaymentSheet());
-          }
-          }}
+          onPress={handleCheckout}
           disabled={subtotal == 0}
           style={[styles.buyRow,{backgroundColor: subtotal == 0?Colors.light.gray:Colors.light.primary  }]}
         >
@@ -338,15 +331,38 @@ export default function cart() {
           </Text>
         </TouchableOpacity>
       </ThemedView>
-      <AddressBottomModal bottomSheetModalRef={bottomSheetModalRef}/>
-    </>
+      <AddressSheet
+        visible={showAddressSheet}
+        presentationStyle="fullscreen"
+        appearance={{colors:{primary:Colors[colorScheme ?? "light"].primary}}}
+        onSubmit={(result)=>console.log(result)}
+        onError={(err) => {
+          console.log(err);
+          setShowAddressSheet(false);
+        }}
+        additionalFields={{
+          phoneNumber: 'required',
+        }}
+        allowedCountries={["PK"]}
+        defaultValues={
+          address
+            ? address
+            : {
+                address: {
+                  line1: location?.district ?? "",
+                  city: location?.city ?? "",
+                },
+                name: user?.fullName ?? "",
+              }
+        }
+      />
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-between",
   },
   productContainer: {
     flexDirection: "row",

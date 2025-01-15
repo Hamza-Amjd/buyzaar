@@ -18,17 +18,17 @@ import {
   EvilIcons,
 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { ThemedView } from "@/components/ui/ThemedView";
+import { ThemedText } from "@/components/ui/ThemedText";
+import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import { router, useLocalSearchParams } from "expo-router";
 import { numberWithCommas } from "@/utils/healper";
-import Product from "@/components/ProductCard";
+import Product from "@/components/home/ProductCard";
 import Carousel from "react-native-reanimated-carousel";
-import { getProductDetails, getRelatedProducts } from "@/utils/actions";
-import Header from "@/components/Header";
-import WishlistButton from "@/components/WishlistButton";
-import useCart, { CartItem } from "@/hooks/useCart";
+import { getProductDetails, getRelatedProducts } from "@/services/api/actions";
+import Header from "@/components/ui/Header";
+import WishlistButton from "@/components/ui/WishlistButton";
+import useCart, { CartItem } from "@/services/cartStore";
 import Animated from "react-native-reanimated";
 import EnhancedImageViewing from "react-native-image-viewing/dist/ImageViewing";
 

@@ -1,6 +1,6 @@
 import { ActivityIndicator } from "react-native";
 import React from "react";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedView } from "@/components/ui/ThemedView";
 import { useAuth } from "@clerk/clerk-expo";
 import { Redirect } from "expo-router";
 

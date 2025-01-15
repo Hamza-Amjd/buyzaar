@@ -2,13 +2,13 @@ import { View, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { router, Stack } from "expo-router";
 import { useSignIn } from "@clerk/clerk-expo";
-import CustomButton from "@/components/CustomButton";
-import Header from "@/components/Header";
+import CustomButton from "@/components/ui/CustomButton";
+import Header from "@/components/ui/Header";
 import { Colors } from "@/constants/Colors";
-import { ThemedText } from "@/components/ThemedText";
-import ConfirmationCodeInput from "@/components/ConfirmationCodeInput";
+import { ThemedText } from "@/components/ui/ThemedText";
+import ConfirmationCodeInput from "@/components/auth/ConfirmationCodeInput";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedView } from "@/components/ui/ThemedView";
 
 const PwReset = () => {
   const [emailAddress, setEmailAddress] = useState("");

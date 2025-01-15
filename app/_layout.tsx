@@ -5,7 +5,6 @@ import {
 } from "@react-navigation/native";
 import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
 import { Stack } from "expo-router";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { tokenCache } from "@/utils/healper";
@@ -20,15 +19,11 @@ import { useEffect } from "react";
 import { Colors } from "@/constants/Colors";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { usePushNotifications } from "@/hooks/usePushNotification";
-const ClerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string;
-const StripePublishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string;
+import { useColorScheme } from "react-native";
+const ClerkPublishableKey = "pk_test_aW1tb3J0YWwtdHJvbGwtMzkuY2xlcmsuYWNjb3VudHMuZGV2JA";
+const StripePublishableKey = "pk_test_51PJNNlGfVO2eEzjSWFlEPrAO7Fjsw918Iq16sjQjWzGRnCf9J1q314U0fXsYfXD3amw4Pund0xiqFV3SnhVUifkk00x2n6qBZx";
 SplashScreen.preventAutoHideAsync();
 
-// Set the animation options. This is optional.
-SplashScreen.setOptions({
-  duration: 1000,
-  fade: true,
-});
 // This is the default configuration
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -41,7 +36,7 @@ export default function RootLayout() {
     poppins_medium: require("@/assets/fonts/Poppins-Medium.ttf"),
     poppins_bold: require("@/assets/fonts/Poppins-Bold.ttf"),
   });
-  const { expoPushToken, fcmToken } = usePushNotifications();
+  // const { expoPushToken, fcmToken } = usePushNotifications();
   useEffect(() => {
     if (!loaded) {
       SplashScreen.hideAsync();
@@ -73,6 +68,7 @@ export default function RootLayout() {
                 >
                   <Stack.Screen name="(tabs)" />
                   <Stack.Screen name="(auth)" />
+                  <Stack.Screen name="(screens)" />
                 </Stack>
               </ThemeProvider>
             </BottomSheetModalProvider>

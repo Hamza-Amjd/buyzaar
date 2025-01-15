@@ -12,9 +12,9 @@ import { Colors } from "@/constants/Colors";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Link, router } from "expo-router";
-import { ThemedText } from "./ThemedText";
+import { ThemedText } from "../ui/ThemedText";
 import { numberWithCommas } from "@/utils/healper";
-import WishlistButton from "./WishlistButton";
+import WishlistButton from "../ui/WishlistButton";
 type productProps = {
   item: any;
 };

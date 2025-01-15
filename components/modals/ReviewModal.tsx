@@ -6,10 +6,10 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import CenterModal from "./CenterModal";
-import { ThemedText } from "./ThemedText";
+import { ThemedText } from "../ui/ThemedText";
 import { Colors } from "@/constants/Colors";
 import { AirbnbRating } from "react-native-ratings";
-import CustomButton from "./CustomButton";
+import CustomButton from "../ui/CustomButton";
 interface props {
   isVisible: any;
   onClose: any;

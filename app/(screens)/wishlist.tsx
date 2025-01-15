@@ -2,14 +2,14 @@ import {
   FlatList,
 } from "react-native";
 import React from "react";
-import Product from "../components/ProductCard";
+import Product from "@/components/home/ProductCard";
 import AnimatedLottieView from "lottie-react-native";
-import { ThemedView } from "@/components/ThemedView";
-import Header from "@/components/Header";
-import useCart from "@/hooks/useCart";
+import { ThemedView } from "@/components/ui/ThemedView";
+import Header from "@/components/ui/Header";
+import useCartStore from "@/services/cartStore";
 
 const wishlist = () => {
-  const wishlist=useCart().wishlist;
+  const wishlist=useCartStore().wishlist;
   return (
     <ThemedView style={{flex:1}}>
       <Header title="Wishlist"/>
@@ -19,7 +19,7 @@ const wishlist = () => {
           loop
           speed={0.3}
           style={{ height: 150, width: 150, alignSelf: "center" ,top:250 }}
-          source={require("../assets/images/emptyCart.json")}
+          source={require("@/assets/images/emptyCart.json")}
         />
       )}
       <FlatList
