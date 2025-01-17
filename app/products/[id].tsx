@@ -2,14 +2,10 @@ import {
   StyleSheet,
   Text,
   View,
-  Image,
-  StatusBar,
   useColorScheme,
-  Dimensions,
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
-  TouchableWithoutFeedback,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -24,25 +20,27 @@ import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import { router, useLocalSearchParams } from "expo-router";
 import { numberWithCommas } from "@/utils/healper";
 import Product from "@/components/home/ProductCard";
-import Carousel from "react-native-reanimated-carousel";
 import { getProductDetails, getRelatedProducts } from "@/services/api/actions";
 import Header from "@/components/ui/Header";
 import WishlistButton from "@/components/ui/WishlistButton";
-import useCart, { CartItem } from "@/services/cartStore";
-import Animated from "react-native-reanimated";
-import EnhancedImageViewing from "react-native-image-viewing/dist/ImageViewing";
+import useCart from "@/services/cartStore";
+import CustomButton from "@/components/ui/CustomButton";
+import ProductGallery from "@/components/home/ProductGallery";
 
 const productDetails = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const cart = useCart();
   const colorScheme = useColorScheme();
+
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [product, setProduct] = useState<ProductType | any>();
   const [loading, setLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [showfulldesc, setshowfulldesc] = useState(false);
-  const [showImageModal, setshowImageModal] = useState(false);
-  const [selectedImageIndex, setSeletedImageIndex] = useState(0);
+
+  const [quantity, setQuantity] = useState(1);
+
   useEffect(() => {
     setLoading(true);
     getProductDetails(id).then((product) => {
@@ -55,8 +53,7 @@ const productDetails = () => {
       setRelatedProducts(relatedProducts)
     );
   }, []);
-  const [quantity, setQuantity] = useState(1);
-  const cart = useCart();
+  
 
   const handleAddToCart = () => {
     //@ts-ignore
@@ -71,10 +68,9 @@ const productDetails = () => {
   const handleBuynow = () => {
     cart.clearCart();
     handleAddToCart();
-    router.push('/cart')
+    router.push("/cart");
   };
 
-  const width = Dimensions.get("screen").width;
   return loading ? (
     <ThemedView style={styles.container}>
       <ActivityIndicator size={"large"} />
@@ -82,51 +78,7 @@ const productDetails = () => {
   ) : (
     <>
       <ParallaxScrollView
-        headerImage={
-          <View style={{ width: width, height: 393 }}>
-            <Carousel
-              width={width}
-              height={393}
-              data={product.media}
-              onSnapToItem={(index)=>setSeletedImageIndex(index)}
-              renderItem={({ item, index}) => (
-                <TouchableWithoutFeedback
-                  style={{ flex: 1 }}
-                  key={index}
-                  onPress={() => {
-                    setshowImageModal(true);
-                  }}
-                >
-                  <Animated.Image style={{ flex: 1 }} source={{ uri: item as string }} sharedTransitionTag={""}/>
-                  
-                </TouchableWithoutFeedback>
-              )}
-            />
-            <View
-              style={{
-                flexDirection: "row",
-                gap: 2,
-                position: "absolute",
-                bottom: 20,
-                right: 10,
-              }}
-            >
-              {product?.media.map((img: string, i: number) => (
-                <Image
-                  style={{
-                    width: 50,
-                    height: 50,
-                    borderWidth: selectedImageIndex == i ? 1.5 : 0.3,
-                    borderColor: "black",
-                    borderRadius: 3,
-                  }}
-                  key={img}
-                  source={{ uri: img }}
-                />
-              ))}
-            </View>
-          </View>
-        }
+        headerImage={<ProductGallery media={product.media}/>}
       >
         <ThemedView
           style={[
@@ -134,20 +86,15 @@ const productDetails = () => {
             { backgroundColor: Colors[colorScheme ?? "light"].background3 },
           ]}
         >
-          
-          <View style={styles.titleRow}>
+          <View style={styles.row}>
             <ThemedText type="subtitle" style={{ flex: 1 }}>
               {product?.title}
             </ThemedText>
           </View>
-          <View style={styles.titleRow}>
+          <View style={styles.row}>
             <View style={{ flexDirection: "row", alignItems: "baseline" }}>
               <Text
-                style={{
-                  fontWeight: "bold",
-                  fontSize: 22,
-                  color: "tomato",
-                }}
+                style={styles.priceText}
               >
                 <Text style={{ fontSize: 18 }}>Rs. </Text>
                 {product?.price && numberWithCommas(product?.price)}
@@ -181,7 +128,7 @@ const productDetails = () => {
               </View>
             )}
           </View>
-          <View style={styles.titleRow}>
+          <View style={styles.row}>
             {product?.rating ? (
               <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
                 {[...new Array(5)].map((_, i) => {
@@ -195,10 +142,7 @@ const productDetails = () => {
                     <Ionicons key={i} name={name} size={20} color={"gold"} />
                   );
                 })}
-                <ThemedText type="default">
-                  {" "}
-                  {product?.rating?.rate}/5
-                </ThemedText>
+                <ThemedText> {product?.rating?.rate}/5</ThemedText>
               </View>
             ) : (
               <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
@@ -210,7 +154,7 @@ const productDetails = () => {
                     color="gold"
                   />
                 ))}
-                <ThemedText type="default"> 0/5</ThemedText>
+                <ThemedText> 0/5</ThemedText>
               </View>
             )}
             <View style={styles.flex}>
@@ -229,7 +173,7 @@ const productDetails = () => {
                 />
               </TouchableOpacity>
 
-              <ThemedText type="default" style={{ marginHorizontal: 5 }}>
+              <ThemedText style={{ marginHorizontal: 5 }}>
                 {quantity}
               </ThemedText>
               <TouchableOpacity onPress={() => setQuantity(quantity + 1)}>
@@ -242,55 +186,70 @@ const productDetails = () => {
             </View>
           </View>
 
-          <ThemedText type="subtitle" style={styles.titleRow}>
+          <ThemedText type="subtitle" style={styles.row}>
             Description
           </ThemedText>
 
           <ThemedText
-            type="default"
             onPress={() => setshowfulldesc(!showfulldesc)}
             numberOfLines={showfulldesc ? 10 : 5}
             style={styles.desc}
           >
             {product?.description}
           </ThemedText>
-          {product?.colors.length>0 && (
+          {product?.colors.length > 0 && (
             <View>
-              <ThemedText type="subtitle" style={styles.titleRow}>
+              <ThemedText type="subtitle" style={styles.row}>
                 Colors
               </ThemedText>
-              <View
-                style={styles.colorContainer}
-              >
+              <View style={styles.colorContainer}>
                 {product.colors.map((color: string, index: string) => (
                   <TouchableOpacity
                     key={index}
                     onPress={() => setSelectedColor(color)}
-                    style={{alignItems:'center',justifyContent:'center',gap:5}}
+                    style={{
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 5,
+                    }}
                   >
                     <View
                       style={[
                         styles.colorOption,
                         { backgroundColor: color },
-                        selectedColor === color && {borderColor: Colors.dark.primary},
+                        selectedColor === color && {
+                          borderColor: Colors.dark.primary,
+                        },
                       ]}
                     >
-                      {selectedColor === color && <Ionicons name="checkmark" size={20} color={Colors.dark.primary} />}
+                      {selectedColor === color && (
+                        <Ionicons
+                          name="checkmark"
+                          size={20}
+                          color={Colors.dark.primary}
+                        />
+                      )}
                     </View>
-                    <ThemedText type='default' style={{textTransform:'capitalize',textAlign:'center'}}>{color}</ThemedText>
+                    <ThemedText
+                      type="default"
+                      style={{
+                        textTransform: "capitalize",
+                        textAlign: "center",
+                      }}
+                    >
+                      {color}
+                    </ThemedText>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
           )}
-          {product?.sizes?.length>0 && (
+          {product?.sizes?.length > 0 && (
             <View>
-              <ThemedText type="subtitle" style={styles.titleRow}>
+              <ThemedText type="subtitle" style={styles.row}>
                 Varients
               </ThemedText>
-              <View
-                style={styles.colorContainer}
-              >
+              <View style={styles.colorContainer}>
                 {product.sizes.map((size: string, index: string) => (
                   <TouchableOpacity
                     key={index}
@@ -316,7 +275,7 @@ const productDetails = () => {
           )}
           <View
             style={[
-              styles.titleRow,
+              styles.row,
               { backgroundColor: Colors.light.secondary, borderRadius: 25 },
             ]}
           >
@@ -337,7 +296,7 @@ const productDetails = () => {
               </Text>
             </View>
           </View>
-          <ThemedText type="subtitle" style={styles.titleRow}>
+          <ThemedText type="subtitle" style={styles.row}>
             Suggestions
           </ThemedText>
           {loading ? (
@@ -350,7 +309,8 @@ const productDetails = () => {
               renderItem={({ item }) => <Product item={item} />}
               numColumns={2}
               contentContainerStyle={{
-                 marginHorizontal:'auto',justifyContent:'space-evenly'
+                marginHorizontal: "auto",
+                justifyContent: "space-evenly",
               }}
             />
           )}
@@ -368,66 +328,20 @@ const productDetails = () => {
           { backgroundColor: Colors[colorScheme ?? "light"].background2 },
         ]}
       >
-        <TouchableOpacity
-          style={[styles.buybtn, { width: "40%" }]}
+        <CustomButton
           onPress={handleBuynow}
-        >
-          <Text style={styles.btntxt}>
-            <MaterialCommunityIcons
-              name="shopping"
-              size={22}
-              color={Colors.light.secondary}
-            />
-            BUY NOW
-          </Text>
-        </TouchableOpacity>
-        {cart.cartItems.some(
-          (item: CartItem) => item.item._id == product?._id
-        ) ? (
-          <TouchableOpacity
-            onPress={() => router.push("/cart")}
-            style={[styles.buybtn, { width: "55%" }]}
-          >
-            <Text style={styles.btntxt}>
-              <MaterialCommunityIcons
-                name="cart-check"
-                size={22}
-                color={Colors.light.secondary}
-              />
-              ADDED TO CART
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            onPress={handleAddToCart}
-            style={[styles.buybtn, { width: "55%" }]}
-            disabled={loading}
-          >
-            <Text style={styles.btntxt}>
-              <MaterialCommunityIcons
-                name="cart"
-                size={22}
-                color={Colors.light.secondary}
-              />
-              ADD TO CART
-            </Text>
-          </TouchableOpacity>
-        )}
+          title="Buy Now"
+          icon={"bag"}
+          style={{ flex: 0.6 }}
+        />
+        <CustomButton
+          onPress={handleAddToCart}
+          title="Add to Cart"
+          icon={"cart"}
+          style={{ flex: 0.4 }}
+        />
+        
       </ThemedView>
-      <EnhancedImageViewing
-        animationType="slide"
-        presentationStyle="fullScreen"
-        swipeToCloseEnabled
-        backgroundColor={Colors[colorScheme ?? "light"].background2}
-        imageIndex={selectedImageIndex}
-        visible={showImageModal}
-        onRequestClose={() => setshowImageModal(false)}
-        images={[
-          ...product.media.map((img: any) => {
-            return { uri: img };
-          }),
-        ]}
-      />
     </>
   );
 };
@@ -462,7 +376,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  titleRow: {
+  row: {
     flex: 1,
     marginTop: 10,
     marginHorizontal: 16,
@@ -470,11 +384,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  colorContainer:{
+  colorContainer: {
     paddingHorizontal: 15,
     paddingVertical: 10,
     flexDirection: "row",
     gap: 10,
+  },
+  priceText:{
+    fontWeight: "bold",
+    fontSize: 22,
+    color: "tomato",
   },
   optionsItem: {
     borderWidth: 2,
@@ -500,6 +419,7 @@ const styles = StyleSheet.create({
     padding: 8,
     flexDirection: "row",
     width: "100%",
+    gap: 5,
     justifyContent: "space-evenly",
     alignItems: "center",
   },

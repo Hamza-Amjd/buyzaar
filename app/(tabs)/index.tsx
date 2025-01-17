@@ -6,6 +6,8 @@ import {
   FlatList,
   ActivityIndicator,
   useColorScheme,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { AntDesign, FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -19,9 +21,9 @@ import AddressBottomModal from "@/components/modals/AddressBottomModal";
 import { getCollectionDetails, getProducts } from "@/services/api/actions";
 import CategoryList from "@/components/home/CategoryList";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useAddressStore } from "@/services/addressStore";
 import useLocation from "@/hooks/useLocation";
 import ProductCard from "@/components/home/ProductCard";
+import CustomIconButton from "@/components/ui/CustomIconButton";
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -31,12 +33,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [footerLoading, setFooterLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [modalVisible, setModalVisible] = useState(false);
-  const {location} = useLocation(); 
+  const { location } = useLocation();
 
   const fetchData = async () => {
     setLoading(true);
-    await getCollectionDetails("66c0bf6a79a56dc5903581f5")
+    await getCollectionDetails("678a5a5470fbbd34d9099db3")
       .then((res) => setDiscountItems(res.products))
       .finally(() => setLoading(false));
     await getProducts()
@@ -58,27 +59,22 @@ export default function Home() {
   const handlePresentModalPress = React.useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
-  
+
   return (
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.header}>
-        <TouchableOpacity
+        <CustomIconButton
           onPress={handlePresentModalPress}
-        >
-          <Ionicons
-            name={"location-sharp"}
-            size={30}
-            color={Colors[colorScheme ?? "light"].text}
-          />
-        </TouchableOpacity>
+          iconName="location-sharp"
+          size={30}
+        />
         <ThemedText
           type="mediumSemiBold"
-          style={{ textTransform: "capitalize",fontSize:16 }}
-          onPress={() => {
-            setModalVisible(!modalVisible);
-          }}
+          style={{ textTransform: "capitalize", fontSize: 16 }}
+          onPress={handlePresentModalPress}
         >
-          {location?.city && (location?.city+ ", " )}{location?.country &&  location?.country}
+          {location?.city && location?.city + ", "}
+          {location?.country && location?.country}
         </ThemedText>
         <TouchableOpacity
           onPress={() => {
@@ -98,62 +94,59 @@ export default function Home() {
           </View>
         </TouchableOpacity>
       </View>
-      <FlatList
-        data={products}
-        keyExtractor={(item, index) => item._id + index}
-        renderItem={renderItem}
-        onRefresh={getProducts}
-        refreshing={loading}
-        ListHeaderComponent={
-          <View>
-            <Collections />
-            <ThemedText
-              type="title"
-              style={{ paddingLeft: 10, paddingTop: 20, fontSize: 42 }}
-            >
-              Categories
-            </ThemedText>
-            <CategoryList />
-            <ThemedText
-              type="title"
-              style={{ paddingLeft: 10, paddingTop: 10 }}
-            >
-              60%-OFF
-            </ThemedText>
-            <ThemedText type="default" style={{ paddingLeft: 10 }}>
-              Limited time offer <AntDesign name="arrowright" size={15} />
-            </ThemedText>
-            <FlatList
-              data={discountItems}
-              keyExtractor={(item, index) => item._id + index}
-              renderItem={renderItem}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ padding: 5 }}
-            />
-            <ThemedText type="title" style={{ paddingLeft: 10 }}>
-              For you
-            </ThemedText>
-            <ThemedText type="default" style={{ paddingLeft: 10 }}>
-              Selected products only for you{" "}
-              <FontAwesome5 name="fire" size={15} />
-            </ThemedText>
-          </View>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={fetchData} />
         }
-        onEndReached={loadMoreItems}
-        ListFooterComponent={() => {
-          return (
-            footerLoading && (
-              <ActivityIndicator
-                size={"large"}
-                style={{ alignSelf: "center" }}
-              />
-            )
-          );
-        }}
-        numColumns={2}
-        columnWrapperStyle={{ marginHorizontal: 10 }}
-      />
+      >
+        <Collections />
+        <ThemedText type="title" style={{paddingTop:20,fontSize:38,paddingLeft:10}}>
+          Categories
+        </ThemedText>
+        <CategoryList />
+        <ThemedText type="title" style={styles.text}>
+          60%-OFF
+        </ThemedText>
+        <ThemedText style={styles.text}>
+          Limited time offer <AntDesign name="arrowright" size={15} />
+        </ThemedText>
+        <FlatList
+          data={discountItems}
+          keyExtractor={(item, index) => item._id + index}
+          renderItem={renderItem}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ padding: 5 }}
+        />
+        <ThemedText type="title" style={styles.text}>
+          For you
+        </ThemedText>
+        <ThemedText style={styles.text}>
+          Selected products only for you <FontAwesome5 name="fire" size={15} />
+        </ThemedText>
+
+        <FlatList
+          data={products}
+          keyExtractor={(item, index) => item._id + index}
+          renderItem={renderItem}
+          onRefresh={getProducts}
+          refreshing={loading}
+          scrollEnabled={false}
+          onEndReached={loadMoreItems}
+          ListFooterComponent={() => {
+            return (
+              footerLoading && (
+                <ActivityIndicator
+                  size={"large"}
+                  style={{ alignSelf: "center" }}
+                />
+              )
+            );
+          }}
+          numColumns={2}
+          columnWrapperStyle={{ marginHorizontal: 10 }}
+        />
+      </ScrollView>
       <AddressBottomModal
         setAddress={setCurrentPage}
         bottomSheetModalRef={bottomSheetModalRef}
@@ -181,5 +174,8 @@ const styles = StyleSheet.create({
   },
   cartno: {
     color: "white",
+  },
+  text: {
+    paddingLeft: 10,
   },
 });

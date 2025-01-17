@@ -59,7 +59,7 @@ const Page = () => {
       if (item.title) {
         setTitle(item?.title);
         setPhoneNumber(item.phoneNumber);
-        setCoordinates({latitude:item.coordinates.latitude,longitude:coordinates.longitude,longitudeDelta:0.005,latitudeDelta:0.005});
+        // setCoordinates({latitude:item.coordinates.latitude,longitude:coordinates.longitude,longitudeDelta:0.005,latitudeDelta:0.005});
       }
       let regionName = await Location.reverseGeocodeAsync(coordinates);
       setSelectedLocationName(regionName[0]);

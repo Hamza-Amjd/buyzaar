@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Image,
-} from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -15,10 +9,9 @@ import { ThemedText } from "@/components/ui/ThemedText";
 import Header from "@/components/ui/Header";
 import AuthTextInput from "@/components/auth/AuthTextInput";
 import CustomButton from "@/components/ui/CustomButton";
-import {  useOAuth, useSignIn } from "@clerk/clerk-expo";
-import * as WebBrowser from 'expo-web-browser'
-import * as Linking from 'expo-linking'
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useOAuth, useSignIn } from "@clerk/clerk-expo";
+import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -31,41 +24,25 @@ const validationSchema = Yup.object().shape({
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
-    void WebBrowser.warmUpAsync()
+    void WebBrowser.warmUpAsync();
     return () => {
-      void WebBrowser.coolDownAsync()
-    }
-  }, [])
-}
+      void WebBrowser.coolDownAsync();
+    };
+  }, []);
+};
 
-WebBrowser.maybeCompleteAuthSession()
+WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [obsecurePass, setobsecurePass] = useState(true);
-  
+
   const { signIn, setActive, isLoaded } = useSignIn();
-  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' })
+  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
   useWarmUpBrowser();
 
-  useEffect(() => {
-    const checkFirstStart = async () => {
-    try {
-      const isFirstStart = await AsyncStorage.getItem('isFirstStart');
-      if (isFirstStart === null) {
-        // First time opening app
-        await AsyncStorage.setItem('isFirstStart', 'false');
-        router.replace('/onboarding');
-      }
-    } catch (error) {
-      console.error('Error checking first start:', error);
-    }
-  };
-  checkFirstStart();
-  }, []);
-
-  const handleLogin =async (values: any) => {
+  const handleLogin = async (values: any) => {
     if (!isLoaded) {
       return;
     }
@@ -73,7 +50,7 @@ export default function Login() {
     try {
       const completeSignIn = await signIn.create({
         identifier: values.email,
-        password:values.password,
+        password: values.password,
       });
 
       // This indicates the user is signed in
@@ -84,7 +61,6 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-
 
   const handleGoogleSignIn = React.useCallback(async () => {
     try {
@@ -155,14 +131,13 @@ export default function Login() {
               setobsecurePass={setobsecurePass}
               error={errors.password}
             />
-            <TouchableOpacity
-              onPress={() => router.push("/(auth)/reset")}>
-                <ThemedText style={styles.link}>Forget Password?</ThemedText>
-              </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/(auth)/reset")}>
+              <ThemedText style={styles.link}>Forget Password?</ThemedText>
+            </TouchableOpacity>
             <CustomButton
               isLoading={isLoading}
               isValid={isValid}
-              onPress={handleSubmit}
+              onPress={() => handleSubmit}
               title="S I G N   I N"
               height={50}
             />
@@ -227,14 +202,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 18,
-    gap:5
+    gap: 5,
   },
-  link:{
+  link: {
     marginBottom: 10,
-    color:"cyan",
+    color: "cyan",
     fontWeight: "500",
     textDecorationLine: "underline",
     textAlign: "right",
-    paddingRight:5
-  }
+    paddingRight: 5,
+  },
 });

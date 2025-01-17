@@ -7,6 +7,7 @@ import AnimatedLottieView from "lottie-react-native";
 import { ThemedView } from "@/components/ui/ThemedView";
 import Header from "@/components/ui/Header";
 import useCartStore from "@/services/cartStore";
+import EmptyListView from "@/components/ui/EmptyListView";
 
 const wishlist = () => {
   const wishlist=useCartStore().wishlist;
@@ -14,13 +15,7 @@ const wishlist = () => {
     <ThemedView style={{flex:1}}>
       <Header title="Wishlist"/>
       {wishlist.length == 0 && (
-        <AnimatedLottieView
-          autoPlay
-          loop
-          speed={0.3}
-          style={{ height: 150, width: 150, alignSelf: "center" ,top:250 }}
-          source={require("@/assets/images/emptyCart.json")}
-        />
+        <EmptyListView style={{paddingTop:200}}/>
       )}
       <FlatList
         data={wishlist}

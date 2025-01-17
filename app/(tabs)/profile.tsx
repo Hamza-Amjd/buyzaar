@@ -14,7 +14,7 @@ import { ThemedText } from "@/components/ui/ThemedText";
 import { router } from "expo-router";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { useAuth, useUser } from "@clerk/clerk-expo";
-import * as WebBrowser from "expo-web-browser"
+import * as WebBrowser from "expo-web-browser";
 import { useAddressStore } from "@/services/addressStore";
 
 const profile = () => {
@@ -22,14 +22,17 @@ const profile = () => {
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
   const { signOut } = useAuth();
-  const {removeAddresses}=useAddressStore();
+  const { removeAddresses } = useAddressStore();
 
-  const logout = async() => {
+  const logout = async () => {
     Alert.alert("Logout", "Are you sure you want to logout", [
       { text: "Cancel" },
       {
         text: "Confirm",
-        onPress: async () => {await signOut();removeAddresses()},
+        onPress: async () => {
+          await signOut();
+          removeAddresses();
+        },
       },
     ]);
   };
@@ -53,7 +56,9 @@ const profile = () => {
       name: "Privacy policy",
       icon: "shield-checkmark",
       function: () =>
-        WebBrowser.openBrowserAsync("https://buyzaar.vercel.app/site/privacypolicy"),
+        WebBrowser.openBrowserAsync(
+          "https://buyzaar.vercel.app/site/privacypolicy"
+        ),
     },
     { name: "Log out", icon: "log-out", function: logout },
   ];
@@ -76,22 +81,17 @@ const profile = () => {
           <ActivityIndicator style={{ height: 100 }} />
         ) : user ? (
           <View
-            style={{
-              height: 100,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            style={styles.nameTxtContainer}
           >
-            <View
+            <ThemedText
+              type="subtitle"
               style={[
                 styles.nameTxt,
                 { borderColor: Colors[colorScheme ?? "light"].text },
               ]}
             >
-              <ThemedText type="subtitle">
-                {user?.firstName + " " + user?.lastName}
-              </ThemedText>
-            </View>
+              {user?.firstName + " " + user?.lastName}
+            </ThemedText>
             <ThemedText type="defaultSemiBold">
               {user && user?.emailAddresses[0].emailAddress}
             </ThemedText>
@@ -125,7 +125,7 @@ const profile = () => {
                 size={25}
                 color={Colors[colorScheme ?? "light"].text}
               />
-              <ThemedText type="subtitle"> {menu.name}</ThemedText>
+              <ThemedText type="mediumSemiBold"> {menu.name}</ThemedText>
             </TouchableOpacity>
           );
         })}
@@ -165,6 +165,11 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 10,
     flexDirection: "row",
+  },
+  nameTxtContainer: {
+      height: 100,
+      alignItems: "center",
+      justifyContent: "center",
   },
   nameTxt: {
     borderWidth: 2,

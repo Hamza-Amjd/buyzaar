@@ -72,7 +72,7 @@ const CategoryList = () => {
                         {category.icon}
                       </View>
                       {/* <ThemedText
-                        type="default"
+                        
                         style={{ textTransform: "capitalize" }}
                       >
                         {category.name.replace(/ ./, "")}</ThemedText> */}

@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { ThemedText } from "./ThemedText";
+import CustomIconButton from "./CustomIconButton";
 
 const Header = ({
   title,
@@ -25,12 +26,8 @@ const Header = ({
   return (
     <View style={[styles.bar,style]}>
       <View style={{ flexDirection: "row", gap: 15 ,alignItems:'center'}}>
-        {showBackButton && <TouchableOpacity
-          onPress={onBackPress}
-        >
-          <Ionicons name="arrow-back" size={30} color={color?color:Colors[colorScheme??'light'].text}/>
-        </TouchableOpacity>}
-        {title && <ThemedText style={[styles.title,{color:color?color:Colors[colorScheme??'light'].text}]}>{title}</ThemedText>}
+        {showBackButton && <CustomIconButton onPress={onBackPress} iconName="arrow-back" size={30} color={color?color:Colors[colorScheme??'light'].text}/>}
+        {title && <ThemedText style={[styles.title,color && {color:color}]}>{title}</ThemedText>}
       </View>
       {headerRight && headerRight}
     </View>

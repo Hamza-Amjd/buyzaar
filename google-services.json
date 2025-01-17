@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "985275296337",
     "project_id": "buyzar-88e72",
-    "storage_bucket": "buyzar-88e72.appspot.com"
+    "storage_bucket": "buyzar-88e72.firebasestorage.app"
   },
   "client": [
     {
@@ -12,7 +12,20 @@
           "package_name": "com.hamzaamjd.buyzaar"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "985275296337-anc1uqerl4kbptjlsotmegr7i7ua3svv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hamzaamjd.buyzaar",
+            "certificate_hash": "8dc597fe1afb00830b39273f0fc4522600a82d28"
+          }
+        },
+        {
+          "client_id": "985275296337-5m1emcdjn0ivlssabp2u3o1qk8gaeipp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCbg7VNLplzSfPofpsJBG40Ip81VIEengA"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "985275296337-5m1emcdjn0ivlssabp2u3o1qk8gaeipp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "985275296337-5ctkj35ibog763oct2kr61fd119quslp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hamzaamjd.buyzaar"
+              }
+            }
+          ]
         }
       }
     }

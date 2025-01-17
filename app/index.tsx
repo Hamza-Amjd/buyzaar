@@ -1,24 +1,41 @@
-import { ActivityIndicator } from "react-native";
-import React from "react";
+import { ActivityIndicator, Alert } from "react-native";
+import React, { useEffect } from "react";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { useAuth } from "@clerk/clerk-expo";
-import { Redirect } from "expo-router";
+import {  router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Main = () => {
   const { isLoaded, isSignedIn } = useAuth();
-    if (!isLoaded) {
-    return (
-      <ThemedView style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size="large"/>
-      </ThemedView>
-    );
-  }
+  
+    const tokenCheck = async () => {
+      const isFirstStart = await AsyncStorage.getItem("isFirstStart");
+      if (isFirstStart==null) {
+        router.replace("/(screens)/onboarding");
+        return false;
+      }
+      if (isLoaded && !isSignedIn) {
+        router.replace("/(auth)");
+        return false;
+      }
+      if (isLoaded && isSignedIn) {
+        router.replace("/(tabs)");
+        return true;
+      }
+    };
 
-  if (isSignedIn) {
-    return <Redirect href="/(tabs)" />;
-  }
+    useEffect(() => {
+      const timeoutId = setTimeout(tokenCheck, 100);
+      return () => clearTimeout(timeoutId);
+    }, []);
 
-  return <Redirect href="/(auth)" />;
+  return (
+    <ThemedView
+      style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+    >
+      <ActivityIndicator size="large" />
+    </ThemedView>
+  );
 };
 
 export default Main;

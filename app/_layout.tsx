@@ -33,10 +33,13 @@ configureReanimatedLogger({
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    poppins_medium: require("@/assets/fonts/Poppins-Medium.ttf"),
-    poppins_bold: require("@/assets/fonts/Poppins-Bold.ttf"),
+    regular: require("@/assets/fonts/Poppins-Regular.ttf"),
+    medium: require("@/assets/fonts/Poppins-Medium.ttf"),
+    bold: require("@/assets/fonts/Poppins-Bold.ttf"),
+    semi_bold: require("@/assets/fonts/Poppins-SemiBold.ttf"),
+    extra_bold: require("@/assets/fonts/Poppins-ExtraBold.ttf"),
   });
-  // const { expoPushToken, fcmToken } = usePushNotifications();
+  const { expoPushToken, fcmToken } = usePushNotifications();
   useEffect(() => {
     if (!loaded) {
       SplashScreen.hideAsync();

@@ -1,5 +1,3 @@
-// src/TrackOrder.js
-
 import Header from '@/components/ui/Header';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { ThemedView } from '@/components/ui/ThemedView';
@@ -54,7 +52,6 @@ const TrackOrder = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 35,
     paddingHorizontal: 10,
   },
   content: {

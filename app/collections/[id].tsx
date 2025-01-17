@@ -3,14 +3,12 @@ import {
   FlatList,
   Image,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { getCollectionDetails } from "@/services/api/actions";
 import { useLocalSearchParams } from "expo-router";
-import { ScrollView } from "react-native-gesture-handler";
 import ProductCard from "@/components/home/ProductCard";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import Header from "@/components/ui/Header";
@@ -80,7 +78,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 300,
+    height: 250,
     resizeMode: "cover",
   },
   description: {

@@ -41,8 +41,8 @@ type addressModalProps = {
 }: addressModalProps) =>{
   const { user } = useUser();
   const colorScheme = useColorScheme();
-  const { addresses,defaultAddress,setDefaultAddress } = useAddressStore();
-
+  const { addresses,defaultAddress,setDefaultAddress,removeAddresses } = useAddressStore();
+  
   const mapRef = useRef<MapView | null>(null);
   
   const { location} = useLocation();
@@ -190,7 +190,7 @@ type addressModalProps = {
 
                     <TouchableOpacity
                       //@ts-ignore
-                      onPress={()=>{router.navigate({pathname: "/(screens)/address",params:address});dismiss();}}
+                      onPress={()=>{dismiss();router.navigate({pathname: "/(screens)/address",params:address});}}
                     >
                       <MaterialIcons name="edit" color="#6B7280" size={23} />
                     </TouchableOpacity>
@@ -229,7 +229,7 @@ type addressModalProps = {
               </MapView>
               <View style={{ marginVertical: 10 }}>
                 <ThemedText type="subtitle">{selectedAddress.title}</ThemedText>
-                <ThemedText type="default">
+                <ThemedText >
                   {selectedAddress.address}
                 </ThemedText>
               </View>
@@ -238,8 +238,8 @@ type addressModalProps = {
           <View style={{ flexDirection: "row", gap: 10 }}>
             <TouchableOpacity
               onPress={()=>{
-                router.navigate({pathname: "/(screens)/address",params:selectedAddress});
                 dismiss();
+                router.navigate({pathname: "/(screens)/address",params:selectedAddress});
               }}
               style={[
                 styles.actionButton,

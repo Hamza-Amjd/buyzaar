@@ -94,7 +94,7 @@ const settings = () => {
       style={{ flex: 1, gap: 10 }}
     >
       <Header title="Settings"/>
-      <View style={styles.userInfo}>
+      {user?.emailAddresses&&<View style={styles.userInfo}>
         <View style={{ flexDirection: "row", gap: 20 }}>
           <Image
             source={{ uri: user?.imageUrl }}
@@ -104,7 +104,7 @@ const settings = () => {
             style={{ justifyContent: "space-between", paddingVertical: 10 }}
           >
             <ThemedText type="defaultSemiBold">{user?.fullName}</ThemedText>
-            <ThemedText type="default">
+            <ThemedText >
               {user?.emailAddresses[0].emailAddress}
             </ThemedText>
           </View>
@@ -114,11 +114,11 @@ const settings = () => {
           name="qr-code"
           style={{ color: Colors[colorScheme ?? "light"].text, fontSize: 30 }}
         />
-      </View>
+      </View>}
       {SETTING.map((item, index) => {
         return (
           <View key={index} style={{ padding: 10 }}>
-            <ThemedText type="default">{item.header}</ThemedText>
+            <ThemedText >{item.header}</ThemedText>
 
             {item.items.map((subitem, index) => (
               <TouchableOpacity
@@ -138,7 +138,7 @@ const settings = () => {
                     size={25}
                     color={Colors[colorScheme ?? "light"].text}
                   />
-                  <ThemedText type="subtitle">{subitem.name}</ThemedText>
+                  <ThemedText type="mediumSemiBold">{subitem.name}</ThemedText>
                 </View>
                 {subitem.name=="Theme"&&<Ionicons
                   name="chevron-forward"
@@ -155,11 +155,11 @@ const settings = () => {
         <View style={{justifyContent:'flex-start',width:'100%',gap:10}}>
           <TouchableOpacity style={[styles.themeButton,colorScheme=="light"&&{backgroundColor:"rgba(0,0,0,0.2)"}]} onPress={()=>handleColorScheme('light')}>
             <Ionicons name="sunny-outline" size={24} color={Colors[colorScheme ?? "light"].text} />
-            <ThemedText type="default">Light</ThemedText>
+            <ThemedText >Light</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.themeButton,colorScheme=="dark"&&{backgroundColor:"rgba(0,0,0,0.2)"}]} onPress={()=>handleColorScheme('dark')}>
             <Ionicons name="moon-outline" size={24} color={Colors[colorScheme ?? "light"].text} />
-            <ThemedText type="default">Dark</ThemedText>
+            <ThemedText >Dark</ThemedText>
           </TouchableOpacity> 
         </View>
       </CenterModal>

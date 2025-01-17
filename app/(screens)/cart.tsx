@@ -3,35 +3,34 @@ import {
   StyleSheet,
   View,
   Text,
-  TouchableOpacity,
-  FlatList,
-  Image,
-  useColorScheme,
   Alert,
   ToastAndroid,
+  FlatList,
 } from "react-native";
-import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import AnimatedLottieView from "lottie-react-native";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { ThemedText } from "@/components/ui/ThemedText";
-import { Link, router } from "expo-router";
 import {  numberWithCommas } from "@/utils/healper";
 import Header from "@/components/ui/Header";
 import axios from "axios";
 import { useUser } from "@clerk/clerk-expo";
-import useCartStore, { CartItem } from "@/services/cartStore";
-import useLocation from "@/hooks/useLocation";
-import { AddressSheet, useStripe } from "@stripe/stripe-react-native";
+import useCartStore from "@/services/cartStore";
+import { useStripe } from "@stripe/stripe-react-native";
+import { useAddressStore } from "@/services/addressStore";
+import AddressBottomModal from "@/components/modals/AddressBottomModal";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import EmptyListView from "@/components/ui/EmptyListView";
+import CustomIconButton from "@/components/ui/CustomIconButton";
+import CustomButton from "@/components/ui/CustomButton";
+import CartItemCard from "@/components/cart/CartItemCard";
 
 export default function Page() {
-  const colorScheme = useColorScheme();
-  const {location} = useLocation();
+  const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
 
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
-  const [address, setAddress] = useState<any>();
-  const [showAddressSheet, setShowAddressSheet] = useState(false);
+
+  const{ defaultAddress,setDefaultAddress}=useAddressStore();
 
   const { user } = useUser();
   const cart = useCartStore();
@@ -59,7 +58,6 @@ export default function Page() {
         },
         body: JSON.stringify({
           amount: total,
-          address,
         }),
       }
     );
@@ -102,13 +100,13 @@ export default function Page() {
           address:{
             name: customerInfo.name,
             address:{
-              line1: address.address,
+              line1: defaultAddress?.address,
             line2: "",
-            city: address.city,
+            city: defaultAddress?.city,
             state:"",
             postalCode: "",
-            country: address.country},
-            phone:address.phoneNumber
+            country: defaultAddress?.country},
+            phone:defaultAddress?.phoneNumber
           },
         })
         .then(() => cart.clearCart())
@@ -122,11 +120,10 @@ export default function Page() {
     }
   };
   const handleCheckout=async() => {
-    if(!address){
-      setShowAddressSheet(true);
-      // await initializePaymentSheet().then(async()=> await openPaymentSheet())
+    if(!defaultAddress){
+      bottomSheetModalRef.current?.present();
     }else{
-      console.log("asds")  
+      await initializePaymentSheet().then(async()=> await openPaymentSheet())  
     }
   }
   const handleClearCart = () => {
@@ -140,152 +137,23 @@ export default function Page() {
       ]);
     };
 
-  const renderItem = ({ item }: { item: CartItem }) => {
-    return (
-      <Link
-        href={`/products/${item.item._id}`}
-        asChild
-        style={[
-          styles.productContainer,
-          {
-            backgroundColor: Colors[colorScheme ?? "light"].background2,
-          },
-        ]}
-      >
-        <TouchableOpacity>
-          <View style={styles.imgContainer}>
-            <Image
-              style={styles.imgContainer}
-              source={{ uri: item.item.media[0] }}
-            />
-          </View>
-          <View>
-            <ThemedText type="defaultSemiBold">
-              {item.item.title.length > 28
-                ? `${item.item.title.slice(0, 28)}...`
-                : item.item.title}
-            </ThemedText>
-            {item?.color && (
-              <ThemedText type="default">
-                Color: {item.color.toUpperCase()}
-              </ThemedText>
-            )}
-            {item?.size && (
-              <ThemedText type="default">
-                Varient: {item.size.toUpperCase()}
-              </ThemedText>
-            )}
-            <ThemedText
-              type="mediumSemiBold"
-              style={{ color: Colors.light.tertiary }}
-            >
-              <Text style={{ fontSize: 16 }}>Rs. </Text>
-              {numberWithCommas(item?.item?.price)}
-            </ThemedText>
-            <View style={styles.quantityRow}>
-              {item.quantity !== 1 ? (
-                <TouchableOpacity
-                  onPress={() => cart.decreaseQuantity(item.item._id)}
-                >
-                  <Feather
-                    name="minus"
-                    size={23}
-                    color="white"
-                    style={{
-                      borderTopLeftRadius: 3,
-                      borderBottomLeftRadius: 5,
-                      backgroundColor: Colors.light.primary,
-                    }}
-                  />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={() => cart.removeItem(item.item._id)}
-                >
-                  <MaterialCommunityIcons
-                    name="delete"
-                    size={20}
-                    color="white"
-                    style={{
-                      backgroundColor: Colors.light.primary,
-                      borderTopLeftRadius: 3,
-                      borderBottomLeftRadius: 3,
-                      padding: 2,
-                    }}
-                  />
-                </TouchableOpacity>
-              )}
-
-              <ThemedText
-                style={{
-                  fontSize: 16,
-                  borderTopWidth: 0.8,
-                  borderColor: Colors.light.primary,
-                  borderBottomWidth: 0.8,
-                  paddingHorizontal: 10,
-                  lineHeight: 22,
-                }}
-              >
-                {item.quantity}
-              </ThemedText>
-              <TouchableOpacity
-                onPress={() => cart.increaseQuantity(item.item._id)}
-              >
-                <Feather
-                  name="plus"
-                  size={23}
-                  color="white"
-                  style={{
-                    borderTopRightRadius: 3,
-                    borderBottomRightRadius: 3,
-                    backgroundColor: Colors.light.primary,
-                  }}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </Link>
-    );
-  };
+  
+  
   return (
     <ThemedView style={styles.container}>
-      <ThemedView style={styles.container}>
         <Header
           title="Cart"
-          headerRight={
-            <TouchableOpacity onPress={handleClearCart}>
-              <Ionicons
-                name="trash-bin"
-                color={Colors[colorScheme ?? "light"].text}
-                size={25}
-              />
-            </TouchableOpacity>
-          }
+          headerRight={<CustomIconButton onPress={handleClearCart} iconName="trash-bin"/>}
         />
         <View style={{ flex: 1 }}>
           {cart.cartItems.length == 0 ? (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <AnimatedLottieView
-                autoPlay
-                loop
-                speed={0.3}
-                style={{ height: 150, width: 150 }}
-                source={require("@/assets/images/emptyCart.json")}
-              />
-            </View>
+            <EmptyListView/>
           ) : (
             <FlatList
               data={cart.cartItems}
               showsVerticalScrollIndicator={false}
               keyExtractor={(item) => item.item._id}
-              renderItem={renderItem}
+              renderItem={({item})=><CartItemCard item={item}/>}
               ListFooterComponent={() => (
                 <>
                   <View style={styles.titleRow}>
@@ -313,49 +181,8 @@ export default function Page() {
             />
           )}
         </View>
-
-        <TouchableOpacity
-          onPress={handleCheckout}
-          disabled={subtotal == 0}
-          style={[styles.buyRow,{backgroundColor: subtotal == 0?Colors.light.gray:Colors.light.primary  }]}
-        >
-          <MaterialCommunityIcons
-            name="cart-arrow-right"
-            size={24}
-            color={"#fff"}
-          />
-          <Text
-            style={styles.cheakoutBtn}
-          >
-            C H E A K O U T
-          </Text>
-        </TouchableOpacity>
-      </ThemedView>
-      <AddressSheet
-        visible={showAddressSheet}
-        presentationStyle="fullscreen"
-        appearance={{colors:{primary:Colors[colorScheme ?? "light"].primary}}}
-        onSubmit={(result)=>console.log(result)}
-        onError={(err) => {
-          console.log(err);
-          setShowAddressSheet(false);
-        }}
-        additionalFields={{
-          phoneNumber: 'required',
-        }}
-        allowedCountries={["PK"]}
-        defaultValues={
-          address
-            ? address
-            : {
-                address: {
-                  line1: location?.district ?? "",
-                  city: location?.city ?? "",
-                },
-                name: user?.fullName ?? "",
-              }
-        }
-      />
+          <CustomButton title="C H E A K O U T" icon={"cart"}  onPress={handleCheckout} isValid={subtotal !== 0} style={{margin:10}}/>
+      <AddressBottomModal bottomSheetModalRef={bottomSheetModalRef} setAddress={setDefaultAddress} />
     </ThemedView>
   );
 }
@@ -364,25 +191,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  productContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    borderRadius: 15,
-    marginHorizontal: 10,
-    padding: 5,
-    marginVertical: 10,
-    elevation: 5,
-    overflow: "hidden",
-  },
-  imgContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    resizeMode: "contain",
-    backgroundColor: "#FFFFFF",
-    marginRight: 10,
-  },
+ 
   titleRow: {
     marginTop: 10,
     marginHorizontal: 20,
@@ -393,14 +202,6 @@ const styles = StyleSheet.create({
   textlight: {
     color: "grey",
     fontSize: 14,
-  },
-  quantityRow: {
-    flexDirection: "row",
-    marginVertical: 5,
-    alignSelf: "center",
-    justifyContent: "center",
-    width: "100%",
-    paddingRight: 10,
   },
   buyRow: {
     flexDirection: "row",

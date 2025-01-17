@@ -68,7 +68,7 @@ const ProductCard: React.FC<productProps> = ({ item }) => {
           <Text style={{ fontSize: 14 }}>Rs. </Text>
           {numberWithCommas(price)}
         </Text>
-        <ThemedText type="default" style={{ left: 7, width: "98%" }}>
+        <ThemedText  style={{ left: 7, width: "98%" }}>
           {title.length > 40 ? title.slice(0, 38) + "..." : title}
         </ThemedText>
       </TouchableOpacity>

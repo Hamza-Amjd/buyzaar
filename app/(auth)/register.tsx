@@ -95,7 +95,6 @@ export default function RegisterationScreen() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <Header onBackPress={onBackPress}/>
-      <View style={{flex:1,alignItems:'center',justifyContent:'center'}}>
        
       <View style={styles.info}>
         <View style={styles.logoRow}>
@@ -143,7 +142,7 @@ export default function RegisterationScreen() {
             <AuthTextInput handleChange={handleChange} iconName={'email'} setFieldTouched={setFieldTouched} title="email" touched={touched.email} value={values.email} isPassword={false} error={errors.email}/>
             <AuthTextInput handleChange={handleChange} iconName={'form-textbox-password'} setFieldTouched={setFieldTouched} title="password" touched={touched.password} value={values.password} isPassword={true} obsecurePass={obsecurePass} setobsecurePass={setobsecurePass} error={errors.password}/>
             <AuthTextInput handleChange={handleChange} iconName={'form-textbox-password'} setFieldTouched={setFieldTouched} title="confirmPassword" touched={touched.confirmPassword} value={values.confirmPassword} isPassword={true} obsecurePass={obsecureCpass} setobsecurePass={setobsecureCpass} error={errors.confirmPassword} placeholder="Confirm password"/>
-            <CustomButton isValid={isValid} isLoading={loading} onPress={handleSubmit} title={"S I G N   U P"} height={50}/>
+            <CustomButton isValid={isValid} isLoading={loading} onPress={()=>handleSubmit()} title={"S I G N   U P"} height={50}/>
             <TouchableOpacity onPress={() => router.back()}>
               <ThemedText
                 type="defaultSemiBold"
@@ -155,13 +154,13 @@ export default function RegisterationScreen() {
           </View>
         )}
       </Formik>} 
-      </View>
     </ThemedView>
   );
 }
 const styles = StyleSheet.create({
 
   info: {
+    marginTop:30,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 50,

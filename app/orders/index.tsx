@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
-import AnimatedLottieView from "lottie-react-native";
 import { Link, router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ui/ThemedView";
@@ -19,6 +18,7 @@ import Header from "@/components/ui/Header";
 import { getOrders } from "@/services/api/actions";
 import { numberWithCommas } from "@/utils/healper";
 import { useUser } from "@clerk/clerk-expo";
+import EmptyListView from "@/components/ui/EmptyListView";
 
 const OrdersScreen = () => {
   const colorScheme = useColorScheme();
@@ -57,11 +57,11 @@ const OrdersScreen = () => {
               {new Date(item.createdAt).toDateString()}
             </ThemedText>
           </View>
-          <ThemedText type="default">
+          <ThemedText >
             {/* @ts-ignore */}
             {`Deliver to "${item.shippingAddress.name}" at "${item.shippingAddress?.line1}, ${item.shippingAddress?.line2.length>0?item.shippingAddress?.line2+", ":""}${item.shippingAddress?.city}, ${item.shippingAddress?.country}"`}
           </ThemedText>
-          <ThemedText type="default">
+          <ThemedText >
             {/* @ts-ignore */}
             {`Phone no. ${item.shippingAddress?.phone}`}
           </ThemedText>
@@ -88,12 +88,12 @@ const OrdersScreen = () => {
                       : product.product.title}
                   </ThemedText>
                   <ThemedText
-                    type="default"
+                    
                     style={{ textTransform: "capitalize" }}
                   >
                     Color : {product.color}
                   </ThemedText>
-                  <ThemedText type="default">
+                  <ThemedText >
                     Price : Rs {numberWithCommas(product.product.price)} x{" "}
                     {product.quantity}
                   </ThemedText>
@@ -135,13 +135,7 @@ const OrdersScreen = () => {
           <ActivityIndicator size={"large"} />
         </View>
       ) : orders.length == 0 ? (
-        <AnimatedLottieView
-          autoPlay
-          loop
-          speed={0.3}
-          style={{ height: 150, width: 150, alignSelf: "center", top: "30%" }}
-          source={require("@/assets/images/emptyCart.json")}
-        />
+        <EmptyListView/>
       ) : (
         <FlatList
           data={orders}

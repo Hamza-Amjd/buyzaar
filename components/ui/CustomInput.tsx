@@ -3,6 +3,7 @@ import { View, TextInput, Animated, StyleSheet, TextInputProps, useColorScheme, 
 import { Ionicons } from '@expo/vector-icons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { Colors } from '@/constants/Colors';
+import { useFocusEffect } from 'expo-router';
 
 interface CustomInputProps extends TextInputProps {
     label: string;
@@ -38,6 +39,15 @@ const CustomInput: React.FC<CustomInputProps> = ({
         checkValidation()
     }, [value, validationFunction]);
 
+    useFocusEffect(() => {
+        if(value){
+            Animated.timing(labelAnim, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: false,
+            }).start();
+        }
+    });
     const handleFocus = () => {
         setIsFocused(true);
         Animated.timing(labelAnim, {

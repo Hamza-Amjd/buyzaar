@@ -20,14 +20,14 @@ const NotificationItem = ({ item }: any) => {
   return (
     <Animated.View style={styles.notificationItem}>
       <View style={styles.titleRow}>
-        <ThemedText type="mediumSemiBold">{item.title}</ThemedText>
-        <ThemedText type="default" style={{ fontSize: 12, color: "grey" }}>
+        <ThemedText type="mediumSemiBold">
+          {item.title}
+        </ThemedText>
+        <ThemedText style={{ color: "grey" }}>
           {new Date(item.date).toLocaleString()}
         </ThemedText>
       </View>
-      <ThemedText type="defaultSemiBold" style={{ color: "#eeeade" }}>
-        {item.body}
-      </ThemedText>
+      <ThemedText>{item.body}</ThemedText>
     </Animated.View>
   );
 };
@@ -55,19 +55,16 @@ const messages = () => {
     }, [])
   );
   const handleClearNotications = () => {
-    Alert.alert(
-      "Clear notifications?","",
-      [
-        { text: "Cancel" },
-        {
-          text: "Confirm",
-          onPress: () => {
-            AsyncStorage.removeItem("notifications");
-            setNotifications([]);
-          },
+    Alert.alert("Clear notifications?", "", [
+      { text: "Cancel" },
+      {
+        text: "Confirm",
+        onPress: () => {
+          AsyncStorage.removeItem("notifications");
+          setNotifications([]);
         },
-      ]
-    );
+      },
+    ]);
   };
   return (
     <ThemedView style={styles.container}>
@@ -85,15 +82,17 @@ const messages = () => {
       <FlatList
         data={notifications}
         renderItem={NotificationItem}
-        ListEmptyComponent={()=>
-            <View style={styles.emptyListContainer}>
-                    <Ionicons name="notifications" 
-            size={60}
-            color={Colors[colorScheme ?? "light"].text}/>
-                    <ThemedText type="mediumSemiBold" style={{textAlign:'center'}}>No notifications yet</ThemedText>
-                
-            </View>
-        }
+        ListEmptyComponent={() => (
+          <View style={styles.emptyListContainer}>
+            <Ionicons name="notifications" size={60} color={"grey"} />
+            <ThemedText
+              type="defaultSemiBold"
+              style={{ textAlign: "center", color: "grey" }}
+            >
+              No notifications yet
+            </ThemedText>
+          </View>
+        )}
         //@ts-ignore
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingHorizontal: 15, gap: 10 }}
@@ -108,11 +107,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  emptyListContainer:{
-    marginTop:"80%",
-    justifyContent:"center",
-    alignItems:"center",
-    textAlign:'center'
+  emptyListContainer: {
+    marginTop: "80%",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
   },
   notificationItem: {
     padding: 10,
