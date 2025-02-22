@@ -53,7 +53,7 @@ export default function category() {
                   size={80}
                 />
 
-                <ThemedText variant='h5' fontFamily="semi_bold" style={{ color: "grey" }}>
+                <ThemedText type="subtitle" style={{ color: "grey" }}>
                   Nothing found.
                 </ThemedText>
               </>

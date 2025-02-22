@@ -8,6 +8,11 @@ export function numberWithCommas(x:any) {
     return x;
   }
 
+  export function getDiscount(price:any,discount:any) {
+    return ((discount/price).toFixed(3))*100;
+    
+  }
+
  export const tokenCache = {
     async getToken(key: string) {
       try {

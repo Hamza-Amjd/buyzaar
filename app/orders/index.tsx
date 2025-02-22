@@ -74,9 +74,7 @@ const OrdersScreen = () => {
         </View>
         {item.products.map((product: OrderItemType) => {
           return (
-            <Link href={`/products/${product.product._id}`} style={[styles.productContainer,{backgroundColor: Colors[colorScheme ?? "light"].background3}]} key={product._id}>
-              <View style={[{flexDirection:"row",gap:5}]}
-              >
+              <TouchableOpacity key={product._id} onPress={()=>router.navigate({pathname:"/(screens)/productdetails",params:product.product})} style={[styles.productContainer,{backgroundColor: Colors[colorScheme ?? "light"].background3}]}>
                 <Image
                   style={styles.imgContainer}
                   source={{ uri: product.product.media[0] }}
@@ -98,8 +96,7 @@ const OrdersScreen = () => {
                     {product.quantity}
                   </ThemedText>
                 </View>
-              </View>
-            </Link>
+              </TouchableOpacity>
           );
         })}
         <ThemedText>
@@ -171,7 +168,7 @@ const styles = StyleSheet.create({
       alignItems: "center",
       padding: 8,
       borderRadius: 5,
-      marginBottom: 10,
+      marginBottom: 10,flexDirection:"row",gap:5
   },
   imgContainer: {
     width: 80,

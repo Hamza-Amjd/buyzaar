@@ -10,6 +10,7 @@ const _layout = () => {
         <Stack.Screen name="category"  />
         <Stack.Screen name="settings"  />
         <Stack.Screen name="address"  />
+        <Stack.Screen name="productdetails"  />
       </Stack>
   )
 }

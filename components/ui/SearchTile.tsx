@@ -10,21 +10,16 @@ import {
 import { Colors } from "@/constants/Colors";
 import { ThemedText } from "./ThemedText";
 import { numberWithCommas } from "@/utils/healper";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 
 const SearchTile = ({ item }: { item: ProductType }) => {
   const colorScheme = useColorScheme();
   return (
-    <Link
-      href={`/products/${item._id}`}
-      asChild
-      style={{
+      <TouchableOpacity onPress={()=>router.navigate({pathname:"/(screens)/productdetails",params:item})} style={{
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-      }}
-    >
-      <TouchableOpacity>
+      }}>
         <View
           style={[
             styles.productMain,
@@ -59,7 +54,6 @@ const SearchTile = ({ item }: { item: ProductType }) => {
           </View>
         </View>
       </TouchableOpacity>
-    </Link>
   );
 };
 

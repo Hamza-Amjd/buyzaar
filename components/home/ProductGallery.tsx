@@ -15,13 +15,24 @@ import CustomSafeAreaView from "../ui/CustomSafeAreaView";
 
 const width = Dimensions.get("screen").width;
 
-const ProductGallery = ({ media }: { media: any }) => {
+const ProductGallery = ({
+  media,
+  loading,
+}: {
+  media: any;
+  loading: boolean;
+}) => {
   const colorScheme = useColorScheme();
   const [showImageModal, setshowImageModal] = useState(false);
   const [selectedImageIndex, setSeletedImageIndex] = useState(0);
-  return (
+
+  const hieght=393;
+
+  return loading ? (
+    <Image source={{ uri: media }} style={{ width: width, height: hieght }} />
+  ) : (
     <>
-      <View style={{ width: width, height: 393 }}>
+      <View style={{ width: width, height: hieght }}>
         <Carousel
           width={width}
           height={393}
@@ -40,7 +51,7 @@ const ProductGallery = ({ media }: { media: any }) => {
           )}
         />
         <View style={styles.galleryContainer}>
-          {media.map((img: string, i: number) => (
+          {media?.map((img: string, i: number) => (
             <Image
               style={[
                 styles.galleryImg,
@@ -54,7 +65,7 @@ const ProductGallery = ({ media }: { media: any }) => {
           ))}
         </View>
       </View>
-      <View style={{flex:1}}>
+      <View style={{ flex: 1 }}>
         <EnhancedImageViewing
           animationType="slide"
           presentationStyle="fullScreen"

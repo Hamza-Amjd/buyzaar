@@ -24,6 +24,7 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import useLocation from "@/hooks/useLocation";
 import ProductCard from "@/components/home/ProductCard";
 import CustomIconButton from "@/components/ui/CustomIconButton";
+import CartIcon from "@/components/cart/CartIcon";
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -76,23 +77,7 @@ export default function Home() {
           {location?.city && location?.city + ", "}
           {location?.country && location?.country}
         </ThemedText>
-        <TouchableOpacity
-          onPress={() => {
-            router.push("/cart");
-          }}
-        >
-          <View style={{ alignItems: "flex-end" }}>
-            <View style={styles.cartcount}>
-              <Text style={styles.cartno}>{cart.cartItems.length}</Text>
-            </View>
-
-            <Ionicons
-              name={"cart"}
-              size={35}
-              color={Colors[colorScheme ?? "light"].text}
-            />
-          </View>
-        </TouchableOpacity>
+        <CartIcon/>
       </View>
       <ScrollView
         refreshControl={

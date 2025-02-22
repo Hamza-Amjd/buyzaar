@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
   TouchableOpacity,
   Image,
+  KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { Formik } from "formik";
@@ -20,10 +22,11 @@ import ConfirmationCodeInput from "@/components/auth/ConfirmationCodeInput";
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("Please enter your firstname"),
   lastName: Yup.string().required("Please enter your lastname"),
-  username: Yup.string().required("Please enter a unique username"),
+  username: Yup.string().matches(/^[a-zA-Z0-9-_]*$/, 'Username should only contain letters and numbers').required("Please enter a unique username"),
   email: Yup.string().email("Invalid email address").required("Required"),
   password: Yup.string()
-    .min(8, "Password must be atleast 8 characters")
+    .min(8, "Password must be at least 8 characters")
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/, 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character')
     .required("Required"),
   confirmPassword: Yup.string().when("password", (password, field) =>
     password ? field.required("Required").oneOf([Yup.ref("password")],"Password did'nt match") : field
@@ -35,9 +38,9 @@ export default function RegisterationScreen() {
 
   const [loading, setLoading] = useState(false);
   const [obsecurePass, setobsecurePass] = useState(true);
-  const [obsecureCpass, setobsecureCpass] = useState(true);
   const [pendingVerification, setPendingVerification] = useState(false);
   const [code, setCode] = useState('');
+
   const handleRegister = async (values: any) => {
     if (!isLoaded) {
       return;
@@ -77,9 +80,14 @@ export default function RegisterationScreen() {
         code,
       });
 
-      await setActive({ session: completeSignUp.createdSessionId }).catch((err)=>alert(err));
+      await setActive({ session: completeSignUp.createdSessionId })
+      router.replace("/(tabs)")
     } catch (err: any) {
-      alert(err.errors[0].message);
+      console.log(JSON.stringify(err));
+      Alert.alert(
+        "Verification failed.",
+        "Please check your code send to your email and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -92,14 +100,16 @@ export default function RegisterationScreen() {
       router.back();
     }
   };
+  
   return (
     <ThemedView style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior="position">
       <Header onBackPress={onBackPress}/>
        
       <View style={styles.info}>
         <View style={styles.logoRow}>
           <Image
-            source={require("@/assets/images/logo.png")}
+            source={require("@/assets/images/icon.png")}
             style={styles.logo}
           />
           <ThemedText type="title"> Buyzaar</ThemedText>
@@ -141,7 +151,7 @@ export default function RegisterationScreen() {
             <AuthTextInput handleChange={handleChange} iconName={'account'} setFieldTouched={setFieldTouched} title="username" touched={touched.username} value={values.username} isPassword={false}  error={errors.username} autoCapitalize={"words"} placeholder="Enter unique username"/>
             <AuthTextInput handleChange={handleChange} iconName={'email'} setFieldTouched={setFieldTouched} title="email" touched={touched.email} value={values.email} isPassword={false} error={errors.email}/>
             <AuthTextInput handleChange={handleChange} iconName={'form-textbox-password'} setFieldTouched={setFieldTouched} title="password" touched={touched.password} value={values.password} isPassword={true} obsecurePass={obsecurePass} setobsecurePass={setobsecurePass} error={errors.password}/>
-            <AuthTextInput handleChange={handleChange} iconName={'form-textbox-password'} setFieldTouched={setFieldTouched} title="confirmPassword" touched={touched.confirmPassword} value={values.confirmPassword} isPassword={true} obsecurePass={obsecureCpass} setobsecurePass={setobsecureCpass} error={errors.confirmPassword} placeholder="Confirm password"/>
+            <AuthTextInput handleChange={handleChange} iconName={'form-textbox-password'} setFieldTouched={setFieldTouched} title="confirmPassword" touched={touched.confirmPassword} value={values.confirmPassword} isPassword={true} obsecurePass={obsecurePass} setobsecurePass={setobsecurePass} error={errors.confirmPassword} placeholder="Confirm password"/>
             <CustomButton isValid={isValid} isLoading={loading} onPress={()=>handleSubmit()} title={"S I G N   U P"} height={50}/>
             <TouchableOpacity onPress={() => router.back()}>
               <ThemedText
@@ -154,6 +164,7 @@ export default function RegisterationScreen() {
           </View>
         )}
       </Formik>} 
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }

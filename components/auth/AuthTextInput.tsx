@@ -50,6 +50,7 @@ const AuthTextInput = ({
         style={[
           styles.input,
           touched && { borderColor: Colors["light"].primary },
+          !touched&&value.length>0&&error&& { borderColor:"red"}
         ]}
       >
         <MaterialCommunityIcons
@@ -59,7 +60,7 @@ const AuthTextInput = ({
         />
         <TextInput
           style={{ flex: 1 }}
-          placeholder={placeholder?placeholder:`Enter ${title}`}
+          placeholder={placeholder?placeholder:`${title}`}
           onChangeText={handleChange(title)}
           value={value}
           onBlur={() => setFieldTouched(title, "")}

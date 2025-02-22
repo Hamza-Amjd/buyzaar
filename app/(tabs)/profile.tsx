@@ -16,12 +16,15 @@ import { ThemedView } from "@/components/ui/ThemedView";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import * as WebBrowser from "expo-web-browser";
 import { useAddressStore } from "@/services/addressStore";
+import CartIcon from "@/components/cart/CartIcon";
+import useCartStore from "@/services/cartStore";
 
 const profile = () => {
   const colorScheme = useColorScheme();
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
   const { signOut } = useAuth();
+  const { clearCart } = useCartStore();
   const { removeAddresses } = useAddressStore();
 
   const logout = async () => {
@@ -31,7 +34,9 @@ const profile = () => {
         text: "Confirm",
         onPress: async () => {
           await signOut();
+          clearCart();
           removeAddresses();
+          router.push("/(auth)");
         },
       },
     ]);
@@ -40,27 +45,27 @@ const profile = () => {
   const menuitems = [
     {
       name: "Wishlist",
-      icon: "bookmark-sharp",
+      iconName: "bookmark-sharp",
       function: () => router.push("/wishlist"),
     },
-    { name: "Cart", icon: "cart", function: () => router.push("/cart") },
-    { name: "Orders", icon: "bag", function: () => router.push("/orders") },
-    { name: "To Review", icon: "star", function: () => router.push("/orders") },
-    { name: "Payment info", icon: "card", function: () => {} },
+    { name: "Cart", icon: <CartIcon size={25}/>, function: () => router.push("/cart") },
+    { name: "Orders", iconName: "bag", function: () => router.push("/orders") },
+    { name: "To Review", iconName: "star", function: () => router.push("/orders") },
+    { name: "Payment info", iconName: "card", function: () => {} },
     {
       name: "Settings",
-      icon: "settings",
+      iconName: "settings",
       function: () => router.push("/settings"),
     },
     {
       name: "Privacy policy",
-      icon: "shield-checkmark",
+      iconName: "shield-checkmark",
       function: () =>
         WebBrowser.openBrowserAsync(
           "https://buyzaar.vercel.app/site/privacypolicy"
         ),
     },
-    { name: "Log out", icon: "log-out", function: logout },
+    { name: "Log out", iconName: "log-out", function: logout },
   ];
   return (
     <ThemedView style={styles.container}>
@@ -120,11 +125,11 @@ const profile = () => {
                 { backgroundColor: Colors[colorScheme ?? "light"].background2 },
               ]}
             >
-              <Ionicons
-                name={menu.icon as any}
+              {menu?.icon??<Ionicons
+                name={menu.iconName as any}
                 size={25}
                 color={Colors[colorScheme ?? "light"].text}
-              />
+              />}
               <ThemedText type="mediumSemiBold"> {menu.name}</ThemedText>
             </TouchableOpacity>
           );
@@ -162,6 +167,7 @@ const styles = StyleSheet.create({
   menuItem: {
     padding: 5,
     borderRadius: 10,
+    gap:10,
     width: "100%",
     marginBottom: 10,
     flexDirection: "row",

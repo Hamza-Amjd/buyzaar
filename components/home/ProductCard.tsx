@@ -25,18 +25,15 @@ const cardsPerRow = 2;
 const cardWidth = (screenWidth - cardMargin * (cardsPerRow + 1)) / cardsPerRow;
 
 const ProductCard: React.FC<productProps> = ({ item }) => {
-  const { title, media, price, rating } = item;
+  const { title, media, price} = item;
+  const rating = 4.6;
   const colorScheme = useColorScheme();
   return (
-    <Link
-      href={`/products/${item._id}?image=${item.media[0]}`}
-      asChild
-      style={[
+   
+      <TouchableOpacity onPress={()=>router.navigate({pathname:"/(screens)/productdetails",params:item})} style={[
         styles.productContainer,
         { width: cardWidth },
-      ]}
-    >
-      <TouchableOpacity>
+      ]}>
         <View
           style={[
             styles.imgContainer,
@@ -49,30 +46,31 @@ const ProductCard: React.FC<productProps> = ({ item }) => {
           <Image style={styles.img} source={{ uri: media[0] }} />
           {rating && (
             <View
-              style={{
-                position: "absolute",
-                right: 0,
-                bottom: 0,
-                backgroundColor: Colors.light.gray,
-                padding: 5,
-                borderTopLeftRadius: 10,
-              }}
+              style={styles.ratingContainer}
             >
               <Text style={{ color: "gold", fontSize: 12, fontWeight: "bold" }}>
-                <Ionicons name="star" size={10} /> {rating.rate}
+                <Ionicons name="star" size={10} /> {rating}
               </Text>
             </View>
           )}
         </View>
         <Text style={styles.price}>
           <Text style={{ fontSize: 14 }}>Rs. </Text>
-          {numberWithCommas(price)}
+          {item.discount ? (
+                  <>
+                    {numberWithCommas(item.price - item.discount)}{" "}
+                    <Text style={styles.oldprice}>
+                      {numberWithCommas(item.price)}
+                    </Text>
+                  </>
+                ) : (
+                  numberWithCommas(item.price - item.discount)
+                )}
         </Text>
         <ThemedText  style={{ left: 7, width: "98%" }}>
           {title.length > 40 ? title.slice(0, 38) + "..." : title}
         </ThemedText>
       </TouchableOpacity>
-    </Link>
   );
 };
 
@@ -105,6 +103,20 @@ const styles = StyleSheet.create({
     color: "tomato",
     alignSelf: "flex-end",
   },
+  oldprice: {
+    fontSize: 13,
+    color: "grey",
+    marginLeft: 5,
+    textDecorationLine: "line-through",
+  },
+  ratingContainer:{
+    position: "absolute",
+    right: 0,
+    bottom: 0,
+    backgroundColor: Colors.light.gray,
+    padding: 5,
+    borderTopLeftRadius: 10,
+  }
 });
 
 export default ProductCard;

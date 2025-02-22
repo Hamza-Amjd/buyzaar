@@ -1,13 +1,14 @@
-import { ActivityIndicator, Alert } from "react-native";
+import { ActivityIndicator, Alert, Image } from "react-native";
 import React, { useEffect } from "react";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { useAuth } from "@clerk/clerk-expo";
 import {  router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import useCartStore from "@/services/cartStore";
 
 const Main = () => {
   const { isLoaded, isSignedIn } = useAuth();
-  
+
     const tokenCheck = async () => {
       const isFirstStart = await AsyncStorage.getItem("isFirstStart");
       if (isFirstStart==null) {
@@ -33,7 +34,7 @@ const Main = () => {
     <ThemedView
       style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
     >
-      <ActivityIndicator size="large" />
+      <Image source={require('@/assets/images/adaptive-icon.png')} style={{height:200,width:200}}/>
     </ThemedView>
   );
 };

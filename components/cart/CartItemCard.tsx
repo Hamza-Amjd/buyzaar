@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import React from "react";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import useCartStore, { CartItem } from "@/services/cartStore";
 import { Colors } from "@/constants/Colors";
 import { ThemedText } from "../ui/ThemedText";
@@ -18,15 +18,10 @@ const CartItemCard = ({ item }: { item: CartItem }) => {
   const colorScheme = useColorScheme();
   const cart = useCartStore();
   return (
-    <Link
-      href={`/products/${item.item._id}`}
-      asChild
-      style={[
+      <TouchableOpacity onPress={()=>router.navigate({pathname:"/(screens)/productdetails",params:item.item})} style={[
         styles.productContainer,
         { backgroundColor: Colors[colorScheme ?? "light"].background2 },
-      ]}
-    >
-      <TouchableOpacity>
+      ]}>
         <Image
           style={styles.imgContainer}
           source={{ uri: item.item.media[0] }}
@@ -56,9 +51,10 @@ const CartItemCard = ({ item }: { item: CartItem }) => {
           </ThemedText>
           <View style={styles.quantityRow}>
             <CustomIconButton
-              onPress={() => cart.decreaseQuantity(item.item._id)}
+              onPress={() => item.quantity==1?cart.removeItem(item.item._id):cart.decreaseQuantity(item.item._id)}
               iconName="remove"
               size={23}
+              color="white"
               style={styles.minus}
             />
 
@@ -69,12 +65,12 @@ const CartItemCard = ({ item }: { item: CartItem }) => {
               onPress={() => cart.increaseQuantity(item.item._id)}
               iconName="add"
               size={23}
+              color="white"
               style={styles.plus}
             />
           </View>
         </View>
       </TouchableOpacity>
-    </Link>
   );
 };
 

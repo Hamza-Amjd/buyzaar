@@ -6,6 +6,9 @@ import {
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
+  Image,
+  StatusBar,
+  Share,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -17,20 +20,29 @@ import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { ThemedText } from "@/components/ui/ThemedText";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
-import { router, useLocalSearchParams } from "expo-router";
-import { numberWithCommas } from "@/utils/healper";
+import { router } from "expo-router";
+import { getDiscount, numberWithCommas } from "@/utils/healper";
 import Product from "@/components/home/ProductCard";
 import { getProductDetails, getRelatedProducts } from "@/services/api/actions";
 import Header from "@/components/ui/Header";
 import WishlistButton from "@/components/ui/WishlistButton";
-import useCart from "@/services/cartStore";
+import useCart, { CartItem } from "@/services/cartStore";
 import CustomButton from "@/components/ui/CustomButton";
 import ProductGallery from "@/components/home/ProductGallery";
+import { useRoute } from "@react-navigation/native";
+import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import * as Linking from "expo-linking";
+import CustomIconButton from "@/components/ui/CustomIconButton";
 
-const productDetails = () => {
-  const { id } = useLocalSearchParams<{ id: string }>();
+const productdetails = () => {
+  const route = useRoute();
+  const item: any = route.params;
   const cart = useCart();
   const colorScheme = useColorScheme();
+
+  const isInCart = cart.cartItems.some(
+    (cartitem: CartItem) => cartitem.item._id == item._id
+  );
 
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [product, setProduct] = useState<ProductType | any>();
@@ -43,17 +55,16 @@ const productDetails = () => {
 
   useEffect(() => {
     setLoading(true);
-    getProductDetails(id).then((product) => {
+    getProductDetails(item?._id).then((product) => {
       setProduct(product);
       setSelectedColor(product.colors[0]);
       setSelectedSize(product.sizes[0]);
       setLoading(false);
     });
-    getRelatedProducts(id).then((relatedProducts) =>
+    getRelatedProducts(item?._id).then((relatedProducts) =>
       setRelatedProducts(relatedProducts)
     );
-  }, []);
-  
+  }, [item.title]);
 
   const handleAddToCart = () => {
     //@ts-ignore
@@ -71,14 +82,22 @@ const productDetails = () => {
     router.push("/cart");
   };
 
-  return loading ? (
-    <ThemedView style={styles.container}>
-      <ActivityIndicator size={"large"} />
-    </ThemedView>
-  ) : (
+  const handleShare = async () => {
+    const redirectUrl=Linking.createURL('/(tabs)/', { scheme: "buyzaar" });
+    try {
+      await Share.share({
+        message: `Check out this product: ${product.title} at https://${redirectUrl}`,
+        // message: redirectUrl,
+      });
+    } catch (error) {
+      console.error('Error sharing book:', error);
+    }
+  }
+
+  return (
     <>
       <ParallaxScrollView
-        headerImage={<ProductGallery media={product.media}/>}
+        headerImage={<ProductGallery media={loading?item.media:product.media} loading={loading}/>}
       >
         <ThemedView
           style={[
@@ -88,28 +107,26 @@ const productDetails = () => {
         >
           <View style={styles.row}>
             <ThemedText type="subtitle" style={{ flex: 1 }}>
-              {product?.title}
+              {item.title}
             </ThemedText>
           </View>
           <View style={styles.row}>
             <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-              <Text
-                style={styles.priceText}
-              >
+              <Text style={styles.priceText}>
                 <Text style={{ fontSize: 18 }}>Rs. </Text>
-                {product?.price && numberWithCommas(product?.price)}
+                {item.discount !== "0" ? (
+                  <>
+                    {numberWithCommas(item.price - item.discount)}{" "}
+                    <Text style={styles.oldprice}>
+                      {numberWithCommas(item.price)}
+                    </Text>
+                    <ThemedText type="defaultSemiBold">-{getDiscount(item.price,item.discount)} %</ThemedText>
+                  </>
+                ) : (
+                  numberWithCommas(item.price - item.discount)
+                )}
               </Text>
-              <Text
-                style={{
-                  color: Colors[colorScheme ?? "light"].gray,
-                  marginLeft: 5,
-                  textDecorationLine: "line-through",
-                }}
-              >
-                {product?.price &&
-                  numberWithCommas((product?.price * 1.12).toFixed(0))}
-              </Text>
-              <ThemedText type="defaultSemiBold"> -12%</ThemedText>
+              
             </View>
             {product?.soldQuantity ? (
               <ThemedText>{product?.soldQuantity} Sold</ThemedText>
@@ -129,7 +146,7 @@ const productDetails = () => {
             )}
           </View>
           <View style={styles.row}>
-            {product?.rating ? (
+            {item.rating ? (
               <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
                 {[...new Array(5)].map((_, i) => {
                   let name: any =
@@ -195,9 +212,9 @@ const productDetails = () => {
             numberOfLines={showfulldesc ? 10 : 5}
             style={styles.desc}
           >
-            {product?.description}
+            {item.description}
           </ThemedText>
-          {product?.colors.length > 0 && (
+          {!loading && product.colors.length > 0 && (
             <View>
               <ThemedText type="subtitle" style={styles.row}>
                 Colors
@@ -244,7 +261,7 @@ const productDetails = () => {
               </View>
             </View>
           )}
-          {product?.sizes?.length > 0 && (
+          {!loading && product.sizes?.length > 0 && (
             <View>
               <ThemedText type="subtitle" style={styles.row}>
                 Varients
@@ -318,7 +335,7 @@ const productDetails = () => {
       </ParallaxScrollView>
       <View style={styles.bar}>
         <Header
-          headerRight={<WishlistButton product={product} />}
+          headerRight={<View style={{...styles.flex,gap:15}}><CustomIconButton onPress={handleShare} color="grey" iconName='share-social'/><WishlistButton product={item} /></View>}
           color={"grey"}
         />
       </View>
@@ -332,21 +349,22 @@ const productDetails = () => {
           onPress={handleBuynow}
           title="Buy Now"
           icon={"bag"}
-          style={{ flex: 0.6 }}
+          style={{ flex: 0.55 }}
         />
         <CustomButton
-          onPress={handleAddToCart}
-          title="Add to Cart"
-          icon={"cart"}
-          style={{ flex: 0.4 }}
+          onPress={
+            isInCart ? () => router.push("/(screens)/cart") : handleAddToCart
+          }
+          title={isInCart ? "Added to Cart" : "Add to Cart"}
+          icon={isInCart ? "checkmark-circle" : "cart"}
+          style={{ flex: 0.45 }}
         />
-        
       </ThemedView>
     </>
   );
 };
 
-export default productDetails;
+export default productdetails;
 
 const styles = StyleSheet.create({
   container: {
@@ -390,10 +408,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
   },
-  priceText:{
+  priceText: {
     fontWeight: "bold",
     fontSize: 22,
     color: "tomato",
+  },
+  oldprice: {
+    fontSize: 16,
+    color: "grey",
+    marginLeft: 5,
+    textDecorationLine: "line-through",
   },
   optionsItem: {
     borderWidth: 2,

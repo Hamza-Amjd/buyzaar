@@ -1,18 +1,13 @@
-import { Link, Stack, router } from "expo-router";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Text,
   View,
   StyleSheet,
-  SafeAreaView,
-  Pressable,
   useColorScheme,
-  Dimensions,
   Image,
   TouchableOpacity,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import {
   GestureDetector,
   Gesture,
@@ -22,17 +17,17 @@ import {
 import Animated, {
   FadeIn,
   FadeOut,
-  BounceInRight,
   SlideOutLeft,
-  BounceOutLeft,
   SlideInRight,
-  runOnJS,
 } from "react-native-reanimated";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { Colors } from "@/constants/Colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-//@ts-ignore
-import onboarding1 from "@/assets/images/onboarding1.png";import onboarding2 from "@/assets/images/onboarding2.png";import onboarding3 from "@/assets/images/onboarding3.png";
+
+import onboarding1 from "@/assets/images/onboarding1.png";
+import onboarding2 from "@/assets/images/onboarding2.png";
+import onboarding3 from "@/assets/images/onboarding3.png";
+import { ThemedText } from "@/components/ui/ThemedText";
 
 const onboardingSteps = [
   {
@@ -59,27 +54,24 @@ export default function onboarding() {
   const data = onboardingSteps[screenIndex];
 
   const onContinue = () => {
-    'worklet';
     const isLastScreen = screenIndex === onboardingSteps.length - 1;
     if (isLastScreen) {
-      runOnJS(endOnboarding)();
+      endOnboarding();
     } else {
-      runOnJS(setScreenIndex)(screenIndex + 1);
+      setScreenIndex(screenIndex + 1);
     }
   };
 
   const onBack = () => {
-    'worklet';
     const isFirstScreen = screenIndex === 0;
     if (isFirstScreen) {
-      runOnJS(endOnboarding)();
+      endOnboarding();
     } else {
-      runOnJS(setScreenIndex)(screenIndex - 1);
+      setScreenIndex(screenIndex - 1);
     }
   };
 
-  const endOnboarding = async() => {
-    'worklet';
+  const endOnboarding = async () => {
     await AsyncStorage.setItem("isFirstStart", "false");
     router.replace("/(auth)");
   };
@@ -91,13 +83,15 @@ export default function onboarding() {
 
   return (
     <ThemedView style={styles.page}>
+      <TouchableOpacity style={styles.skipBtn} onPress={endOnboarding}>
+            <ThemedText type="subtitle" style={styles.skipTxt}>
+              Skip
+            </ThemedText>
+          </TouchableOpacity>
       <GestureDetector gesture={swipes}>
         <View style={styles.pageContent} key={screenIndex}>
           <Animated.View entering={FadeIn} exiting={FadeOut}>
-            <Image
-              source={data.icon}
-              style={styles.image}
-            />
+            <Image source={data.icon} style={styles.image} />
           </Animated.View>
 
           <View style={styles.footer}>
@@ -122,7 +116,8 @@ export default function onboarding() {
             <View style={{ paddingTop: 80 }}>
               {onboardingSteps[screenIndex].title ==
               "Easy & Secure Checkout" ? (
-                <TouchableOpacity onPress={endOnboarding}
+                <TouchableOpacity
+                  onPress={endOnboarding}
                   style={{
                     width: 55,
                     height: 55,
@@ -174,6 +169,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  skipBtn: { 
+    position: "absolute",
+    top: 30,
+    right: 20
+  },
+  skipTxt: {
+    textDecorationLine: "underline",
+    color: "grey"
   },
   image: {
     width: 200,
