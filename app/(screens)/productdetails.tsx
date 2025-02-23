@@ -67,7 +67,7 @@ const productdetails = () => {
   }, [item.title]);
 
   const handleAddToCart = () => {
-    //@ts-ignore
+    if(loading) return;
     cart.addItem({
       item: product,
       quantity,

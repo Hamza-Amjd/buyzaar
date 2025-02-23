@@ -39,8 +39,8 @@ export default function RootLayout() {
     semi_bold: require("@/assets/fonts/Poppins-SemiBold.ttf"),
     extra_bold: require("@/assets/fonts/Poppins-ExtraBold.ttf"),
   });
-  const { expoPushToken, fcmToken } = usePushNotifications();
   useEffect(() => {
+    const { expoPushToken, fcmToken } = usePushNotifications();
     if (!loaded) {
       SplashScreen.hideAsync();
     }

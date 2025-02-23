@@ -40,6 +40,12 @@
           "resizeMode": "contain"
         }
       ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+        }
+      ],
       "expo-secure-store"
     ],
     "experiments": {

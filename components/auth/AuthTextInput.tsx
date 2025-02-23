@@ -60,7 +60,7 @@ const AuthTextInput = ({
         />
         <TextInput
           style={{ flex: 1 }}
-          placeholder={placeholder?placeholder:`${title}`}
+          placeholder={placeholder?placeholder:`Enter ${title}`}
           onChangeText={handleChange(title)}
           value={value}
           onBlur={() => setFieldTouched(title, "")}

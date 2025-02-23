@@ -4,28 +4,35 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect } from "react";
-import { EvilIcons, Ionicons } from "@expo/vector-icons";
+import {
+  EvilIcons,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useState } from "react";
 import axios from "axios";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import SearchTile from "@/components/ui/SearchTile";
 import { ThemedView } from "@/components/ui/ThemedView";
-import {
-  EXPO_PUBLIC_BASE_URL,
-  getSearchedProducts,
-} from "@/services/api/actions";
+import { EXPO_PUBLIC_BASE_URL } from "@/services/api/actions";
 import { ThemedText } from "@/components/ui/ThemedText";
 import FilterModal from "@/components/modals/FilterModal";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { BarcodeScanningResult } from "expo-camera";
+import Scanner from "@/components/modals/Scanner";
+import { useFocusEffect } from "expo-router";
 
 const search = () => {
   const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
 
   const [searchKey, setSearchKey] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [showScanner, setShowScanner] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [filters, setFilters] = useState<any>(null);
 
   const onApplyFilters = ({ min, max, sortBy }: any) => {
@@ -34,29 +41,59 @@ const search = () => {
   };
 
   const search = async () => {
-    if (searchKey.length == 0) return;
+    if (searchKey.length == 0) {
+      setSearchResults([]);
+      return;
+    }
+    setLoading(true);
     await axios
       .get(
         `${EXPO_PUBLIC_BASE_URL}/search/${searchKey}${
           filters
-            ? `?${
-                filters.min.length > 0 ? `minPrice=${filters.min}&` : ""
-              }${
+            ? `?${filters.min.length > 0 ? `minPrice=${filters.min}&` : ""}${
                 filters.max.length > 0 ? `maxPrice=${filters.max}&` : ""
               }priceSort=${filters.sortBy}`
             : ""
         }`
       )
-      .then((response) => {
-        setSearchResults(response.data);
-      })
-      .catch((error) => console.error(error));
+      .then((response) => setSearchResults(response.data))
+      .catch((error) => console.error(error)).then(() => setLoading(false));
   };
+
   useEffect(() => {
     search();
   }, [searchKey]);
 
-  return (
+  useFocusEffect(
+    React.useCallback(() => {
+      setError("");
+    }, [])
+  );
+
+  const onBarcodeScanned = async (scanningResult: BarcodeScanningResult) => {
+    setShowScanner(false);
+    setLoading(true);
+    const { data } = scanningResult;
+    console.log(data);
+    await axios
+      .get(`${EXPO_PUBLIC_BASE_URL}/scan/${data}`)
+      .then((response) => {
+        if (response.data.length == 0) {
+          setError("No product found with this barcode.");
+          return;
+        }
+        setSearchResults(response.data);
+      })
+      .catch((error) => console.error(error))
+      .finally(() => setLoading(false));
+  };
+
+  return showScanner ? (
+    <Scanner
+      onBarcodeScanned={onBarcodeScanned}
+      onClose={() => setShowScanner(false)}
+    />
+  ) : (
     <ThemedView style={{ flex: 1, padding: 10 }}>
       <View style={{ borderRadius: 10, marginBottom: 10 }}>
         <View style={styles.searchbar}>
@@ -68,6 +105,13 @@ const search = () => {
             value={searchKey}
             onChangeText={setSearchKey}
           />
+
+          <TouchableOpacity
+            style={styles.searchIcon}
+            onPress={() => setShowScanner(true)}
+          >
+            <Ionicons name={"scan"} color="white" size={25} />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.searchIcon}
             onPress={() => bottomSheetModalRef.current?.present()}
@@ -103,22 +147,34 @@ const search = () => {
         )}
       </View>
 
-      {searchKey?.length > 0 ? (
-        searchResults.length > 0 && (
-          <FlatList
-            data={searchResults}
-            keyExtractor={(item: any) => item._id}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => <SearchTile item={item} />}
-          />
-        )
+      {searchResults.length > 0 ? (
+        <FlatList
+          data={searchResults}
+          keyExtractor={(item: any) => item._id}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => <SearchTile item={item} />}
+        />
       ) : (
         <View style={styles.emptyContainer}>
-          <EvilIcons name="search" color={"grey"} size={80} />
-
-          <ThemedText type="defaultSemiBold" style={{ color: "grey" }}>
-            Search anything you want.
-          </ThemedText>
+          {loading?<ActivityIndicator size={'large'}/>:error.length > 0 ? (
+            <>
+              <MaterialCommunityIcons
+                name="store-search"
+                size={80}
+                color="#871e1e"
+              />
+              <ThemedText type="defaultSemiBold" style={{ color: "#871e1e" }}>
+                {error}
+              </ThemedText>
+            </>
+          ) : (
+            <>
+              <EvilIcons name="search" color={"grey"} size={80} />
+              <ThemedText type="defaultSemiBold" style={{ color: "grey" }}>
+                Search anything you want.
+              </ThemedText>
+            </>
+          )}
         </View>
       )}
       <FilterModal

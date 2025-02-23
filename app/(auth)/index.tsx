@@ -16,27 +16,27 @@ import { ThemedText } from "@/components/ui/ThemedText";
 import Header from "@/components/ui/Header";
 import AuthTextInput from "@/components/auth/AuthTextInput";
 import CustomButton from "@/components/ui/CustomButton";
-import { useClerk, useOAuth, useSignIn } from "@clerk/clerk-expo";
+import { useOAuth, useSignIn } from "@clerk/clerk-expo";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
+// import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
-GoogleSignin.configure({
-      webClientId:"985275296337-5m1emcdjn0ivlssabp2u3o1qk8gaeipp.apps.googleusercontent.com",
-      forceCodeForRefreshToken: true,
-      offlineAccess: false,
-      scopes:["https://www.googleapis.com/auth/userinfo.email","https://www.googleapis.com/auth/userinfo.profile"]
-    });
-// export const useWarmUpBrowser = () => {
-//     useEffect(() => {
-//       void WebBrowser.warmUpAsync();
-//       return () => {
-//         void WebBrowser.coolDownAsync();
-//       };
-//     }, []);
-//   };
+// GoogleSignin.configure({
+//       webClientId:"985275296337-5m1emcdjn0ivlssabp2u3o1qk8gaeipp.apps.googleusercontent.com",
+//       forceCodeForRefreshToken: true,
+//       offlineAccess: false,
+//       scopes:["https://www.googleapis.com/auth/userinfo.email","https://www.googleapis.com/auth/userinfo.profile"]
+//     });
+export const useWarmUpBrowser = () => {
+    useEffect(() => {
+      void WebBrowser.warmUpAsync();
+      return () => {
+        void WebBrowser.coolDownAsync();
+      };
+    }, []);
+  };
 
-// WebBrowser.maybeCompleteAuthSession();
+WebBrowser.maybeCompleteAuthSession();
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email address").required("Required"),
@@ -47,7 +47,6 @@ const validationSchema = Yup.object().shape({
 
 export default function Login() {
   const router = useRouter();
-  const clerk = useClerk();
   const [isLoading, setIsLoading] = useState(false);
   const [obsecurePass, setobsecurePass] = useState(true);
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
@@ -78,42 +77,42 @@ export default function Login() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      await GoogleSignin.signOut();
-      const { data, type } = await GoogleSignin.signIn();
-
-      if (data?.idToken && signIn) {
-        const result = await signIn.create({
-          strategy: "google_one_tap",
-          token: data?.idToken,
-        });
-
-        if (result.status === "complete") {
-          await setActive({ session: result.createdSessionId });
-        }
-      }
-    } catch (error: any) {
-      console.log(JSON.stringify(error));
-    }
-  };
-
-  // const handleGoogleSignIn = React.useCallback(async () => {
+  // const handleGoogleSignIn = async () => {
   //   try {
-  //     const { createdSessionId, signIn, signUp, setActive } = await startOAuthFlow({
-  //       redirectUrl: Linking.createURL('/(tabs)', { scheme: "buyzaar" }),
-  //     })
+  //     await GoogleSignin.hasPlayServices();
+  //     await GoogleSignin.signOut();
+  //     const { data, type } = await GoogleSignin.signIn();
 
-  //     if (createdSessionId) {
-  //       setActive!({ session: createdSessionId })
-  //     } else {
+  //     if (data?.idToken && signIn) {
+  //       const result = await signIn.create({
+  //         strategy: "google_one_tap",
+  //         token: data?.idToken,
+  //       });
 
+  //       if (result.status === "complete") {
+  //         await setActive({ session: result.createdSessionId });
+  //       }
   //     }
-  //   } catch (err) {
-  //     console.error('OAuth error', err)
+  //   } catch (error: any) {
+  //     console.log(JSON.stringify(error));
   //   }
-  // }, [])
+  // };
+
+  const handleGoogleSignIn = React.useCallback(async () => {
+    try {
+      const { createdSessionId, signIn, signUp, setActive } = await startOAuthFlow({
+        redirectUrl: Linking.createURL('/(tabs)', { scheme: "buyzaar" }),
+      })
+
+      if (createdSessionId) {
+        setActive!({ session: createdSessionId })
+      } else {
+
+      }
+    } catch (err) {
+      console.error('OAuth error', err)
+    }
+  }, [])
 
   return (
     <ThemedView style={styles.container}>

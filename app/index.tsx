@@ -1,10 +1,9 @@
-import { ActivityIndicator, Alert, Image } from "react-native";
+import { Image } from "react-native";
 import React, { useEffect } from "react";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { useAuth } from "@clerk/clerk-expo";
 import {  router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import useCartStore from "@/services/cartStore";
 
 const Main = () => {
   const { isLoaded, isSignedIn } = useAuth();

@@ -19,6 +19,7 @@ import Animated, {
   FadeOut,
   SlideOutLeft,
   SlideInRight,
+  runOnJS,
 } from "react-native-reanimated";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { Colors } from "@/constants/Colors";
@@ -77,84 +78,85 @@ export default function onboarding() {
   };
 
   const swipes = Gesture.Simultaneous(
-    Gesture.Fling().direction(Directions.LEFT).onEnd(onContinue),
-    Gesture.Fling().direction(Directions.RIGHT).onEnd(onBack)
+    Gesture.Fling()
+      .direction(Directions.LEFT)
+      .onEnd(() => runOnJS(onContinue)()),
+    Gesture.Fling()
+      .direction(Directions.RIGHT)
+      .onEnd(() => runOnJS(onBack)())
   );
 
   return (
-    <ThemedView style={styles.page}>
-      <TouchableOpacity style={styles.skipBtn} onPress={endOnboarding}>
-            <ThemedText type="subtitle" style={styles.skipTxt}>
-              Skip
-            </ThemedText>
-          </TouchableOpacity>
-      <GestureDetector gesture={swipes}>
-        <View style={styles.pageContent} key={screenIndex}>
-          <Animated.View entering={FadeIn} exiting={FadeOut}>
-            <Image source={data.icon} style={styles.image} />
-          </Animated.View>
+    <GestureDetector gesture={swipes}>
+      <ThemedView style={styles.pageContent} key={screenIndex}>
+        <TouchableOpacity style={styles.skipBtn} onPress={endOnboarding}>
+          <ThemedText type="subtitle" style={styles.skipTxt}>
+            Skip
+          </ThemedText>
+        </TouchableOpacity>
+        <Animated.View entering={FadeIn} exiting={FadeOut}>
+          <Image source={data.icon} style={styles.image} />
+        </Animated.View>
 
-          <View style={styles.footer}>
-            <Animated.Text
-              entering={SlideInRight}
-              exiting={SlideOutLeft}
-              style={[
-                styles.title,
-                { color: Colors[colorScheme ?? "light"].text },
-              ]}
-            >
-              {data.title}
-            </Animated.Text>
-            <Animated.Text
-              entering={SlideInRight.delay(50)}
-              exiting={SlideOutLeft}
-              style={styles.description}
-            >
-              {data.description}
-            </Animated.Text>
+        <View style={styles.footer}>
+          <Animated.Text
+            entering={SlideInRight}
+            exiting={SlideOutLeft}
+            style={[
+              styles.title,
+              { color: Colors[colorScheme ?? "light"].text },
+            ]}
+          >
+            {data.title}
+          </Animated.Text>
+          <Animated.Text
+            entering={SlideInRight.delay(50)}
+            exiting={SlideOutLeft}
+            style={styles.description}
+          >
+            {data.description}
+          </Animated.Text>
 
-            <View style={{ paddingTop: 80 }}>
-              {onboardingSteps[screenIndex].title ==
-              "Easy & Secure Checkout" ? (
-                <TouchableOpacity
-                  onPress={endOnboarding}
-                  style={{
-                    width: 55,
-                    height: 55,
-                    backgroundColor: Colors[colorScheme ?? "light"].primary,
-                    borderRadius: 50,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    alignSelf: "center",
-                  }}
-                >
-                  <FontAwesome5 name="arrow-right" size={40} color={"white"} />
-                </TouchableOpacity>
-              ) : (
-                <View style={styles.stepIndicatorContainer}>
-                  {onboardingSteps.map((step, index) => {
-                    return (
-                      <View
-                        key={index}
-                        style={[
-                          styles.stepIndicator,
-                          {
-                            backgroundColor:
-                              index === screenIndex
-                                ? Colors[colorScheme ?? "light"].primary
-                                : "grey",
-                          },
-                        ]}
-                      />
-                    );
-                  })}
-                </View>
-              )}
-            </View>
+          <View style={{ paddingTop: 80 }}>
+            {onboardingSteps[screenIndex].title == "Easy & Secure Checkout" ? (
+              <TouchableOpacity
+                onPress={endOnboarding}
+                style={{
+                  width: 55,
+                  height: 55,
+                  backgroundColor: Colors[colorScheme ?? "light"].primary,
+                  borderRadius: 50,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  alignSelf: "center",
+                }}
+              >
+                <FontAwesome5 name="arrow-right" size={40} color={"white"} />
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.stepIndicatorContainer}>
+                {onboardingSteps.map((step, index) => {
+                  return (
+                    <View
+                      key={index}
+                      style={[
+                        styles.stepIndicator,
+                        {
+                          backgroundColor:
+                            index === screenIndex
+                              ? Colors[colorScheme ?? "light"].primary
+                              : "grey",
+                        },
+                      ]}
+                    />
+                  );
+                })}
+              </View>
+            )}
           </View>
         </View>
-      </GestureDetector>
-    </ThemedView>
+      </ThemedView>
+    </GestureDetector>
   );
 }
 
@@ -170,14 +172,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  skipBtn: { 
+  skipBtn: {
     position: "absolute",
     top: 30,
-    right: 20
+    right: 20,
   },
   skipTxt: {
     textDecorationLine: "underline",
-    color: "grey"
+    color: "grey",
   },
   image: {
     width: 200,

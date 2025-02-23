@@ -33,9 +33,9 @@ const profile = () => {
       {
         text: "Confirm",
         onPress: async () => {
-          await signOut();
           clearCart();
           removeAddresses();
+          await signOut();
           router.push("/(auth)");
         },
       },

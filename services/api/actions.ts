@@ -1,6 +1,7 @@
 import axios from "axios"
 export const EXPO_PUBLIC_BASE_URL='https://buyzaar-admin.vercel.app/api'
 
+
 export const getCollections = async () => {
   const collections = await axios.get(`${EXPO_PUBLIC_BASE_URL}/collections`).then((response) =>{return response.data}).catch((error) =>(console.error(error)));
   return collections
@@ -34,4 +35,9 @@ export const getOrders = async (customerId: string) => {
 export const getRelatedProducts = async (productId: string) => {
   const relatedProducts = await axios.get(`${EXPO_PUBLIC_BASE_URL}/products/${productId}/related`).then((response) =>{return response.data}).catch((error) =>(console.error(error)));
   return relatedProducts
+}
+
+export const getScannedProducts = async (barcode:string) => {
+  const searchedProducts = await axios.get(`${EXPO_PUBLIC_BASE_URL}/search/${barcode}`).then((response) =>{return response.data})
+  return searchedProducts
 }

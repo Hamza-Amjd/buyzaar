@@ -2,7 +2,7 @@ import CustomButton from "@/components/ui/CustomButton";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { router} from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Animated } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Animated, useColorScheme } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -11,10 +11,12 @@ import { useRoute } from "@react-navigation/native";
 import { isValidPhoneNumber } from "@/utils/healper";
 import { AddAddressService, UpdateAddressService} from "@/services/api/addressServices";
 import CustomInput from "@/components/ui/CustomInput";
+import { darkMapStyle } from "@/constants/Constants";
 
 const Page = () => {
   const { user } = useUser();
   const route:any =useRoute();
+  const colorScheme = useColorScheme()
   const mapRef = useRef<MapView>(null);
   const item = route.params;
 
@@ -97,7 +99,7 @@ const Page = () => {
   return (
     <ThemedView style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={()=>router.back()}>
-        <Ionicons name="arrow-back" size={30} color={"grey"}/>
+        <Ionicons name="arrow-back" size={30} color={"white"}/>
       </TouchableOpacity>
       <View style={styles.mapContainer}>
         <MapView
@@ -106,6 +108,7 @@ const Page = () => {
           initialRegion={coordinates}
           onRegionChangeComplete={handleRegionChange}
           ref={mapRef}
+          customMapStyle={colorScheme==="dark"?darkMapStyle:[]}
         />
         <Animated.View
           style={[
@@ -188,9 +191,9 @@ const styles = StyleSheet.create({
     top: 10,
     left: 10,
     zIndex: 100,
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    padding: 5,
+    borderRadius: 30,
+    backgroundColor: "rgba(175, 175, 175, 0.7)",
   },
   buttonContainer: {
     marginTop: 20,

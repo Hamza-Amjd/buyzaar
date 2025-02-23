@@ -105,6 +105,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
                     style={[
                         styles.input,
                         {
+                            color:Colors[colorScheme??'light'].text,
                             borderColor: isFocused ? !isValid?"red": Colors[colorScheme??'light'].primary : '#666',
                             borderWidth: isFocused ? 2 : 1,
                         },
