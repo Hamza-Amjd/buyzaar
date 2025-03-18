@@ -20,8 +20,8 @@ import { Colors } from "@/constants/Colors";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { usePushNotifications } from "@/hooks/usePushNotification";
 import { useColorScheme } from "react-native";
-const ClerkPublishableKey = "pk_test_aW1tb3J0YWwtdHJvbGwtMzkuY2xlcmsuYWNjb3VudHMuZGV2JA";
-const StripePublishableKey = "pk_test_51PJNNlGfVO2eEzjSWFlEPrAO7Fjsw918Iq16sjQjWzGRnCf9J1q314U0fXsYfXD3amw4Pund0xiqFV3SnhVUifkk00x2n6qBZx";
+const ClerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string;
+const StripePublishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string;
 SplashScreen.preventAutoHideAsync();
 
 // This is the default configuration
@@ -32,6 +32,8 @@ configureReanimatedLogger({
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { expoPushToken, fcmToken } = usePushNotifications();
+  console.log(fcmToken)
   const [loaded] = useFonts({
     regular: require("@/assets/fonts/Poppins-Regular.ttf"),
     medium: require("@/assets/fonts/Poppins-Medium.ttf"),
@@ -40,7 +42,6 @@ export default function RootLayout() {
     extra_bold: require("@/assets/fonts/Poppins-ExtraBold.ttf"),
   });
   useEffect(() => {
-    const { expoPushToken, fcmToken } = usePushNotifications();
     if (!loaded) {
       SplashScreen.hideAsync();
     }
